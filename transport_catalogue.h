@@ -27,7 +27,7 @@ namespace info {
 	};
 
 	struct Stop {
-		transport_guide::detail::Coordinates coordinates;
+		geo::Coordinates coordinates;
 		std::unordered_map<std::string_view, int> distance_to_stops = {};
 		std::set<std::string_view> passing_buses;
 	};

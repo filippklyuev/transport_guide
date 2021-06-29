@@ -149,7 +149,7 @@ void TransportCatalogue::CalculateRoute(std::string_view stop, info::Bus& bus_in
 		return ;
 	}
 	int size = bus_info.stops.size();
-	bus_info.geo_route_length += detail::ComputeDistance(GetStopsMap().at(bus_info.stops[size - 2]).coordinates, 
+	bus_info.geo_route_length += geo::ComputeDistance(GetStopsMap().at(bus_info.stops[size - 2]).coordinates, 
 													GetStopsMap().at(bus_info.stops.back()).coordinates);
 	if (GetStopsMap().at(bus_info.stops[size - 2]).distance_to_stops.count(stop)){
 		bus_info.factial_route_length += (GetStopsMap().at(bus_info.stops[size - 2]).distance_to_stops.at(stop));

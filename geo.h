@@ -2,9 +2,7 @@
 
 #include <cmath>
 
-namespace transport_guide {
-
-namespace detail {
+namespace geo {
 
 struct Coordinates {
     double lat;
@@ -19,6 +17,5 @@ inline double ComputeDistance(Coordinates from, Coordinates to) {
         * 6371000;
 }
 
-} // namespace detail
+} // namespace geo
 
-} // namespace transport_guide
