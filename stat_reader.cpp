@@ -21,18 +21,18 @@ std::vector<OutputQuery> read::Queries(TransportCatalogue& catalogue, const int 
 }
 
 void print::Output(const TransportCatalogue& catalogue, const std::vector<OutputQuery>& queries_to_print){
-	for (const auto qry : queries_to_print) {
-		if (qry.is_stop_query){
-			std::cout << "Stop " << qry.query << ": ";
-			if (catalogue.IsStopListed(qry.query)){
-				print::QueryInfo(catalogue.GetStopInfo(qry.query));
+	for (const auto query : queries_to_print) {
+		if (query.is_stop_query){
+			std::cout << "Stop " << query.query << ": ";
+			if (catalogue.IsStopListed(query.query)){
+				print::QueryInfo(catalogue.GetStopInfo(query.query));
 			} else {
 				std::cout << "not found" << std::endl;
 			}
 		} else {
-			std::cout << "Bus " << qry.query << ": ";
-			if (catalogue.IsBusListed(qry.query)){
-				print::QueryInfo(catalogue.GetRouteInfo(qry.query));
+			std::cout << "Bus " << query.query << ": ";
+			if (catalogue.IsBusListed(query.query)){
+				print::QueryInfo(catalogue.GetRouteInfo(query.query));
 			} else {
 				std::cout << "not found" << std::endl;
 			}

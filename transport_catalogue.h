@@ -38,8 +38,8 @@ class TransportCatalogue {
 public:
 	TransportCatalogue() = default;
 
-	TransportCatalogue(int qry_nbr){
-		input_queries_.resize(qry_nbr);
+	TransportCatalogue(int query_nbr){
+		input_queries_.resize(query_nbr);
 	}
 
 	using BusMap = std::unordered_map<std::string_view, info::Bus>;
@@ -84,15 +84,15 @@ private:
 
 	const BusMap& GetBusesMap() const;
 
-	void GetStopDistances(const std::string& stop_qry);
+	void GetStopDistances(const std::string& stop_query);
 
-	std::string_view GetStopName(const std::string& stop_qry, int64_t& pos_first, int64_t& pos_last);	
+	std::string_view GetStopName(const std::string& stop_query, int64_t& pos_first, int64_t& pos_last);	
 
-	std::pair<std::string_view, info::Stop> ParseStopQuery(const std::string& stop_qry);
+	std::pair<std::string_view, info::Stop> ParseStopQuery(const std::string& stop_query);
 
-	std::pair<std::string_view, info::Bus> ParseBusQuery(const std::string& bus_qry);
+	std::pair<std::string_view, info::Bus> ParseBusQuery(const std::string& bus_query);
 
-	char DefineBreaker(const std::string& bus_qry);
+	char DefineBreaker(const std::string& bus_query);
 
 	void CalculateRoute(std::string_view stop, info::Bus& bus_info);
 

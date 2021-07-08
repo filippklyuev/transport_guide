@@ -77,53 +77,53 @@ const std::unordered_map<std::string_view, info::Bus>& TransportCatalogue::GetBu
 	return buses_map_;
 }
 
-std::string_view TransportCatalogue::GetStopName(const std::string& stop_qry, int64_t& pos_first, int64_t& pos_last){
-	pos_first = stop_qry.find(' ') + 1;
-	pos_last = stop_qry.find(':');
-	return std::string_view(stop_qry.data() + pos_first, pos_last - pos_first);
+std::string_view TransportCatalogue::GetStopName(const std::string& stop_query, int64_t& pos_first, int64_t& pos_last){
+	pos_first = stop_query.find(' ') + 1;
+	pos_last = stop_query.find(':');
+	return std::string_view(stop_query.data() + pos_first, pos_last - pos_first);
 }
 
-std::pair<std::string_view, info::Stop> TransportCatalogue::ParseStopQuery(const std::string& stop_qry){
+std::pair<std::string_view, info::Stop> TransportCatalogue::ParseStopQuery(const std::string& stop_query){
 	std::pair<std::string_view, info::Stop> result;
 	int64_t pos_first, pos_last;
-	result.first = GetStopName(stop_qry, pos_first, pos_last);
+	result.first = GetStopName(stop_query, pos_first, pos_last);
 	pos_first = pos_last + 2;
-	pos_last = stop_qry.find(',');
-	result.second.coordinates.lat = std::stod(stop_qry.substr(pos_first, pos_last - pos_first));
-	pos_first = stop_qry.find(' ', pos_last);
-	pos_last = stop_qry.find(',', pos_first);
-	if (pos_last == stop_qry.npos){
-		result.second.coordinates.lng = std::stod(stop_qry.substr(pos_first));
+	pos_last = stop_query.find(',');
+	result.second.coordinates.lat = std::stod(stop_query.substr(pos_first, pos_last - pos_first));
+	pos_first = stop_query.find(' ', pos_last);
+	pos_last = stop_query.find(',', pos_first);
+	if (pos_last == stop_query.npos){
+		result.second.coordinates.lng = std::stod(stop_query.substr(pos_first));
 		return result;
 	}
-	result.second.coordinates.lng = std::stod(stop_qry.substr(pos_first, pos_last - pos_first));
+	result.second.coordinates.lng = std::stod(stop_query.substr(pos_first, pos_last - pos_first));
 	return result;
 }
 
-void TransportCatalogue::GetStopDistances(const std::string& stop_qry){
+void TransportCatalogue::GetStopDistances(const std::string& stop_query){
 	int64_t pos_first = 0, pos_last = 0;
-	std::string_view stop_name = GetStopName(stop_qry, pos_first, pos_last);
+	std::string_view stop_name = GetStopName(stop_query, pos_first, pos_last);
 	std::unordered_map<std::string_view, int> result;
 	pos_first = pos_last;
 	for (int i = 0; i < 2; i++){
-		pos_first = stop_qry.find(',', pos_first + 1);
+		pos_first = stop_query.find(',', pos_first + 1);
 	}
-	if (pos_first == stop_qry.npos){
+	if (pos_first == stop_query.npos){
 		return ;
 	}
 	pos_first += 2;
 	std::string_view to_stop;
 	int meters;
 	while (true){
-		pos_last = stop_qry.find('m', pos_first);
-		meters = std::stoi(stop_qry.substr(pos_first, pos_last - pos_first));
+		pos_last = stop_query.find('m', pos_first);
+		meters = std::stoi(stop_query.substr(pos_first, pos_last - pos_first));
 		pos_first = pos_last + 5;
-		pos_last = stop_qry.find(',', pos_first);
-		if (pos_last == stop_qry.npos){
-			to_stop = std::string_view(stop_qry.data() + pos_first);
+		pos_last = stop_query.find(',', pos_first);
+		if (pos_last == stop_query.npos){
+			to_stop = std::string_view(stop_query.data() + pos_first);
 			break ;
  		} else {
- 			to_stop = std::string_view(stop_qry.data() + pos_first, pos_last - pos_first);
+ 			to_stop = std::string_view(stop_query.data() + pos_first, pos_last - pos_first);
  			pos_first = pos_last + 2;
  			result.emplace(std::make_pair(to_stop, meters));
  		}
@@ -132,9 +132,9 @@ void TransportCatalogue::GetStopDistances(const std::string& stop_qry){
 	GetStopsMap().at(stop_name).distance_to_stops = result;	
 }
 
-char TransportCatalogue::DefineBreaker(const std::string& bus_qry){
+char TransportCatalogue::DefineBreaker(const std::string& bus_query){
 	char breaker;
-	if (bus_qry.rfind('>') != bus_qry.npos){
+	if (bus_query.rfind('>') != bus_query.npos){
 		breaker = '>';
 	} else {
 		breaker = '-';
@@ -173,21 +173,21 @@ int TransportCatalogue::CalculateBackRoute(const info::Bus& bus_info){
 	return back_route;
 }
 
-std::pair<std::string_view, info::Bus> TransportCatalogue::ParseBusQuery(const std::string& bus_qry){
-	const char breaker = DefineBreaker(bus_qry);
+std::pair<std::string_view, info::Bus> TransportCatalogue::ParseBusQuery(const std::string& bus_query){
+	const char breaker = DefineBreaker(bus_query);
     std::pair<std::string_view, info::Bus> result;
-    int64_t pos = bus_qry.find(':', 4);
-    result.first = std::string_view(bus_qry.data() + 4, pos - 4);
+    int64_t pos = bus_query.find(':', 4);
+    result.first = std::string_view(bus_query.data() + 4, pos - 4);
     pos = pos + 2;
     while (true) {
-    	int64_t pos_last = bus_qry.find(breaker, pos);
-    	if (pos_last == bus_qry.npos){
-    		std::string_view last_stop = std::string_view(bus_qry.data() + pos);
+    	int64_t pos_last = bus_query.find(breaker, pos);
+    	if (pos_last == bus_query.npos){
+    		std::string_view last_stop = std::string_view(bus_query.data() + pos);
     		CalculateRoute(last_stop, result.second);
     		AddBusToStop(result.first, last_stop);
     		break ;
     	}
-    	std::string_view stop = std::string_view(bus_qry.data() + pos, pos_last - (pos + 1));
+    	std::string_view stop = std::string_view(bus_query.data() + pos, pos_last - (pos + 1));
     	CalculateRoute(stop, result.second);
     	AddBusToStop(result.first, stop);
     	pos = pos_last + 2;
