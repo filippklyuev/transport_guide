@@ -29,7 +29,7 @@ namespace info {
 	struct Stop {
 		geo::Coordinates coordinates;
 		std::unordered_map<std::string_view, int> distance_to_stops = {};
-		std::set<std::string_view> passing_buses;
+		std::set<std::string_view> passing_buses = {};
 	};
 
 } //namespace info	
@@ -37,42 +37,45 @@ namespace info {
 class TransportCatalogue {
 public:
 	TransportCatalogue() = default;
-
-	TransportCatalogue(int query_nbr){
-		input_queries_.resize(query_nbr);
-	}
-
+	
 	using BusMap = std::unordered_map<std::string_view, info::Bus>;
 	using StopMap = std::unordered_map<std::string_view, info::Stop>;
 
 	void ProcessInputQueries();
 
+	std::string_view  GetSVFromInsertedBusName(const std::string bus_name);
+
+	std::string_view  GetSVFromInsertedStopName(const std::string stop_name);
+
 	void AddStop(const std::pair<std::string_view, info::Stop> stop);
 
 	void AddRoute(const std::pair<std::string_view, info::Bus> bus_route);
 
-	bool IsBusListed(std::string_view bus_nbr) const ;
+	bool IsBusListed(std::string_view bus_name) const ;
 
 	bool IsStopListed(std::string_view stop_name) const ;
 
-
-	const info::Bus& GetRouteInfo(std::string_view bus_nbr) const ;
+	const info::Bus& GetRouteInfo(const std::string_view bus_name) const ;
 
 	const info::Stop& GetStopInfo(const std::string_view stop) const ;
-
-	std::vector<std::string>& GetInputQueries();
-
-	const std::vector<std::string>& GetInputQueries() const;
 
 	std::vector<std::string>& GetOutputQueries();
 
 	const std::vector<std::string>& GetOutputQueries() const;
 
+	void AddDistanceToStop(std::string_view stop, info::Bus& bus_info);
+
+	void AddBusToStop(const std::string_view bus_name, const std::string_view stop_name);
+
+	int CalculateBackRoute(const info::Bus& bus_info);
+
 	
 private:
 
-	std::vector<std::string> input_queries_;
 	std::vector<std::string> output_queries_;
+	std::unordered_set<std::string> buses_;
+	std::unordered_set<std::string> stops_;
+
 	StopMap stops_map_;
 	BusMap buses_map_;
 
@@ -83,22 +86,6 @@ private:
 	BusMap& GetBusesMap();
 
 	const BusMap& GetBusesMap() const;
-
-	void GetStopDistances(const std::string& stop_query);
-
-	std::string_view GetStopName(const std::string& stop_query, int64_t& pos_first, int64_t& pos_last);	
-
-	std::pair<std::string_view, info::Stop> ParseStopQuery(const std::string& stop_query);
-
-	std::pair<std::string_view, info::Bus> ParseBusQuery(const std::string& bus_query);
-
-	char DefineBreaker(const std::string& bus_query);
-
-	void CalculateRoute(std::string_view stop, info::Bus& bus_info);
-
-	void AddBusToStop(const std::string_view bus_name, const std::string_view stop_name);
-
-	int CalculateBackRoute(const info::Bus& bus_info);
 };
 	
 template <typename S>

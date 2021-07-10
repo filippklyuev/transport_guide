@@ -10,16 +10,14 @@
 // using namespace transport_guide;
 
 void Test(){
-	int queries_count = transport_guide::input::read::LineWithNumber();
-	transport_guide::TransportCatalogue catalogue(queries_count);
-	transport_guide::input::read::Queries(catalogue, queries_count);
-	std::cout << std::setprecision(6);
-	catalogue.ProcessInputQueries();
-	queries_count = transport_guide::input::read::LineWithNumber();
-	std::vector<transport_guide::output::OutputQuery> output_queries = transport_guide::output::read::Queries(catalogue, nbr_of_queries);
-	transport_guide::output::print::Output(catalogue, output_queries);		
+	transport_guide::input::Queries input_queries = transport_guide::input::GetQueriesByType();
+	transport_guide::TransportCatalogue catalogue;
+	transport_guide::input::to_catalogue::PutStops(catalogue, input_queries.stops_strings);
+	transport_guide::input::to_catalogue::PutBuses(catalogue, input_queries.buses_strings);
 }
 
+
 int main(){
+	std::cout << std::setprecision(6);
 	Test();
 }

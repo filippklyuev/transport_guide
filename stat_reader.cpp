@@ -21,7 +21,7 @@ std::vector<OutputQuery> read::Queries(TransportCatalogue& catalogue, const int 
 }
 
 void print::Output(const TransportCatalogue& catalogue, const std::vector<OutputQuery>& queries_to_print){
-	for (const auto query : queries_to_print) {
+	for (const auto& query : queries_to_print) {
 		if (query.is_stop_query){
 			std::cout << "Stop " << query.query << ": ";
 			if (catalogue.IsStopListed(query.query)){
