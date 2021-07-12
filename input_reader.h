@@ -1,6 +1,7 @@
 #pragma once
 #include <iomanip>
 #include <iostream>
+#include <chrono>
 #include <iterator>
 #include <set>
 #include <string>
@@ -11,32 +12,57 @@
 #include "geo.h"
 #include "transport_catalogue.h"
 
+#define PROFILE_CONCAT_INTERNAL(X, Y) X##Y
+#define PROFILE_CONCAT(X, Y) PROFILE_CONCAT_INTERNAL(X, Y)
+#define UNIQUE_VAR_NAME_PROFILE PROFILE_CONCAT(profileGuard, LINE)
+#define LOG_DURATION(x) LogDuration UNIQUE_VAR_NAME_PROFILE(x)
+#define LOG_DURATION_STREAM(x,y) LogDuration UNIQUE_VAR_NAME_PROFILE(x,y)
+
+
+class LogDuration {
+public:
+    // заменим имя типа std::chrono::steady_clock
+    // с помощью using для удобства
+    using Clock = std::chrono::steady_clock;
+
+    LogDuration(const std::string& id, std::ostream& out = std::cerr)
+        : id_(id), out_(out) {
+    }
+
+    ~LogDuration() {
+        using namespace std::chrono;
+        using namespace std::literals;
+
+        const auto end_time = Clock::now();
+        const auto dur = end_time - start_time_;
+        out_ << "Operation time for " << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
+    }
+
+private:
+    const std::string id_;
+    const Clock::time_point start_time_ = Clock::now();
+    std::ostream& out_;
+};
+
 namespace transport_guide {
+
+enum class QueryType {
+	STOP,
+	BUS
+};
+
+QueryType DefineQueryType(const std::string& query);
 
 namespace input {
 
-namespace to_catalogue {
-
-void PutStops(transport_guide::TransportCatalogue& catalogue, const std::vector<std::string>& stops_strings);
-
-void PutBuses(transport_guide::TransportCatalogue& catalogue, const std::vector<std::string>& buses_strings);
-
-} // namespace to_catalogue
-
-struct Queries {
-
-	enum class Type {
-		STOP,
-		BUS
-	};
-
-	std::vector<std::string> stops_strings;
-	std::vector<std::string> buses_strings;
+struct Query {
+	std::string query;
+	transport_guide::QueryType type;
 };
 
-Queries::Type DefineQueryType(const std::string& query);
+void ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<Query>& input_queries);
 
-Queries GetQueriesByType();
+std::vector<Query> GetQueries();
 
 namespace read {
 
@@ -58,7 +84,7 @@ char DefineSeparator(const std::string& bus_query);
 
 std::pair<std::string_view, transport_guide::info::Stop> GetStopNameAndInfo (transport_guide::TransportCatalogue& catalogue, const std::string& stop_query);
 
-std::unordered_map<std::string_view, int> GetStopDistances(transport_guide::TransportCatalogue& catalogue, std::string_view stop_name, const std::string& stop_query, uint64_t pos_last);
+std::unordered_map<std::string_view, int> GetStopDistances(transport_guide::TransportCatalogue& catalogue, const std::string& stop_query, uint64_t pos_last);
 
 std::pair<std::string_view, transport_guide::info::Bus> GetBusNameAndRoute(transport_guide::TransportCatalogue& catalogue, const std::string& bus_query);
 	

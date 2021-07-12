@@ -2,33 +2,27 @@
 
 using namespace transport_guide;
 
-std::string_view TransportCatalogue::GetSVFromInsertedStopName(const std::string stop_name){
+std::string_view TransportCatalogue::GetSVFromInsertedStopName(std::string stop_name){
 	if (IsStopListed(stop_name)){
 		return *stops_.find(stop_name);
 	}
-	return *stops_.insert(stop_name).first;
+	return *stops_.insert(std::move(stop_name)).first;
 }
 
-std::string_view TransportCatalogue::GetSVFromInsertedBusName(const std::string bus_name){
+std::string_view TransportCatalogue::GetSVFromInsertedBusName(std::string bus_name){
 	if (IsBusListed(bus_name)){
 		return *buses_.find(bus_name);
 	}
-	return *buses_.insert(bus_name).first;
+	return *buses_.insert(std::move(bus_name)).first;
 }
 
 
-void TransportCatalogue::AddStop(const std::pair<std::string_view, info::Stop> stop){
-	// if (IsStopListed(stop.first)){
-	// 	GetStopsMap().at(stop.first) = stop.second;
-	// }
-	GetStopsMap().emplace(stop);
+void TransportCatalogue::AddStop(std::pair<std::string_view, info::Stop> stop){
+	GetStopsMap().emplace(std::move(stop));
 }
 
-void TransportCatalogue::AddRoute(const std::pair<std::string_view, info::Bus> bus_route){
-	// if (IsBusListed(bus_route.first)){
-	// 	GetBusesMap().at(bus_route.first) = bus_route.second;
-	// }
-	GetBusesMap().emplace(bus_route);
+void TransportCatalogue::AddRoute(std::pair<std::string_view, info::Bus> bus_route){
+	GetBusesMap().emplace(std::move(bus_route));
 }
 
 bool TransportCatalogue::IsBusListed(std::string_view bus_name) const {
@@ -45,14 +39,6 @@ const info::Bus& TransportCatalogue::GetRouteInfo(const std::string_view bus_nam
 
 const info::Stop& TransportCatalogue::GetStopInfo(const std::string_view stop) const {
 	return GetStopsMap().at(stop);
-}
-
-std::vector<std::string>& TransportCatalogue::GetOutputQueries(){
-	return output_queries_;
-}
-
-const std::vector<std::string>& TransportCatalogue::GetOutputQueries() const{
-	return output_queries_;
 }
 
 std::unordered_map<std::string_view, info::Stop>& TransportCatalogue::GetStopsMap(){

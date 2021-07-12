@@ -43,9 +43,9 @@ public:
 
 	void ProcessInputQueries();
 
-	std::string_view  GetSVFromInsertedBusName(const std::string bus_name);
+	std::string_view  GetSVFromInsertedBusName(std::string bus_name);
 
-	std::string_view  GetSVFromInsertedStopName(const std::string stop_name);
+	std::string_view  GetSVFromInsertedStopName(std::string stop_name);
 
 	void AddStop(const std::pair<std::string_view, info::Stop> stop);
 
@@ -59,10 +59,6 @@ public:
 
 	const info::Stop& GetStopInfo(const std::string_view stop) const ;
 
-	std::vector<std::string>& GetOutputQueries();
-
-	const std::vector<std::string>& GetOutputQueries() const;
-
 	void AddDistanceToStop(std::string_view stop, info::Bus& bus_info);
 
 	void AddBusToStop(const std::string_view bus_name, const std::string_view stop_name);
@@ -72,7 +68,6 @@ public:
 	
 private:
 
-	std::vector<std::string> output_queries_;
 	std::unordered_set<std::string> buses_;
 	std::unordered_set<std::string> stops_;
 

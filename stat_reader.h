@@ -8,41 +8,30 @@
 #include <utility>
 
 #include "geo.h"
+#include "input_reader.h"
 #include "transport_catalogue.h"
 
 namespace transport_guide {
 
 namespace output {
 
-struct OutputQuery {
-	std::string_view query;
-	bool is_stop_query = false;
+struct Query {
+	std::string query;
+	std::string_view short_query;
+	transport_guide::QueryType type;
 };
 
-namespace read {
+std::vector<Query> GetQueries();
 
-std::vector<OutputQuery> Queries(TransportCatalogue& catalogue, const int nbr_of_queries);
+void PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<Query>& output_queries);
 
-} // namespace read
+std::ostream& operator<<(std::ostream& out, const transport_guide::info::Bus& info);
 
-namespace print {
-	
-void Output(const TransportCatalogue& catalogue, const std::vector<OutputQuery>& queries_to_print);
-
-template <typename Info>
-void QueryInfo(const Info& info){
-	std::cout << info << std::endl;
-}
-
-std::ostream& operator<<(std::ostream& out, const info::Bus& info);
-
-std::ostream& operator<<(std::ostream& out, const info::Stop& info);
-
-} //namespace print
+std::ostream& operator<<(std::ostream& out, const transport_guide::info::Stop& info);
 
 namespace detail {
 
-std::string_view TransformBusName(const std::string& bus_name);
+std::string_view GetShortQuery(const std::string& query);
 
 } //namespace detail
 

@@ -2,45 +2,43 @@
 
 using namespace transport_guide::output;
 
-std::string_view detail::TransformBusName(const std::string& bus_name){
-	return std::string_view(bus_name.data() + bus_name.find(' ') + 1);
-}
-
-std::vector<OutputQuery> read::Queries(TransportCatalogue& catalogue, const int nbr_of_queries){
-	std::vector<OutputQuery> get_queries;
-	catalogue.GetOutputQueries().resize(nbr_of_queries);
-	get_queries.resize(nbr_of_queries);
-	for (int i = 0; i < nbr_of_queries; i++){
-		std::getline(std::cin, catalogue.GetOutputQueries()[i]);
-		if (IsStopQuery(catalogue.GetOutputQueries()[i])){
-			get_queries[i].is_stop_query = true;
-		}
-		get_queries[i].query = (detail::TransformBusName(catalogue.GetOutputQueries()[i]));
+std::vector<Query> transport_guide::output::GetQueries(){
+	int number_of_queries = transport_guide::input::read::LineWithNumber();
+	std::vector<Query> output_queries(number_of_queries);
+	for (int i = 0; i < number_of_queries; i++){
+		output_queries[i].query = transport_guide::input::read::Line();
+		output_queries[i].type = transport_guide::DefineQueryType(output_queries[i].query);
+		output_queries[i].short_query = transport_guide::output::detail::GetShortQuery(output_queries[i].query);
 	}
-	return get_queries;
+	return output_queries;
 }
 
-void print::Output(const TransportCatalogue& catalogue, const std::vector<OutputQuery>& queries_to_print){
-	for (const auto& query : queries_to_print) {
-		if (query.is_stop_query){
-			std::cout << "Stop " << query.query << ": ";
-			if (catalogue.IsStopListed(query.query)){
-				print::QueryInfo(catalogue.GetStopInfo(query.query));
+std::string_view detail::GetShortQuery(const std::string& query){
+	return std::string_view(query.data() + query.find(' ') + 1); // finding first letter or digit of bus/stop query after "Bus " or "Stop "
+}
+
+void transport_guide::output::PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<Query>& output_queries){
+	for (const auto& query : output_queries){
+		if (query.type == transport_guide::QueryType::STOP){
+			std::cout << "Stop " << query.short_query << ": ";
+			if (catalogue.IsStopListed(query.short_query)){
+				std::cout << catalogue.GetStopInfo(query.short_query)  << std::endl;
 			} else {
 				std::cout << "not found" << std::endl;
 			}
 		} else {
-			std::cout << "Bus " << query.query << ": ";
-			if (catalogue.IsBusListed(query.query)){
-				print::QueryInfo(catalogue.GetRouteInfo(query.query));
+			std::cout << "Bus " << query.short_query << ": ";
+			if (catalogue.IsBusListed(query.short_query)){
+				std::cout << catalogue.GetRouteInfo(query.short_query) << std::endl;
 			} else {
 				std::cout << "not found" << std::endl;
 			}
 		}
 	}
+
 }
 
-std::ostream& print::operator<<(std::ostream& out, const info::Bus& info){
+std::ostream& transport_guide::output::operator<<(std::ostream& out, const transport_guide::info::Bus& info){
 	(info.is_cycled) ? (out << info.stops.size()) : (out << info.stops.size() * 2 - 1);
 	out << " stops on route, ";
 	(info.is_cycled) ? (out << info.unique_stops.size()) : (out << info.unique_stops.size());
@@ -50,7 +48,7 @@ std::ostream& print::operator<<(std::ostream& out, const info::Bus& info){
 	return out;
 }
 
-std::ostream& print::operator<<(std::ostream& out, const info::Stop& info){
+std::ostream& transport_guide::output::operator<<(std::ostream& out, const transport_guide::info::Stop& info){
 	if (info.passing_buses.size() == 0){
 		out << "no buses";
 	} else {

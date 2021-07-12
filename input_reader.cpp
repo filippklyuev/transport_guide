@@ -15,32 +15,38 @@ int read::LineWithNumber() {
     return result;
 }
 
-Queries::Type transport_guide::input::DefineQueryType(const std::string& query){
+transport_guide::QueryType transport_guide::DefineQueryType(const std::string& query){
     if (query[0] == 'S'){
-        return Queries::Type::STOP;
+        return transport_guide::QueryType::STOP;
     } else {
-        return Queries::Type::BUS;
+        return transport_guide::QueryType::BUS;
     }
 }
 
-transport_guide::input::Queries transport_guide::input::GetQueriesByType(){
+std::vector<transport_guide::input::Query> transport_guide::input::GetQueries(){
+    LOG_DURATION("GET_QUERIES");
     int number_of_queries = read::LineWithNumber();
-    Queries input_queries;
+    std::vector<transport_guide::input::Query> input_queries;
+    input_queries.resize(number_of_queries);
     for (int i = 0 ; i < number_of_queries; i++){
-        std::string query = read::Line();
-        Queries::Type query_type = DefineQueryType(query);
-        if (query_type == Queries::Type::STOP){
-            input_queries.stops_strings.push_back(std::move(query));
-        } else {
-            input_queries.buses_strings.push_back(std::move(query));
-        }
+        std::getline(std::cin, input_queries[i].query);
+        input_queries[i].type = transport_guide::DefineQueryType(input_queries[i].query);
     }
     return input_queries;
 }
 
-void to_catalogue::PutStops(transport_guide::TransportCatalogue& catalogue,const std::vector<std::string>& stops_strings){
-    for (const auto& stop_query: stops_strings){
-        catalogue.AddStop(parse::GetStopNameAndInfo(catalogue, stop_query));
+void transport_guide::input::ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<transport_guide::input::Query>& input_queries){
+    LOG_DURATION("PARSE_INPUT");
+    std::vector<int> positions_of_bus_queries;
+    for (int i = 0; i < input_queries.size(); i++){
+        if (input_queries[i].type == transport_guide::QueryType::STOP){
+            catalogue.AddStop(parse::GetStopNameAndInfo(catalogue, input_queries[i].query));
+        } else {
+            positions_of_bus_queries.push_back(i);
+        }
+    }
+    for (int i = 0; i < positions_of_bus_queries.size(); i++){
+        catalogue.AddRoute(parse::GetBusNameAndRoute(catalogue, input_queries[positions_of_bus_queries[i]].query));
     }
 }
 
@@ -49,12 +55,6 @@ std::string_view parse::detail::GetStopNameSV(const std::string& stop_query){
     pos_first = stop_query.find(' ') + 1; // First letter of the bus stop (after skipping "Stop ")
     pos_last = stop_query.find(':'); // Last letter of the bus stop (befor ":")
     return std::string_view(stop_query.data() + pos_first, pos_last - pos_first);
-}
-
-void to_catalogue::PutBuses(transport_guide::TransportCatalogue& catalogue,const std::vector<std::string>& buses_strings){
-    for (const auto& bus_query: buses_strings){
-        catalogue.AddRoute(parse::GetBusNameAndRoute(catalogue, bus_query));
-    }
 }
 
 std::pair<std::string_view, transport_guide::info::Stop> parse::GetStopNameAndInfo (transport_guide::TransportCatalogue& catalogue, const std::string& stop_query){
@@ -74,11 +74,11 @@ std::pair<std::string_view, transport_guide::info::Stop> parse::GetStopNameAndIn
         return std::make_pair(stop_name, stop_info);
     }
     stop_info.coordinates.lng = std::stod(stop_query.substr(pos_first, pos_last - pos_first));
-    stop_info.distance_to_stops = GetStopDistances(catalogue, stop_name, stop_query, pos_last);
-    return std::make_pair(stop_name, stop_info);;
+    stop_info.distance_to_stops = GetStopDistances(catalogue, stop_query, pos_last);
+    return std::make_pair(stop_name, stop_info);
 }
 
-std::unordered_map<std::string_view, int> parse::GetStopDistances(transport_guide::TransportCatalogue& catalogue, std::string_view stop_name, const std::string& stop_query, uint64_t pos_last){
+std::unordered_map<std::string_view, int> parse::GetStopDistances(transport_guide::TransportCatalogue& catalogue, const std::string& stop_query, uint64_t pos_last){
     //Stop Biryulyovo Zapadnoye: 55.574371, 37.6517, 7500m to Rossoshanskaya ulitsa, 1800m to Biryusinka, 2400m to Universam //reference stop_str
     int64_t pos_first = pos_last + 2; // first digit of distance after skipping ", "
     std::unordered_map<std::string_view, int> stop_distances;
