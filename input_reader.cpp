@@ -24,7 +24,7 @@ transport_guide::QueryType transport_guide::DefineQueryType(const std::string& q
 }
 
 std::vector<transport_guide::input::Query> transport_guide::input::GetQueries(){
-    LOG_DURATION("GET_QUERIES");
+    // LOG_DURATION("GET_QUERIES");
     int number_of_queries = read::LineWithNumber();
     std::vector<transport_guide::input::Query> input_queries;
     input_queries.resize(number_of_queries);
@@ -36,7 +36,7 @@ std::vector<transport_guide::input::Query> transport_guide::input::GetQueries(){
 }
 
 void transport_guide::input::ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<transport_guide::input::Query>& input_queries){
-    LOG_DURATION("PARSE_INPUT");
+    // LOG_DURATION("PARSE_INPUT");
     std::vector<int> positions_of_bus_queries;
     for (int i = 0; i < input_queries.size(); i++){
         if (input_queries[i].type == transport_guide::QueryType::STOP){

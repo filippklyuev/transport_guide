@@ -26,11 +26,11 @@ void TransportCatalogue::AddRoute(std::pair<std::string_view, info::Bus> bus_rou
 }
 
 bool TransportCatalogue::IsBusListed(std::string_view bus_name) const {
-	return (buses_.find(std::string(bus_name)) != buses_.end());
+	return GetBusesMap().find(bus_name) != GetBusesMap().end();
 }
 
 bool TransportCatalogue::IsStopListed(std::string_view stop_name) const {
-	return (stops_.find(std::string(stop_name)) != stops_.end());
+	return GetStopsMap().find(stop_name) != GetStopsMap().end();
 }
 
 const info::Bus& TransportCatalogue::GetRouteInfo(const std::string_view bus_name) const {

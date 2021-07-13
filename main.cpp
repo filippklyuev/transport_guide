@@ -11,7 +11,7 @@
 // using namespace transport_guide;
 
 void Test(){
-	LOG_DURATION("2.0");
+	// LOG_DURATION("2.0");
 	std::vector<transport_guide::input::Query> input_queries = transport_guide::input::GetQueries();
 	transport_guide::TransportCatalogue catalogue;
 	transport_guide::input::ParseInput(catalogue, input_queries);

@@ -83,9 +83,4 @@ private:
 	const BusMap& GetBusesMap() const;
 };
 	
-template <typename S>
-bool IsStopQuery(const S& query){
-	return query[0] == 'S';
-}
-	
 } // namespace transport_guide
