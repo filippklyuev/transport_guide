@@ -23,20 +23,20 @@ transport_guide::QueryType transport_guide::DefineQueryType(const std::string& q
     }
 }
 
-std::vector<transport_guide::input::Query> transport_guide::input::GetQueries(){
-    // LOG_DURATION("GET_QUERIES");
-    int number_of_queries = read::LineWithNumber();
-    std::vector<transport_guide::input::Query> input_queries;
-    input_queries.resize(number_of_queries);
-    for (int i = 0 ; i < number_of_queries; i++){
-        std::getline(std::cin, input_queries[i].query);
-        input_queries[i].type = transport_guide::DefineQueryType(input_queries[i].query);
+std::vector<transport_guide::Query> transport_guide::input::GetQueries(bool is_for_output){
+    int number_of_queries = transport_guide::input::read::LineWithNumber();
+    std::vector<transport_guide::Query> queries(number_of_queries);
+    for (int i = 0; i < number_of_queries; i++){
+        queries[i].query = transport_guide::input::read::Line();
+        queries[i].type = transport_guide::DefineQueryType(queries[i].query);
+        if (is_for_output){
+            queries[i].short_query = transport_guide::output::detail::GetShortQuery(queries[i].query);
+        }
     }
-    return input_queries;
+    return queries;
 }
 
-void transport_guide::input::ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<transport_guide::input::Query>& input_queries){
-    // LOG_DURATION("PARSE_INPUT");
+void transport_guide::input::ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<transport_guide::Query>& input_queries){
     std::vector<int> positions_of_bus_queries;
     for (int i = 0; i < input_queries.size(); i++){
         if (input_queries[i].type == transport_guide::QueryType::STOP){
@@ -124,7 +124,7 @@ std::pair<std::string_view, transport_guide::info::Bus> parse::GetBusNameAndRout
     }
     (separator == '>') ? (bus_info.is_cycled = true) : (bus_info.is_cycled = false);
     if (bus_info.is_cycled == false){
-        bus_info.factial_route_length += catalogue.CalculateBackRoute(bus_info);
+        bus_info.factial_route_length += catalogue.GetBackRouteDistance(bus_info);
         bus_info.geo_route_length *= 2;
     }
     return std::make_pair(bus_name, bus_info);

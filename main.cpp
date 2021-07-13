@@ -8,17 +8,11 @@
 #include "transport_catalogue.h"
 #include "stat_reader.h"
 
-// using namespace transport_guide;
-
 void Test(){
-	// LOG_DURATION("2.0");
-	std::vector<transport_guide::input::Query> input_queries = transport_guide::input::GetQueries();
+	std::vector<transport_guide::Query> input_queries = transport_guide::input::GetQueries(bool{false});
 	transport_guide::TransportCatalogue catalogue;
 	transport_guide::input::ParseInput(catalogue, input_queries);
-	// transport_guide::input::to_catalogue::PutStops(catalogue, input_queries.stops_strings);
-	// transport_guide::input::to_catalogue::PutBuses(catalogue, input_queries.buses_strings);
-	std::vector<transport_guide::output::Query> output_queries = transport_guide::output::GetQueries();
-	// LOG_DURATION("PRINT");
+	std::vector<transport_guide::Query> output_queries = transport_guide::input::GetQueries(bool{true});
 	transport_guide::output::PrintQueriesResult(catalogue, output_queries);
 }
 

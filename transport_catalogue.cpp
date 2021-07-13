@@ -25,11 +25,11 @@ void TransportCatalogue::AddRoute(std::pair<std::string_view, info::Bus> bus_rou
 	GetBusesMap().emplace(std::move(bus_route));
 }
 
-bool TransportCatalogue::IsBusListed(std::string_view bus_name) const {
+bool TransportCatalogue::IsBusListed(const std::string_view bus_name) const {
 	return GetBusesMap().find(bus_name) != GetBusesMap().end();
 }
 
-bool TransportCatalogue::IsStopListed(std::string_view stop_name) const {
+bool TransportCatalogue::IsStopListed(const std::string_view stop_name) const {
 	return GetStopsMap().find(stop_name) != GetStopsMap().end();
 }
 
@@ -57,7 +57,7 @@ const std::unordered_map<std::string_view, info::Bus>& TransportCatalogue::GetBu
 	return buses_map_;
 }
 
-void TransportCatalogue::AddDistanceToStop(std::string_view stop, info::Bus& bus_info){
+void TransportCatalogue::AddDistanceToStop(const std::string_view stop, info::Bus& bus_info){
 	bus_info.stops.push_back(stop);
 	bus_info.unique_stops.insert(stop);
 	if (bus_info.stops.size() == 1){
@@ -73,12 +73,9 @@ void TransportCatalogue::AddDistanceToStop(std::string_view stop, info::Bus& bus
 	}
 }
 
-int TransportCatalogue::CalculateBackRoute(const info::Bus& bus_info){
+int TransportCatalogue::GetBackRouteDistance(const info::Bus& bus_info){
 	int back_route = 0;
-	for (int i = bus_info.stops.size() - 1; i >= 0; i--){
-		if (i == bus_info.stops.size() - 1){
-			i -= 1 ;
-		}
+	for (int i = bus_info.stops.size() - 2; i >= 0; i--){ 
 		if (GetStopsMap().at(bus_info.stops[i + 1]).distance_to_stops.count(bus_info.stops[i])){
 			back_route += (GetStopsMap().at(bus_info.stops[i + 1]).distance_to_stops.at(bus_info.stops[i]));
 		} else {

@@ -13,17 +13,11 @@
 
 namespace transport_guide {
 
+struct Query;
+
 namespace output {
 
-struct Query {
-	std::string query;
-	std::string_view short_query;
-	transport_guide::QueryType type;
-};
-
-std::vector<Query> GetQueries();
-
-void PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<Query>& output_queries);
+void PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<transport_guide::Query>& output_queries);
 
 std::ostream& operator<<(std::ostream& out, const transport_guide::info::Bus& info);
 

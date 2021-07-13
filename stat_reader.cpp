@@ -1,23 +1,10 @@
 #include "stat_reader.h"
 
-using namespace transport_guide::output;
-
-std::vector<Query> transport_guide::output::GetQueries(){
-	int number_of_queries = transport_guide::input::read::LineWithNumber();
-	std::vector<Query> output_queries(number_of_queries);
-	for (int i = 0; i < number_of_queries; i++){
-		output_queries[i].query = transport_guide::input::read::Line();
-		output_queries[i].type = transport_guide::DefineQueryType(output_queries[i].query);
-		output_queries[i].short_query = transport_guide::output::detail::GetShortQuery(output_queries[i].query);
-	}
-	return output_queries;
-}
-
-std::string_view detail::GetShortQuery(const std::string& query){
+std::string_view transport_guide::output::detail::GetShortQuery(const std::string& query){
 	return std::string_view(query.data() + query.find(' ') + 1); // finding first letter or digit of bus/stop query after "Bus " or "Stop "
 }
 
-void transport_guide::output::PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<Query>& output_queries){
+void transport_guide::output::PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<transport_guide::Query>& output_queries){
 	for (const auto& query : output_queries){
 		if (query.type == transport_guide::QueryType::STOP){
 			std::cout << "Stop " << query.short_query << ": ";

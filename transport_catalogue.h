@@ -47,23 +47,23 @@ public:
 
 	std::string_view  GetSVFromInsertedStopName(std::string stop_name);
 
-	void AddStop(const std::pair<std::string_view, info::Stop> stop);
+	void AddStop(std::pair<std::string_view, info::Stop> stop);
 
-	void AddRoute(const std::pair<std::string_view, info::Bus> bus_route);
+	void AddRoute(std::pair<std::string_view, info::Bus> bus_route);
 
-	bool IsBusListed(std::string_view bus_name) const ;
+	bool IsBusListed(const std::string_view bus_name) const ;
 
-	bool IsStopListed(std::string_view stop_name) const ;
+	bool IsStopListed(const std::string_view stop_name) const ;
 
 	const info::Bus& GetRouteInfo(const std::string_view bus_name) const ;
 
 	const info::Stop& GetStopInfo(const std::string_view stop) const ;
 
-	void AddDistanceToStop(std::string_view stop, info::Bus& bus_info);
+	void AddDistanceToStop(const std::string_view stop, info::Bus& bus_info);
 
 	void AddBusToStop(const std::string_view bus_name, const std::string_view stop_name);
 
-	int CalculateBackRoute(const info::Bus& bus_info);
+	int GetBackRouteDistance(const info::Bus& bus_info);
 
 	
 private:
