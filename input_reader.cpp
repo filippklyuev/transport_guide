@@ -112,12 +112,12 @@ std::pair<std::string_view, transport_guide::info::Bus> parse::GetBusNameAndRout
     while (true) {
         pos_last = bus_query.find(separator, pos_first);
         if (pos_last == bus_query.npos){
-            std::string_view last_stop = catalogue.GetSVFromInsertedBusName(bus_query.substr(pos_first));
+            std::string_view last_stop = catalogue.GetSVFromInsertedStopName(bus_query.substr(pos_first));
             catalogue.AddDistanceToStop(last_stop, bus_info);
             catalogue.AddBusToStop(bus_name, last_stop);
             break ;
         }
-        std::string_view stop = catalogue.GetSVFromInsertedBusName(bus_query.substr(pos_first, pos_last - (pos_first + 1)));
+        std::string_view stop = catalogue.GetSVFromInsertedStopName(bus_query.substr(pos_first, pos_last - (pos_first + 1)));
         catalogue.AddDistanceToStop(stop, bus_info);
         catalogue.AddBusToStop(bus_name, stop);
         pos_first = pos_last + 2; // skipping "'separator' " to find first character of the stop name
