@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out, const transport_guide::info::Stop& i
 
 namespace detail {
 
-std::string_view GetShortQuery(const std::string& query);
+std::string_view GetName(const std::string& query);
 
 } //namespace detail
 

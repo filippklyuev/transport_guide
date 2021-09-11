@@ -2,36 +2,47 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <set>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <utility>
-
+#include <unordered_map>
 #include "geo.h"
 #include "stat_reader.h"
 #include "transport_catalogue.h"
 
 namespace transport_guide {
 
-enum class QueryType {
-	STOP,
-	BUS
-};
-
 QueryType DefineQueryType(const std::string& query);
 
 struct Query {
 	std::string query;
-	std::string_view short_query;
-	transport_guide::QueryType type;
+	std::string_view name;
+	QueryType type;
 };
+
+using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace input {
 
-void ParseInput(transport_guide::TransportCatalogue& catalogue,const std::vector<transport_guide::Query>& input_queries);
+struct ParsedStopQuery  {
+	std::string_view name;
+	double lattitude;
+	double longtitude;
+	DistanceMap distance_to_stops = {};
+};
 
-std::vector<transport_guide::Query> GetQueries(bool is_for_output);
+struct ParsedBusQuery {
+	std::string_view name;
+	bool is_cycled;
+	std::vector<std::string_view> stops_on_route;
+};
+
+void updateCatalogue(TransportCatalogue& catalogue,const std::vector<Query>& input_queries);
+
+std::vector<Query> GetQueries(bool is_for_output);
 
 namespace read {
 
@@ -43,21 +54,35 @@ std::string Line();
 
 namespace parse {
 
+input::ParsedStopQuery parseStopQuery(std::string_view stop_query);
+
+DistanceMap getStopDistances(std::string_view distance_to_stops_query);
+
+input::ParsedBusQuery parseBusQuery(std::string_view bus_query);
+
+void updateBusInfo(TransportCatalogue& catalogue, std::vector<std::string_view> stops_on_route_temp, bool is_cycled, info::Bus& bus_info);
+
 namespace detail {
 
 std::string_view GetStopNameSV(const std::string& stop_str);
 
-char DefineSeparator(const std::string& bus_query);
+char DefineSeparator(std::string_view bus_query);
 
-} // namespace detail
+void updateDistance(const std::vector<info::Stop*>& stops_vec, info::Bus& result);
 
-std::pair<std::string_view, transport_guide::info::Stop> GetStopNameAndInfo (transport_guide::TransportCatalogue& catalogue, const std::string& stop_query);
+void updateBackRoute(const std::vector<info::Stop*>& stops_vec, info::Bus& result);
 
-std::unordered_map<std::string_view, int> GetStopDistances(transport_guide::TransportCatalogue& catalogue, const std::string& stop_query, uint64_t pos_last);
-
-std::pair<std::string_view, transport_guide::info::Bus> GetBusNameAndRoute(transport_guide::TransportCatalogue& catalogue, const std::string& bus_query);
+} // namespace detail 
 	
 } //namespace parse
+
+namespace detail {
+
+DistanceMap InsertSvsAndGetUpdatedMap(TransportCatalogue& catalogue, DistanceMap temp_map);
+
+void updatePassingBus(info::Bus* bus_info, std::vector<info::Stop*>& stops_vec);
+
+} // namespace detail
 
 } // namespace input
 
