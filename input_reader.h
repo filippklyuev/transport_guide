@@ -19,7 +19,6 @@ QueryType DefineQueryType(const std::string& query);
 
 struct Query {
 	std::string query;
-	std::string_view name;
 	QueryType type;
 };
 
@@ -42,13 +41,13 @@ struct ParsedBusQuery {
 
 void updateCatalogue(TransportCatalogue& catalogue,const std::vector<Query>& input_queries);
 
-std::vector<Query> GetQueries(bool is_for_output);
+std::vector<Query> GetQueries(std::istream& in);
 
 namespace read {
 
-int LineWithNumber();
+int LineWithNumber(std::istream& in);
 
-std::string Line();
+std::string Line(std::istream& in);
 
 } // namespace read
 
@@ -78,7 +77,7 @@ void updateBackRoute(const std::vector<info::Stop*>& stops_vec, info::Bus& resul
 
 namespace detail {
 
-DistanceMap InsertSvsAndGetUpdatedMap(TransportCatalogue& catalogue, DistanceMap temp_map);
+DistanceMap InsertSvsAndGetNewMap(TransportCatalogue& catalogue, DistanceMap temp_map);
 
 void updatePassingBus(info::Bus* bus_info, std::vector<info::Stop*>& stops_vec);
 

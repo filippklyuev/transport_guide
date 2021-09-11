@@ -43,8 +43,6 @@ namespace info {
 	struct Bus;
 
 	struct Stop : Nameable {
-		Stop(Stop&& other) = default;
-		Stop() = default;
 
 		geo::Coordinates coordinates = {};
 		std::unordered_map<std::string_view, int> distance_to_stops = {};
@@ -53,12 +51,6 @@ namespace info {
 	};
 
 	struct Bus : Nameable {
-		Bus(Bus&& other) = default;
-		Bus() = default;
-
-		bool operator<(const Bus& other) const {
-			return this->name < other.name;
-		}
 
 		std::unordered_set<std::string_view> unique_stops = {};
 		std::vector<Stop*> stops = {};
@@ -73,8 +65,6 @@ namespace info {
 
 } //namespace info	
 
-
-
 class TransportCatalogue {
 public:
 	TransportCatalogue() = default;
@@ -82,9 +72,7 @@ public:
 	using BusMap = std::map<std::string_view, info::Bus>; // поменял на map для избежания инвалидации итераторов
 	using StopMap = std::map<std::string_view, info::Stop>;
 
-	void ProcessInputQueries();
-
-	std::string_view GetSVFromInsertedName(std::string_view name, QueryType type);
+	std::string_view InsertNameSV(std::string_view name, QueryType type);
 
 	void AddStop(std::string_view name);
 
@@ -101,12 +89,6 @@ public:
 	const info::Stop& GetStopInfo(const std::string_view stop) const ;
 
 	info::Stop& GetStopInfo(const std::string_view stop);
-
-	// void AddDistanceToStop(const std::string_view stop, info::Bus& bus_info);
-
-	// void AddBusToStop(const std::string_view bus_name, const std::string_view stop_name);
-
-	// int GetBackRouteDistance(const info::Bus& bus_info);
 	
 private:
 
@@ -116,9 +98,9 @@ private:
 	StopMap stops_map_;
 	BusMap buses_map_;
 
-	std::string_view  GetSVFromInsertedBusName(std::string bus_name);
+	std::string_view  InsertBusName(std::string bus_name);
 
-	std::string_view  GetSVFromInsertedStopName(std::string stop_name);
+	std::string_view  InsertStopName(std::string stop_name);
 
 	StopMap& GetStopsMap();
 

@@ -17,7 +17,7 @@ struct Query;
 
 namespace output {
 
-void PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<transport_guide::Query>& output_queries);
+void PrintQueriesResult(const transport_guide::TransportCatalogue& catalogue, const std::vector<transport_guide::Query>& output_queries, std::ostream& out);
 
 std::ostream& operator<<(std::ostream& out, const transport_guide::info::Bus& info);
 

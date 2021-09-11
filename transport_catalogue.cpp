@@ -2,29 +2,22 @@
 
 using namespace transport_guide;
 
-// std::vector<info::Stop*> TransportCatalogue::updateRouteInfoAndGetStops(std::vector<std::string_view> stops_on_route_temp){
-// 	std::vector<info::Stop*> stops_on_route;
-// 	for (auto stop : stops_on_route){
-
-// 	}
-// }
-
-std::string_view TransportCatalogue::GetSVFromInsertedName(std::string_view name, QueryType type){
+std::string_view TransportCatalogue::InsertNameSV(std::string_view name, QueryType type){
 	if (type == QueryType::STOP){
-		return GetSVFromInsertedStopName(std::string(name));
+		return InsertStopName(std::string(name));
 	} else {
-		return GetSVFromInsertedBusName(std::string(name));
+		return InsertBusName(std::string(name));
 	}
 }
 
-std::string_view TransportCatalogue::GetSVFromInsertedStopName(std::string stop_name){
+std::string_view TransportCatalogue::InsertStopName(std::string stop_name){
 	if (IsStopListed(stop_name)){
 		return *stops_.find(stop_name);
 	}
 	return *stops_.insert(std::move(stop_name)).first;
 }
 
-std::string_view TransportCatalogue::GetSVFromInsertedBusName(std::string bus_name){
+std::string_view TransportCatalogue::InsertBusName(std::string bus_name){
 	if (IsBusListed(bus_name)){
 		return *buses_.find(bus_name);
 	}
@@ -79,35 +72,3 @@ TransportCatalogue::BusMap& TransportCatalogue::GetBusesMap(){
 const TransportCatalogue::BusMap& TransportCatalogue::GetBusesMap() const {
 	return buses_map_;
 }
-
-// void TransportCatalogue::AddDistanceToStop(const std::string_view stop, info::Bus& bus_info){
-// 	bus_info.stops.push_back(stop);
-// 	bus_info.unique_stops.insert(stop);
-// 	if (bus_info.stops.size() == 1){
-// 		return ;
-// 	}
-// 	int size = bus_info.stops.size();
-// 	bus_info.geo_route_length += geo::ComputeDistance(GetStopsMap().at(bus_info.stops[size - 2]).coordinates, 
-// 													GetStopsMap().at(bus_info.stops.back()).coordinates);
-// 	if (GetStopsMap().at(bus_info.stops[size - 2]).distance_to_stops.count(stop)){
-// 		bus_info.factial_route_length += (GetStopsMap().at(bus_info.stops[size - 2]).distance_to_stops.at(stop));
-// 	} else {
-// 		bus_info.factial_route_length += (GetStopsMap().at(stop).distance_to_stops.at(bus_info.stops[size - 2]));
-// 	}
-// }
-
-// int TransportCatalogue::GetBackRouteDistance(const info::Bus& bus_info){
-// 	int back_route = 0;
-// 	for (int i = bus_info.stops.size() - 2; i >= 0; i--){ 
-// 		if (GetStopsMap().at(bus_info.stops[i + 1]).distance_to_stops.count(bus_info.stops[i])){
-// 			back_route += (GetStopsMap().at(bus_info.stops[i + 1]).distance_to_stops.at(bus_info.stops[i]));
-// 		} else {
-// 			back_route += (GetStopsMap().at(bus_info.stops[i]).distance_to_stops.at(bus_info.stops[i + 1]));
-// 		}
-// 	}
-// 	return back_route;
-// }
-
-// void TransportCatalogue::AddBusToStop(const std::string_view bus_name, const std::string_view stop_name){
-// 	GetStopsMap().at(stop_name).passing_buses.insert(bus_name);
-// }

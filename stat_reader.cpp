@@ -6,21 +6,22 @@ std::string_view output::detail::GetName(const std::string& query){
 	return std::string_view(query.data() + query.find(' ') + 1); // finding first letter or digit of bus/stop query after "Bus " or "Stop "
 }
 
-void output::PrintQueriesResult(const TransportCatalogue& catalogue, const std::vector<Query>& output_queries){
+void output::PrintQueriesResult(const TransportCatalogue& catalogue, const std::vector<Query>& output_queries, std::ostream& out){
 	for (const auto& query : output_queries){
+		std::string_view name = output::detail::GetName(query.query);
 		if (query.type == QueryType::STOP){
-			std::cout << "Stop " << query.name << ": ";
-			if (catalogue.IsStopListed(query.name)){
-				std::cout << catalogue.GetStopInfo(query.name)  << std::endl;
+			out << "Stop " << name << ": ";
+			if (catalogue.IsStopListed(name)){
+				out << catalogue.GetStopInfo(name)  << std::endl;
 			} else {
-				std::cout << "not found" << std::endl;
+				out << "not found" << std::endl;
 			}
 		} else {
-			std::cout << "Bus " << query.name << ": ";
-			if (catalogue.IsBusListed(query.name)){
-				std::cout << catalogue.GetRouteInfo(query.name) << std::endl;
+			out << "Bus " << name << ": ";
+			if (catalogue.IsBusListed(name)){
+				out << catalogue.GetRouteInfo(name) << std::endl;
 			} else {
-				std::cout << "not found" << std::endl;
+				out << "not found" << std::endl;
 			}
 		}
 	}

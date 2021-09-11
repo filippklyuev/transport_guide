@@ -11,29 +11,26 @@ QueryType transport_guide::DefineQueryType(const std::string& query){ // Есл�
     }
 }
 
-std::vector<Query> input::GetQueries(bool is_for_output){ // если добавить using namespace transport_guide::input та же ошибка undefined reference, так что пришлось везде оставить явное указание пространств имен
-    int number_of_queries = read::LineWithNumber();
+std::vector<Query> input::GetQueries(std::istream& in){ // если добавить using namespace transport_guide::input та же ошибка undefined reference, так что пришлось везде оставить явное указание пространств имен
+    int number_of_queries = read::LineWithNumber(in);
     std::vector<Query> queries(number_of_queries);
     for (int i = 0; i < number_of_queries; i++){
-        queries[i].query = read::Line();
+        queries[i].query = read::Line(in);
         queries[i].type = DefineQueryType(queries[i].query);
-        if (is_for_output){
-            queries[i].name = output::detail::GetName(queries[i].query);
-        }
     }
     return queries;
 }
 
-std::string input::read::Line() {
+std::string input::read::Line(std::istream& in) {
     std::string s;
-    std::getline(std::cin, s);
+    std::getline(in, s);
     return s;
 }
 
-int input::read::LineWithNumber() {
+int input::read::LineWithNumber(std::istream& in) {
     int result;
-    std::cin >> result;
-    Line();
+    in >> result;
+    Line(in);
     return result;
 }
 
@@ -94,10 +91,10 @@ input::ParsedStopQuery input::parse::parseStopQuery(std::string_view stop_query)
     return parsed_query;
 }
 
-DistanceMap input::detail::InsertSvsAndGetUpdatedMap(TransportCatalogue& catalogue, DistanceMap temp_map){
+DistanceMap input::detail::InsertSvsAndGetNewMap(TransportCatalogue& catalogue, DistanceMap temp_map){
     DistanceMap result;
     for (auto [stop_name_temp, distance] : temp_map){
-        result.emplace(std::make_pair(catalogue.GetSVFromInsertedName(stop_name_temp, QueryType::STOP), distance));
+        result.emplace(std::make_pair(catalogue.InsertNameSV(stop_name_temp, QueryType::STOP), distance));
     }
     return result;
 }
@@ -150,12 +147,12 @@ void input::updateCatalogue(TransportCatalogue& catalogue,const std::vector<Quer
     for (int i = 0; i < input_queries.size(); i++){
         if (input_queries[i].type == QueryType::STOP){
             auto [stop_name_temp, lat, lng, distance_to_stops_temp] = input::parse::parseStopQuery(input_queries[i].query);
-            std::string_view stop_name = catalogue.GetSVFromInsertedName(stop_name_temp, QueryType::STOP);
-            catalogue.AddStop(stop_name);
+            std::string_view stop_name = catalogue.InsertNameSV(stop_name_temp, QueryType::STOP);
+            catalogue.AddStop(stop_name); 
             info::Stop& stop_info = catalogue.GetStopInfo(stop_name);
             stop_info.name = stop_name;
             stop_info.coordinates = {lat, lng};
-            stop_info.distance_to_stops = input::detail::InsertSvsAndGetUpdatedMap(catalogue, std::move(distance_to_stops_temp));
+            stop_info.distance_to_stops = input::detail::InsertSvsAndGetNewMap(catalogue, std::move(distance_to_stops_temp));
         } else {
             positions_of_bus_queries.push_back(i);
         }
@@ -163,7 +160,7 @@ void input::updateCatalogue(TransportCatalogue& catalogue,const std::vector<Quer
     for (int i = 0; i < positions_of_bus_queries.size(); i++){
         auto [bus_name_temp, is_cycled, stops_on_route_temp] = input::parse::parseBusQuery(input_queries[positions_of_bus_queries[i]].query);
 
-        std::string_view bus_name = catalogue.GetSVFromInsertedName(bus_name_temp, QueryType::BUS);
+        std::string_view bus_name = catalogue.InsertNameSV(bus_name_temp, QueryType::BUS);
         catalogue.AddRoute(bus_name);
         info::Bus& bus_info = catalogue.GetRouteInfo(bus_name);
         input::parse::updateBusInfo(catalogue, std::move(stops_on_route_temp), is_cycled, bus_info);

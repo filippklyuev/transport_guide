@@ -10,15 +10,15 @@
 
 using namespace transport_guide;
 
-void Test(){
-	std::vector<Query> input_queries = input::GetQueries(false);
+void Test(std::istream& in, std::ostream& out){
+	std::vector<Query> input_queries = input::GetQueries(in);
 	TransportCatalogue catalogue;
 	input::updateCatalogue(catalogue, input_queries);
-	std::vector<Query> output_queries = input::GetQueries(true);
-	output::PrintQueriesResult(catalogue, output_queries);
+	std::vector<Query> output_queries = input::GetQueries(in);
+	output::PrintQueriesResult(catalogue, output_queries, out);
 }
 
 int main(){
 	std::cout << std::setprecision(6);
-	Test();
+	Test(std::cin, std::cout);
 }
