@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "geo.h"
-// #include "input_reader.h"
 
 namespace transport_guide {
 
@@ -20,6 +19,8 @@ enum class QueryType {
 	STOP,
 	BUS
 };
+
+class TransportCatalogue;
 
 namespace info {
 
@@ -30,23 +31,29 @@ namespace info {
 		}
 	};
 
+	struct Bus;
+
 	struct Nameable {
 
 		std::string_view name;
 
-		std::string_view getName(){
-			return name;
-		}
+		std::string_view getName() const;
 
 	};
 
-	struct Bus;
+	using DistanceMap = std::unordered_map<std::string_view, int>;
 
 	struct Stop : Nameable {
 
 		geo::Coordinates coordinates = {};
-		std::unordered_map<std::string_view, int> distance_to_stops = {};
+		DistanceMap distance_to_stops = {};
 		std::set<Bus*, InfoPtrComparator<Bus>> passing_buses = {};
+
+		Stop& setName(std::string_view stop_name);
+
+		Stop& setCoordinates(geo::Coordinates coords);
+
+		Stop& setDistanceToStops(DistanceMap map);
 
 	};
 
@@ -58,9 +65,20 @@ namespace info {
 		double geo_route_length = 0.0;
 		int64_t factial_route_length = 0;
 
-		size_t getUniqueStopsCount(){
-			return unique_stops.size();
-		}
+		Bus& setName(std::string_view stop_name);
+
+		Bus& setIsCycled(bool is_cycled);
+
+		Bus& setStopsAndDistance(const TransportCatalogue& catalogue, std::vector<std::string_view> stops_on_route_temp);
+
+		void updateBackRoute();
+
+		void updateDistance();
+
+		void updatePassingBus();
+
+		size_t getUniqueStopsCount() const;
+
 	};
 
 } //namespace info	

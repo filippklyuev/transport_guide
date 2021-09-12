@@ -59,17 +59,11 @@ DistanceMap getStopDistances(std::string_view distance_to_stops_query);
 
 input::ParsedBusQuery parseBusQuery(std::string_view bus_query);
 
-void updateBusInfo(TransportCatalogue& catalogue, std::vector<std::string_view> stops_on_route_temp, bool is_cycled, info::Bus& bus_info);
-
 namespace detail {
 
-std::string_view GetStopNameSV(const std::string& stop_str);
+std::string_view GetName(std::string_view stop_query);
 
 char DefineSeparator(std::string_view bus_query);
-
-void updateDistance(const std::vector<info::Stop*>& stops_vec, info::Bus& result);
-
-void updateBackRoute(const std::vector<info::Stop*>& stops_vec, info::Bus& result);
 
 } // namespace detail 
 	
@@ -78,8 +72,6 @@ void updateBackRoute(const std::vector<info::Stop*>& stops_vec, info::Bus& resul
 namespace detail {
 
 DistanceMap InsertSvsAndGetNewMap(TransportCatalogue& catalogue, DistanceMap temp_map);
-
-void updatePassingBus(info::Bus* bus_info, std::vector<info::Stop*>& stops_vec);
 
 } // namespace detail
 
