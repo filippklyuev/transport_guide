@@ -15,7 +15,7 @@ namespace info {
 
     struct RoutingSettings {
         int bus_wait_time;
-        int bus_velocity;
+        double bus_velocity;
     };
 
     template<typename InfoPtr>
@@ -72,7 +72,7 @@ namespace info {
 
         int getBusWaitTime() const;
 
-        int getBusVelocity() const;
+        double getBusVelocity() const;
 
         size_t getUniqueStopsCount() const;
 

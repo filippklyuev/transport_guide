@@ -84,7 +84,7 @@ transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_req
 transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
     transport_guide::info::RoutingSettings result;
     result.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
-    result.bus_velocity = routing_settings.at("bus_velocity").AsInt();
+    result.bus_velocity = routing_settings.at("bus_velocity").AsDouble();
     return result;
 }
 

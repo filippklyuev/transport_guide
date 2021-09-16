@@ -65,7 +65,7 @@ int Bus::getBusWaitTime() const {
     return routing_settings.bus_wait_time;
 }
 
-int Bus::getBusVelocity() const {
+double Bus::getBusVelocity() const {
     return routing_settings.bus_velocity;
 }
 
