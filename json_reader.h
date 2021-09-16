@@ -10,6 +10,7 @@
 
 #include "domain.h"
 #include "json.h"
+#include "json_builder.h"
 #include "svg.h"
 #include "map_renderer.h"
 #include "request_handler.h"
@@ -34,19 +35,19 @@ public:
         settings_(settings)
     {}
 
-    json::Array parseStatArray(const json::Array& requests_vector);
+    json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
     const transport_guide::TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
 
-    json::Dict parseSingleStatRequest(const json::Dict& request);
+    void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
 
-    void updateResultWithBusInfo(json::Dict& result, const transport_guide::info::Bus& bus_info);
+    void updateResultWithBusInfo(json::Builder& builder, const transport_guide::info::Bus& bus_info);
 
-    void updateResultWithStopInfo(json::Dict& result, const transport_guide::info::Stop& stop_info);
+    void updateResultWithStopInfo(json::Builder& builder, const transport_guide::info::Stop& stop_info);
 
-    void updateResultWithMap(json::Dict& result);
+    void updateResultWithMap(json::Builder& builder);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
