@@ -22,11 +22,13 @@ using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace parser {
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue);
+void updateCatalogue(const json::Array& requests_vector, const json::Dict& routing_settings, transport_guide::TransportCatalogue& catalogue);
 
 transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
 transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+
+transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:

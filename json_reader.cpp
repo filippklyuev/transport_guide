@@ -81,8 +81,16 @@ transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_req
     return result;
 }
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
-    std::vector<int> bus_query_positions;   
+transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
+    transport_guide::info::RoutingSettings result;
+    result.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
+    result.bus_velocity = routing_settings.at("bus_velocity").AsInt();
+    return result;
+}
+
+void updateCatalogue(const json::Array& requests_vector, const json::Dict& routing_settings, transport_guide::TransportCatalogue& catalogue){
+    std::vector<int> bus_query_positions;
+    // transport_guide::info::RoutingSettings routing_settings = parseRoutingSettings(routing_settings_);
     for (int i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
         if (input_request.at("type").AsString() == "Bus"){
@@ -94,7 +102,7 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
     }
     for (int i = 0; i < bus_query_positions.size(); i++){
         auto [bus_name_temp, is_cycled, stops_on_route] = parseBusRequest(requests_vector[bus_query_positions[i]].AsDict());
-            catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route));
+            catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route), parseRoutingSettings(routing_settings));
     }
 }
 

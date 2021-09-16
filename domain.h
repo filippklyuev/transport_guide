@@ -13,6 +13,11 @@ using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace info {
 
+    struct RoutingSettings {
+        int bus_wait_time;
+        int bus_velocity;
+    };
+
     template<typename InfoPtr>
     struct InfoPtrComparator {
         bool operator()(const InfoPtr* lhs,const InfoPtr* rhs) const {
@@ -42,15 +47,17 @@ namespace info {
 
     struct Bus {
 
-        Bus(std::string_view name_, bool is_cycled_)
+        Bus(std::string_view name_, bool is_cycled_, info::RoutingSettings routing_settings_)
         : name(name_)
         , is_cycled(is_cycled_)
+        , routing_settings(routing_settings_)
         {}
 
         std::string_view name;
         std::unordered_set<std::string_view> unique_stops = {};
         std::vector<Stop*> stops = {};
-        bool is_cycled = false;
+        info::RoutingSettings routing_settings;
+        bool is_cycled;
         double geo_route_length = 0.0;
         double curvature = 0.0;
         int64_t factial_route_length = 0;
@@ -62,6 +69,10 @@ namespace info {
         void updatePassingBus();
 
         void updateCurvature();
+
+        int getBusWaitTime() const;
+
+        int getBusVelocity() const;
 
         size_t getUniqueStopsCount() const;
 
