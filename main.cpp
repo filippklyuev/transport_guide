@@ -1,24 +1,22 @@
-#include <iomanip>
-#include <iostream>
-#include <string_view>
-#include <utility>
 #include <chrono>
+#include <iostream>
+#include "json.h"
+#include "json_reader.h"
+#include "request_handler.h"
 
-#include "input_reader.h"
-#include "transport_catalogue.h"
-#include "stat_reader.h"
-
-using namespace transport_guide;
-
-void Test(std::istream& in, std::ostream& out){
-	std::vector<Query> input_queries = input::GetQueries(in);
-	TransportCatalogue catalogue;
-	input::updateCatalogue(catalogue, input_queries);
-	std::vector<Query> output_queries = input::GetQueries(in);
-	output::PrintQueriesResult(catalogue, output_queries, out);
+void Test(){
+    json::Document input_json = json::Load(std::cin);
+    transport_guide::TransportCatalogue catalogue;
+    const json::Dict& all_requests = input_json.GetRoot().AsMap();
+    json_reader::parser::updateCatalogue(all_requests.at("base_requests").AsArray(), catalogue);
+    json_reader::parser::StatParser stat_parser(catalogue, json_reader::parser::parseRenderSettings(all_requests.at("render_settings").AsMap()));
+    json::Document result_to_print(stat_parser.parseStatArray(all_requests.at("stat_requests").AsArray()));
+    // request_handler::printSvgDoc(std::cout, result_to_print); // Printing SVG doc only
+    json::Print(result_to_print, std::cout);    
 }
 
 int main(){
-	std::cout << std::setprecision(6);
-	Test(std::cin, std::cout);
+    std::ios_base::sync_with_stdio(0);
+    Test();
 }
+

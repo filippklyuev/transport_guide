@@ -4,3 +4,7 @@ output.txt
 a.exe
 *.txt
 lol.cpp
+stat_reader.cpp
+stat_reader.h
+input_reader.cpp
+input_reader.h
