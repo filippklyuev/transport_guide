@@ -99,6 +99,7 @@ void updateCatalogue(TransportCatalogue& catalogue,const std::vector<Query>& inp
             std::string_view stop_name = catalogue.InsertNameSV(stop_name_temp, QueryType::STOP);
             catalogue.AddStop(stop_name);
             catalogue.GetStopInfo(stop_name).setName(stop_name).setCoordinates({lat, lng}).setDistanceToStops(detail::InsertSvsAndGetNewMap(catalogue, std::move(distance_to_stops_temp)));
+            // catalogue.GetStopInfo(stop_name) = stop_info(stop_name, {lat, lng}, (detail::InsertSvsAndGetNewMap(catalogue, std::move(distance_to_stops_temp))));
         } else {
             positions_of_bus_queries.push_back(i);
         }

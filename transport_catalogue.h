@@ -33,18 +33,11 @@ namespace info {
 
 	struct Bus;
 
-	struct Nameable {
-
-		std::string_view name;
-
-		std::string_view getName() const;
-
-	};
-
 	using DistanceMap = std::unordered_map<std::string_view, int>;
 
-	struct Stop : Nameable {
+	struct Stop {
 
+		std::string_view name;
 		geo::Coordinates coordinates = {};
 		DistanceMap distance_to_stops = {};
 		std::set<Bus*, InfoPtrComparator<Bus>> passing_buses = {};
@@ -55,10 +48,12 @@ namespace info {
 
 		Stop& setDistanceToStops(DistanceMap map);
 
+		std::string_view getName() const;
 	};
 
-	struct Bus : Nameable {
+	struct Bus {
 
+		std::string_view name;
 		std::unordered_set<std::string_view> unique_stops = {};
 		std::vector<Stop*> stops = {};
 		bool is_cycled = false;
@@ -79,6 +74,7 @@ namespace info {
 
 		size_t getUniqueStopsCount() const;
 
+		std::string_view getName() const;
 	};
 
 } //namespace info	

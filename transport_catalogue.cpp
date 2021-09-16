@@ -24,7 +24,6 @@ std::string_view TransportCatalogue::InsertBusName(std::string bus_name){
 	return *buses_.insert(std::move(bus_name)).first;
 }
 
-
 void TransportCatalogue::AddStop(std::string_view name){
 	GetStopsMap()[name];
 }
@@ -75,7 +74,11 @@ const TransportCatalogue::BusMap& TransportCatalogue::GetBusesMap() const {
 
 namespace info {
 
-std::string_view Nameable::getName() const {
+std::string_view Bus::getName() const {
+	return name;
+}
+
+std::string_view Stop::getName() const {
 	return name;
 }
 
