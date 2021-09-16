@@ -83,32 +83,19 @@ ParsedStopQuery parse::parseStopQuery(std::string_view stop_query){
     return parsed_query;
 }
 
-DistanceMap detail::InsertSvsAndGetNewMap(TransportCatalogue& catalogue, DistanceMap temp_map){
-    DistanceMap result;
-    for (auto [stop_name_temp, distance] : temp_map){
-        result.emplace(std::make_pair(catalogue.InsertNameSV(stop_name_temp, QueryType::STOP), distance));
-    }
-    return result;
-}
-
 void updateCatalogue(TransportCatalogue& catalogue,const std::vector<Query>& input_queries){
     std::vector<int> positions_of_bus_queries;
     for (int i = 0; i < input_queries.size(); i++){
         if (input_queries[i].type == QueryType::STOP){
             auto [stop_name_temp, lat, lng, distance_to_stops_temp] = parse::parseStopQuery(input_queries[i].query);
-            std::string_view stop_name = catalogue.InsertNameSV(stop_name_temp, QueryType::STOP);
-            catalogue.AddStop(stop_name);
-            catalogue.GetStopInfo(stop_name).setName(stop_name).setCoordinates({lat, lng}).setDistanceToStops(detail::InsertSvsAndGetNewMap(catalogue, std::move(distance_to_stops_temp)));
-            // catalogue.GetStopInfo(stop_name) = stop_info(stop_name, {lat, lng}, (detail::InsertSvsAndGetNewMap(catalogue, std::move(distance_to_stops_temp))));
+            catalogue.AddStop(stop_name_temp, {lat, lng}, std::move(distance_to_stops_temp));
         } else {
             positions_of_bus_queries.push_back(i);
         }
     }
     for (int i = 0; i < positions_of_bus_queries.size(); i++){
-        auto [bus_name_temp, is_cycled, stops_on_route_temp] = parse::parseBusQuery(input_queries[positions_of_bus_queries[i]].query);
-        std::string_view bus_name = catalogue.InsertNameSV(bus_name_temp, QueryType::BUS);
-        catalogue.AddRoute(bus_name);
-        catalogue.GetRouteInfo(bus_name).setName(bus_name).setIsCycled(is_cycled).setStopsAndDistance(catalogue, std::move(stops_on_route_temp)).updatePassingBus();   
+        auto [bus_name_temp, is_cycled, stops_on_route] = parse::parseBusQuery(input_queries[positions_of_bus_queries[i]].query);
+        catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route));
     }
 }
 

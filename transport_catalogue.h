@@ -37,21 +37,26 @@ namespace info {
 
 	struct Stop {
 
-		std::string_view name;
+		Stop(std::string_view name_, geo::Coordinates coordinates_, DistanceMap distance_to_stops_)
+			: name(name_)
+			, coordinates(coordinates_)
+			, distance_to_stops(distance_to_stops_)
+			{}
+
+		std::string_view name = {};
 		geo::Coordinates coordinates = {};
 		DistanceMap distance_to_stops = {};
 		std::set<Bus*, InfoPtrComparator<Bus>> passing_buses = {};
-
-		Stop& setName(std::string_view stop_name);
-
-		Stop& setCoordinates(geo::Coordinates coords);
-
-		Stop& setDistanceToStops(DistanceMap map);
 
 		std::string_view getName() const;
 	};
 
 	struct Bus {
+
+		Bus(std::string_view name_, bool is_cycled_)
+		: name(name_)
+		, is_cycled(is_cycled_)
+		{}
 
 		std::string_view name;
 		std::unordered_set<std::string_view> unique_stops = {};
@@ -59,12 +64,6 @@ namespace info {
 		bool is_cycled = false;
 		double geo_route_length = 0.0;
 		int64_t factial_route_length = 0;
-
-		Bus& setName(std::string_view stop_name);
-
-		Bus& setIsCycled(bool is_cycled);
-
-		Bus& setStopsAndDistance(const TransportCatalogue& catalogue, std::vector<std::string_view> stops_on_route_temp);
 
 		void updateBackRoute();
 
@@ -86,23 +85,19 @@ public:
 	using BusMap = std::map<std::string_view, info::Bus>; // поменял на map для избежания инвалидации итераторов
 	using StopMap = std::map<std::string_view, info::Stop>;
 
-	std::string_view InsertNameSV(std::string_view name, QueryType type);
+	void AddStop(std::string_view temp_stop_name, geo::Coordinates coords, info::DistanceMap&& distance_map);
 
-	void AddStop(std::string_view name);
-
-	void AddRoute(std::string_view name);
+	void AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route);
 
 	bool IsBusListed(const std::string_view bus_name) const ;
 
 	bool IsStopListed(const std::string_view stop_name) const ;
 
-	const info::Bus& GetRouteInfo(std::string_view bus_name) const ;
-
-	info::Bus& GetRouteInfo(std::string_view bus_name);
+	const info::Bus& GetBusInfo(std::string_view bus_name) const ;
 
 	const info::Stop& GetStopInfo(const std::string_view stop) const ;
 
-	info::Stop& GetStopInfo(const std::string_view stop);
+	
 	
 private:
 
@@ -123,6 +118,14 @@ private:
 	BusMap& GetBusesMap();
 
 	const BusMap& GetBusesMap() const;
+
+	info::Bus& GetBusInfo(std::string_view bus_name);
+
+	info::Stop& GetStopInfo(const std::string_view stop);
+
+	void processStopsOnRoute(info::Bus& bus_info, std::vector<std::string_view> stops_on_route);
+
+	info::DistanceMap InsertSvsAndGetNewMap(info::DistanceMap temp_map);
 };
 	
 } // namespace transport_guide

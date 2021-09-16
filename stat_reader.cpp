@@ -21,7 +21,7 @@ void PrintQueriesResult(const TransportCatalogue& catalogue, const std::vector<Q
 		} else {
 			out << "Bus " << name << ": ";
 			if (catalogue.IsBusListed(name)){
-				out << catalogue.GetRouteInfo(name) << std::endl;
+				out << catalogue.GetBusInfo(name) << std::endl;
 			} else {
 				out << "not found" << std::endl;
 			}

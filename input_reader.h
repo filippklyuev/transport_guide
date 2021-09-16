@@ -69,12 +69,6 @@ char DefineSeparator(std::string_view bus_query);
 	
 } //namespace parse
 
-namespace detail {
-
-DistanceMap InsertSvsAndGetNewMap(TransportCatalogue& catalogue, DistanceMap temp_map);
-
-} // namespace detail
-
 } // namespace input
 
 } // namespace transport_guide
