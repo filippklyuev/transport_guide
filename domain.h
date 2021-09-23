@@ -47,16 +47,14 @@ namespace info {
 
     struct Bus {
 
-        Bus(std::string_view name_, bool is_cycled_, info::RoutingSettings routing_settings_)
+        Bus(std::string_view name_, bool is_cycled_)
         : name(name_)
         , is_cycled(is_cycled_)
-        , routing_settings(routing_settings_)
         {}
 
         std::string_view name;
         std::unordered_set<std::string_view> unique_stops = {};
         std::vector<Stop*> stops = {};
-        info::RoutingSettings routing_settings;
         bool is_cycled;
         double geo_route_length = 0.0;
         double curvature = 0.0;
@@ -69,10 +67,6 @@ namespace info {
         void updatePassingBus();
 
         void updateCurvature();
-
-        int getBusWaitTime() const;
-
-        double getBusVelocity() const;
 
         size_t getUniqueStopsCount() const;
 

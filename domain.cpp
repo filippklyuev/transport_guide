@@ -61,14 +61,6 @@ size_t Bus::getStopsCount() const {
     }
 }
 
-int Bus::getBusWaitTime() const {
-    return routing_settings.bus_wait_time;
-}
-
-double Bus::getBusVelocity() const {
-    return routing_settings.bus_velocity;
-}
-
 } // namespace info
 
 } // namespace transport_guide

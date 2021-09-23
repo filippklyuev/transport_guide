@@ -22,9 +22,9 @@ void TransportCatalogue::AddStop(std::string_view temp_stop_name, geo::Coordinat
 
 }
 
-void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route, info::RoutingSettings routing_settings){
+void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route){
 	std::string_view bus_name = InsertBusName(std::string(bus_name_temp));
-	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled, routing_settings));
+	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled));
 	processStopsOnRoute(GetBusInfo(bus_name), std::move(stops_on_route));
 }
 

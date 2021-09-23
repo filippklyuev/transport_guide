@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
+#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -41,6 +42,7 @@ private:
         for (VertexId vertex = 0; vertex < vertex_count; ++vertex) {
             routes_internal_data_[vertex][vertex] = RouteInternalData{ZERO_WEIGHT, std::nullopt};
             for (const EdgeId edge_id : graph.GetIncidentEdges(vertex)) {
+                // std::cout << "HERE ID = " << edge_id << '\n';
                 const auto& edge = graph.GetEdge(edge_id);
                 if (edge.weight < ZERO_WEIGHT) {
                     throw std::domain_error("Edges' weights should be non-negative");
@@ -97,8 +99,10 @@ Router<Weight>::Router(const Graph& graph)
 template <typename Weight>
 std::optional<typename Router<Weight>::RouteInfo> Router<Weight>::BuildRoute(VertexId from,
                                                                              VertexId to) const {
+    // std::cout << "trying to find route from " << from << " to " << to << '\n';
     const auto& route_internal_data = routes_internal_data_.at(from).at(to);
     if (!route_internal_data) {
+        // std::cout << "nullopt" << '\n';
         return std::nullopt;
     }
     const Weight weight = route_internal_data->weight;
@@ -110,7 +114,6 @@ std::optional<typename Router<Weight>::RouteInfo> Router<Weight>::BuildRoute(Ver
         edges.push_back(*edge_id);
     }
     std::reverse(edges.begin(), edges.end());
-
     return RouteInfo{weight, std::move(edges)};
 }
 

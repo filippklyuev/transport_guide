@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <memory>
 #include <variant>
 #include <vector>
 #include <string>
@@ -22,7 +23,7 @@ using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace parser {
 
-void updateCatalogue(const json::Array& requests_vector, const json::Dict& routing_settings, transport_guide::TransportCatalogue& catalogue);
+void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue);
 
 transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
@@ -32,16 +33,19 @@ transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& ro
 
 class StatParser {
 public:
-    StatParser(const transport_guide::TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
+    StatParser(const transport_guide::TransportCatalogue& catalogue, map_renderer::RenderSettings settings, transport_guide::info::RoutingSettings routing_settings) :
         catalogue_(catalogue),
-        settings_(settings)
+        settings_(settings),
+        routing_settings_(routing_settings)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
+    std::unique_ptr<request_handler::RouterManager> router_manager_ = nullptr;
     const transport_guide::TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
+    transport_guide::info::RoutingSettings routing_settings_;
 
     void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
 
@@ -50,6 +54,9 @@ private:
     void updateResultWithStopInfo(json::Builder& builder, const transport_guide::info::Stop& stop_info);
 
     void updateResultWithMap(json::Builder& builder);
+
+    void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
+
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);

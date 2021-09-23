@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ranges.h"
+#include <iostream>
 
 #include <cstdlib>
 #include <vector>
@@ -45,6 +46,7 @@ DirectedWeightedGraph<Weight>::DirectedWeightedGraph(size_t vertex_count)
 
 template <typename Weight>
 EdgeId DirectedWeightedGraph<Weight>::AddEdge(const Edge<Weight>& edge) {
+    // std::cout << "Adding edge from " << edge.from << " to " << edge.to << " with weight " << edge.weight << " and id = " << edges_.size() <<'\n';
     edges_.push_back(edge);
     const EdgeId id = edges_.size() - 1;
     incidence_lists_.at(edge.from).push_back(id);

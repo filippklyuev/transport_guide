@@ -88,10 +88,10 @@ transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& ro
     return result;
 }
 
-void updateCatalogue(const json::Array& requests_vector, const json::Dict& routing_settings, transport_guide::TransportCatalogue& catalogue){
+void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;
     // transport_guide::info::RoutingSettings routing_settings = parseRoutingSettings(routing_settings_);
-    for (int i = 0; i < requests_vector.size(); i++){
+    for (size_t i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
         if (input_request.at("type").AsString() == "Bus"){
             bus_query_positions.push_back(i);
@@ -100,9 +100,9 @@ void updateCatalogue(const json::Array& requests_vector, const json::Dict& routi
             catalogue.AddStop(name_temp, coordinates, std::move(distance_to_stops_temp));
         }
     }
-    for (int i = 0; i < bus_query_positions.size(); i++){
+    for (size_t i = 0; i < bus_query_positions.size(); i++){
         auto [bus_name_temp, is_cycled, stops_on_route] = parseBusRequest(requests_vector[bus_query_positions[i]].AsDict());
-            catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route), parseRoutingSettings(routing_settings));
+            catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route));
     }
 }
 
@@ -131,12 +131,53 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
             } else if (value.AsString() == "Map"){
                 updateResultWithMap(builder);
                 return ;
+            } else if (value.AsString() == "Route"){
+                updateResultWithRoute(builder, request.at("from").AsString(), request.at("to").AsString());
+                return ;
             }
         }
     }
     builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
     return ;
 }
+
+void StatParser::updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to){
+    if (!router_manager_){
+        router_manager_ = std::make_unique<request_handler::RouterManager>(catalogue_, routing_settings_);
+    }
+    auto [is_successful, time, route_elems] = router_manager_->GetRouteInfo(from, to);
+    if (!is_successful){
+        builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
+        return ;
+    }
+    
+    // StartDict()
+            builder.Key("items")
+                .StartArray();
+                    for (const auto& elem : route_elems){
+                        builder.StartDict();
+                        if (elem.type == request_handler::RouterManager::EDGE_TYPE::WAIT){
+                            builder.Key("stop_name").Value(json::Node(static_cast<std::string>(elem.name)))
+                            .Key("time").Value(json::Node(static_cast<double>(elem.time)))
+                            .Key("type").Value(json::Node(static_cast<std::string>("Wait")));
+                        } else {
+                            builder.Key("bus").Value(json::Node(static_cast<std::string>(elem.name)))
+                            .Key("span_count").Value(json::Node(static_cast<int>(*elem.span)))
+                            .Key("time").Value(json::Node(static_cast<double>(elem.time)))
+                            .Key("type").Value(json::Node(static_cast<std::string>("Bus")));
+                        }
+                        builder.EndDict();
+                    }
+                builder.EndArray()
+            .Key("total_time").Value(json::Node(static_cast<double>(time)));
+}
+
+// void StatParser::processRoute(const transport_guide::info::Bus& bus_info){
+//     graph::Edge<double> edge;
+//     for (int i = 0; i < bus_info.stops.size() - 1; i++){
+        
+//     }
+// }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     json::Builder builder;

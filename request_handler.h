@@ -1,7 +1,14 @@
 #pragma once
+#include <map>
+#include <memory>
+#include <optional>
 #include <string_view>
 #include <sstream>
+#include <unordered_map>
+#include <utility>
 
+#include "graph.h"
+#include "router.h"
 #include "json.h"
 #include "svg.h"
 #include "transport_catalogue.h"
@@ -9,10 +16,75 @@
 
 namespace request_handler {
 
+using Graph = graph::DirectedWeightedGraph<double>;
+using Router = graph::Router<double>;
+using VertexId = size_t;
+using EdgeId = size_t;    
+
 json::Array getPassingBuses(const transport_guide::info::Stop& stop_info);
 
 void printSvgDoc(std::ostream& out, const json::Document& doc_to_print);
     
+class RouterManager {
+public:
+
+    enum class EDGE_TYPE {
+        WAIT,
+        GO
+    };
+
+    struct RouteElemInfo {
+        EDGE_TYPE type;
+        double time;
+        std::string_view name = {};
+        std::optional<int> span = std::nullopt;
+    };
+
+    struct RouteInfo {
+        bool is_successful = false;
+        double overall_time = 0.0;
+        std::vector<RouteElemInfo> route_elems;  
+    };
+
+    RouterManager(const transport_guide::TransportCatalogue& catalogue, transport_guide::info::RoutingSettings routing_settings) 
+        : catalogue_(catalogue){
+            wait_weight = routing_settings.bus_wait_time;
+            bus_velocity = routing_settings.bus_velocity;
+            graph_ = std::make_unique<Graph>(catalogue_.GetStopsMap().size() * 2);
+            createEdges();
+            // std::cout << "HERE " << '\n';
+            router_ = std::make_unique<Router>(*graph_);
+        }
+
+    RouteInfo GetRouteInfo(const std::string& stop_from, const std::string& stop_to);
+
+using BusInfo = transport_guide::info::Bus;
+using StopInfo = transport_guide::info::Stop;
+
+private:
+    const transport_guide::TransportCatalogue& catalogue_;
+    std::unique_ptr<Router> router_ = nullptr;
+    std::unique_ptr<Graph> graph_ = nullptr;
+    std::unordered_map<std::string_view, VertexId> stop_vertex;
+    std::unordered_map<VertexId, std::string_view> vertex_stop;
+    std::map<EdgeId, EDGE_TYPE> edges_info;
+    double wait_weight = 0.0;
+    double bus_velocity = 0.0;
+
+    void createEdges();
+
+    void addGoEdge(const StopInfo& from, const StopInfo& to, VertexId id_from, VertexId id_to);
+
+    double findWeightForGoEdge(int distance);
+
+    void addWaitEdge(VertexId id_from);
+
+    void processSingleRoute(const BusInfo& bus_info);
+
+    std::vector<std::string_view> getPassingBusNames(const StopInfo& stop_info);
+
+    void addStopsAndWaitEdges(const std::vector<transport_guide::info::Stop*>& stops);
+};
 
 } // namespace request handler
 

@@ -25,7 +25,7 @@ public:
 
 	void AddStop(std::string_view temp_stop_name, geo::Coordinates coords, DistanceMap&& distance_map);
 
-	void AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route, info::RoutingSettings routing_settings);
+	void AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route);
 
 	bool IsBusListed(const std::string_view bus_name) const ;
 
