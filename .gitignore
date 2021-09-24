@@ -8,3 +8,6 @@ stat_reader.cpp
 stat_reader.h
 input_reader.cpp
 input_reader.h
+*.json
+*.exe
+1

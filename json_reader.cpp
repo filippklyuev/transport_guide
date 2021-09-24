@@ -1,5 +1,7 @@
 #include "json_reader.h"
 
+namespace transport_guide {
+
 namespace json_reader {
 
 namespace parser {
@@ -51,8 +53,8 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     return settings;
 }
 
-transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
-    transport_guide::input::ParsedStopQuery result;
+input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
+    input::ParsedStopQuery result;
     for (const auto& [key, value] : stop_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -67,8 +69,8 @@ transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_
     return result;
 }
 
-transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
-    transport_guide::input::ParsedBusQuery result;
+input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
+    input::ParsedBusQuery result;
     for (const auto& [key, value] : bus_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -81,16 +83,16 @@ transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_req
     return result;
 }
 
-transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
-    transport_guide::info::RoutingSettings result;
+info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
+    info::RoutingSettings result;
     result.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
     result.bus_velocity = routing_settings.at("bus_velocity").AsDouble();
     return result;
 }
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
+void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;
-    // transport_guide::info::RoutingSettings routing_settings = parseRoutingSettings(routing_settings_);
+    // info::RoutingSettings routing_settings = parseRoutingSettings(routing_settings_);
     for (size_t i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
         if (input_request.at("type").AsString() == "Bus"){
@@ -145,18 +147,20 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
     if (!router_manager_){
         router_manager_ = std::make_unique<request_handler::RouterManager>(catalogue_, routing_settings_);
     }
-    auto [is_successful, time, route_elems] = router_manager_->GetRouteInfo(from, to);
-    if (!is_successful){
+    std::optional<request_handler::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
+    if (!result.has_value()){
+        // std::cout << "FAIL\n";
         builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
         return ;
     }
-    
+    const auto& route_elems = result->route_elems;
+    const double time = result->overall_time;
     // StartDict()
             builder.Key("items")
                 .StartArray();
                     for (const auto& elem : route_elems){
                         builder.StartDict();
-                        if (elem.type == request_handler::RouterManager::EDGE_TYPE::WAIT){
+                        if (elem.type == request_handler::EDGE_TYPE::WAIT){
                             builder.Key("stop_name").Value(json::Node(static_cast<std::string>(elem.name)))
                             .Key("time").Value(json::Node(static_cast<double>(elem.time)))
                             .Key("type").Value(json::Node(static_cast<std::string>("Wait")));
@@ -172,7 +176,7 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
             .Key("total_time").Value(json::Node(static_cast<double>(time)));
 }
 
-// void StatParser::processRoute(const transport_guide::info::Bus& bus_info){
+// void StatParser::processRoute(const info::Bus& bus_info){
 //     graph::Edge<double> edge;
 //     for (int i = 0; i < bus_info.stops.size() - 1; i++){
         
@@ -190,14 +194,14 @@ json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     return json::Document(builder.Build());
 }
 
-void StatParser::updateResultWithBusInfo(json::Builder& builder, const transport_guide::info::Bus& bus_info){
+void StatParser::updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info){
     builder.Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
             .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
             .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
             .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
 }
 
-void StatParser::updateResultWithStopInfo(json::Builder& builder, const transport_guide::info::Stop& stop_info){
+void StatParser::updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info){
     builder.Key("buses").StartArray();
     for (const auto& string_node : request_handler::getPassingBuses(stop_info)){
         builder.Value(string_node);
@@ -235,3 +239,5 @@ std::vector<std::string_view> parseStopsArray(const json::Array& stops){
 } // namespace parser
 
 } // namespace json_reader
+
+} // namespace transport_guide

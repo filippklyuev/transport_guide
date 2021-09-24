@@ -42,6 +42,7 @@ private:
 template <typename Weight>
 DirectedWeightedGraph<Weight>::DirectedWeightedGraph(size_t vertex_count)
     : incidence_lists_(vertex_count) {
+        // std::cout << "Initialized with " << vertex_count << " vertexes\n";
 }
 
 template <typename Weight>

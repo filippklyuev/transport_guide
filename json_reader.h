@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <optional>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -17,23 +18,25 @@
 #include "request_handler.h"
 #include "transport_catalogue.h"
 
+namespace transport_guide {
+
 namespace json_reader {
 
 using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace parser {
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue);
+void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
+input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
-transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
-transport_guide::info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
+info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const transport_guide::TransportCatalogue& catalogue, map_renderer::RenderSettings settings, transport_guide::info::RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings, info::RoutingSettings routing_settings) :
         catalogue_(catalogue),
         settings_(settings),
         routing_settings_(routing_settings)
@@ -43,15 +46,15 @@ public:
 
 private:
     std::unique_ptr<request_handler::RouterManager> router_manager_ = nullptr;
-    const transport_guide::TransportCatalogue& catalogue_;
+    const TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
-    transport_guide::info::RoutingSettings routing_settings_;
+    info::RoutingSettings routing_settings_;
 
     void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
 
-    void updateResultWithBusInfo(json::Builder& builder, const transport_guide::info::Bus& bus_info);
+    void updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info);
 
-    void updateResultWithStopInfo(json::Builder& builder, const transport_guide::info::Stop& stop_info);
+    void updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info);
 
     void updateResultWithMap(json::Builder& builder);
 
@@ -72,3 +75,5 @@ DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops);
 } // namespace parser
 
 } // namespace json_reader
+
+} // namespace transport_guide
