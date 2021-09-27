@@ -145,9 +145,9 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
 
 void StatParser::updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to){
     if (!router_manager_){
-        router_manager_ = std::make_unique<request_handler::RouterManager>(catalogue_, routing_settings_);
+        router_manager_ = std::make_unique<router::TransportRouter>(catalogue_, routing_settings_);
     }
-    std::optional<request_handler::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
+    std::optional<router::TransportRouter::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
     if (!result.has_value()){
         // std::cout << "FAIL\n";
         builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
@@ -160,13 +160,13 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
                 .StartArray();
                     for (const auto& elem : route_elems){
                         builder.StartDict();
-                        if (elem.type == request_handler::EDGE_TYPE::WAIT){
+                        if (elem.type == router::EDGE_TYPE::WAIT){
                             builder.Key("stop_name").Value(json::Node(static_cast<std::string>(elem.name)))
                             .Key("time").Value(json::Node(static_cast<double>(elem.time)))
                             .Key("type").Value(json::Node(static_cast<std::string>("Wait")));
                         } else {
                             builder.Key("bus").Value(json::Node(static_cast<std::string>(elem.name)))
-                            .Key("span_count").Value(json::Node(static_cast<int>(*elem.span)))
+                            .Key("span_count").Value(json::Node(static_cast<int>(elem.span)))
                             .Key("time").Value(json::Node(static_cast<double>(elem.time)))
                             .Key("type").Value(json::Node(static_cast<std::string>("Bus")));
                         }

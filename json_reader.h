@@ -16,6 +16,7 @@
 #include "svg.h"
 #include "map_renderer.h"
 #include "request_handler.h"
+#include "transport_router.h"
 #include "transport_catalogue.h"
 
 namespace transport_guide {
@@ -45,7 +46,7 @@ public:
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
-    std::unique_ptr<request_handler::RouterManager> router_manager_ = nullptr;
+    std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
     info::RoutingSettings routing_settings_;
