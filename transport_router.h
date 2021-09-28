@@ -15,6 +15,8 @@
 #include "ranges.h"
 #include "router.h"
 
+// #include "log_duration.h"
+
 namespace transport_guide {
 
 namespace router {
@@ -25,69 +27,50 @@ using VertexId = size_t;
 using EdgeId = size_t;
 
 
-enum class VERTEX_TYPE {
-	RIDE_START,
-	WAIT_START,
-	DOUBLER
-};
-
-enum class EDGE_TYPE {
-	RIDE,
-	WAIT
-};
 
 struct VertexInfo {
 	VertexId id;
-	VERTEX_TYPE type;
-	std::string_view stop_name;
-	std::string_view bus_name;
-	VertexId wait_vertex;
-	bool is_transferable;
-	bool is_endpoint_of_route;
-	
+	const info::Stop* stop_info;
 };
 
-struct StopRouterInfo {
-	explicit StopRouterInfo(VertexId wait_vertex_id, bool is_transferable_)
-		: wait_vertex(wait_vertex_id)
-		, is_transferable(is_transferable_)
-		{}
+struct Route {
+	bool is_cycled = false;
+	std::vector<const VertexInfo*> route;
+};
 
-	VertexId wait_vertex;
-	bool is_transferable;
-	std::unordered_map<std::string_view, VertexInfo*> routes_vertices;
-	std::unordered_map<std::string_view, VertexInfo*> routes_doubles;
+struct EdgeInfo {
+	std::string_view bus_name;
+	int span;
+	double weight;
+	std::string_view from_stop;
+	std::string_view to_stop;
+};
 
+struct RouteInfo {
+	double overall_time;
+	std::vector<const EdgeInfo*> route_edges;
 };
 
 
 class TransportRouter {
 public:
+	using MapOfRoutes = std::map<std::string_view, Route>;
+
 	explicit TransportRouter(const TransportCatalogue& catalogue, info::RoutingSettings routing_settings)
 		: catalogue_(catalogue)
 		, wait_weight_(routing_settings.bus_wait_time)
 		, bus_velocity_(routing_settings.bus_velocity)
 		{
-			graph_ = std::make_unique<Graph>(getVerticesCount());		
-			fillGraphWithEdges(assignVertices());
+			// LOG_DURATION("TRANSPORT_ROUTER_CONSTRUCTOR");
+			MapOfRoutes routes = assignVerticesGetRoutes();
+			graph_ = std::make_unique<Graph>(vertices_info_.size());
+			fillGraphWithEdges(std::move(routes));
 			router_ = std::make_unique<Router>(*graph_);
 		}
 
-	struct RouteInfo {
-		struct ElemInfo {
-			EDGE_TYPE type;
-			double time;
-			std::string_view name;
-			int span = 0;
-		};
+	std::optional<RouteInfo> GetRouteInfo(std::string_view from, std::string_view to) const ;
 
-		double overall_time;
-		std::vector<ElemInfo> route_elems;
-	};
-
-
-
-	std::optional<TransportRouter::RouteInfo> GetRouteInfo(std::string_view from, std::string_view to);
+	double getWaitWeight() const;
 
 private:
 	const TransportCatalogue& catalogue_;
@@ -96,35 +79,19 @@ private:
 	std::unique_ptr<Graph> graph_;
 	std::unique_ptr<Router> router_;
 
-	// RouteInfo route_info_;
+	std::unordered_map<VertexId, VertexInfo> vertices_info_;
+	std::unordered_map<std::string_view,const VertexInfo*> stops_info_;
+	std::unordered_map<EdgeId, EdgeInfo> edges_info_;
 
-	using RouteVerticesInfo = std::map<std::string_view, std::vector<VertexInfo*>>;
+	MapOfRoutes assignVerticesGetRoutes();
 
-	std::map<VertexId, VertexInfo> vertices_info_;
-	std::unordered_map<std::string_view, StopRouterInfo> stops_routerinfo_;
-	std::unordered_map<EdgeId, EDGE_TYPE> edges_type_;
+	void connectVertexToReachableNoTransfer(const Route& route_info, const int from_position, std::string_view bus_name);
 
-	size_t	getVerticesCount() const;
+	void fillGraphWithEdges(const MapOfRoutes& routes);
 
-	void fillGraphWithEdges(const RouteVerticesInfo route_vertices);
+	double calculateWeight(int distance) const ;
 
-	RouteVerticesInfo assignVertices();
-
-	void addWaitEdges();
-
-	void processSingleRoute(const std::vector<VertexInfo*>& vertex_vector, bool is_cycled);
-
-	void processPairOfStops(const VertexInfo* from, const VertexInfo* to);
-
-	double calculateWeight(const info::Stop& from, const info::Stop& to) const;
-
-	std::optional<std::string_view> findBusIntersection(const info::Stop& from, const info::Stop& to) const ;
-
-	VertexId getStopWaitVertex(std::string_view stop_name) const;
-
-	RouteInfo translateRouteInfo(const Router::RouteInfo route_info) const ;
-
-	std::set<VertexId> getPossibleToIds(std::string_view stop_to) const ;
+	int getDistance(const info::Stop* from, const info::Stop* to) const ;
 };
 
 } //namespace router

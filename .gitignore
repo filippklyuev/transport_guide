@@ -15,3 +15,4 @@ input_reader.h
 *.lib
 *.pdb
 *.exp
+log_duration.h

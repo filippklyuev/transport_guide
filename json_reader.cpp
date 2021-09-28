@@ -147,30 +147,28 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
     if (!router_manager_){
         router_manager_ = std::make_unique<router::TransportRouter>(catalogue_, routing_settings_);
     }
-    std::optional<router::TransportRouter::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
+    std::optional<router::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
     if (!result.has_value()){
-        // std::cout << "FAIL\n";
         builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
         return ;
     }
-    const auto& route_elems = result->route_elems;
+    const auto& route_edges = result->route_edges;
     const double time = result->overall_time;
     // StartDict()
             builder.Key("items")
                 .StartArray();
-                    for (const auto& elem : route_elems){
-                        builder.StartDict();
-                        if (elem.type == router::EDGE_TYPE::WAIT){
-                            builder.Key("stop_name").Value(json::Node(static_cast<std::string>(elem.name)))
-                            .Key("time").Value(json::Node(static_cast<double>(elem.time)))
-                            .Key("type").Value(json::Node(static_cast<std::string>("Wait")));
-                        } else {
-                            builder.Key("bus").Value(json::Node(static_cast<std::string>(elem.name)))
-                            .Key("span_count").Value(json::Node(static_cast<int>(elem.span)))
-                            .Key("time").Value(json::Node(static_cast<double>(elem.time)))
-                            .Key("type").Value(json::Node(static_cast<std::string>("Bus")));
-                        }
-                        builder.EndDict();
+                    for (const router::EdgeInfo* edge : route_edges){
+                        builder.StartDict()
+                                .Key("stop_name").Value(json::Node(static_cast<std::string>(edge->from_stop)))
+                                .Key("time").Value(json::Node(static_cast<double>(router_manager_->getWaitWeight())))
+                                .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
+                        .EndDict()
+                        .StartDict()
+                            .Key("bus").Value(json::Node(static_cast<std::string>(edge->bus_name)))
+                            .Key("span_count").Value(json::Node(static_cast<int>(edge->span)))
+                            .Key("time").Value(json::Node(static_cast<double>(edge->weight - router_manager_->getWaitWeight())))
+                            .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
+                        .EndDict();
                     }
                 builder.EndArray()
             .Key("total_time").Value(json::Node(static_cast<double>(time)));

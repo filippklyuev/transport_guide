@@ -4,7 +4,10 @@
 #include "json_reader.h"
 #include "request_handler.h"
 
+#include "log_duration.h"
+
 void Test(){
+    LOG_DURATION("ALL_TEST");
     json::Document input_json = json::Load(std::cin);
     transport_guide::TransportCatalogue catalogue;
     const json::Dict& all_requests = input_json.GetRoot().AsDict();
