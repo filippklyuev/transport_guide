@@ -53,8 +53,8 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     return settings;
 }
 
-input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
-    input::ParsedStopQuery result;
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
+    ParsedStopQuery result;
     for (const auto& [key, value] : stop_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -69,8 +69,8 @@ input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
     return result;
 }
 
-input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
-    input::ParsedBusQuery result;
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
+    ParsedBusQuery result;
     for (const auto& [key, value] : bus_request){
         if (key == "name"){
             result.name = value.AsString();
