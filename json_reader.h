@@ -21,6 +21,23 @@
 
 namespace transport_guide {
 
+enum class QueryType {
+    STOP,
+    BUS
+};
+
+struct ParsedStopQuery  {
+    std::string_view name;
+    geo::Coordinates coordinates = {};
+    DistanceMap distance_to_stops = {};
+};
+
+struct ParsedBusQuery {
+    std::string_view name;
+    bool is_cycled;
+    std::vector<std::string_view> stops_on_route;
+};      
+
 namespace json_reader {
 
 using DistanceMap = std::unordered_map<std::string_view, int>;
@@ -29,11 +46,11 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
-
-input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
 info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
+
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
 class StatParser {
 public:

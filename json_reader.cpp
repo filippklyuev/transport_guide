@@ -53,8 +53,9 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     return settings;
 }
 
-input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
-    input::ParsedStopQuery result;
+
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
+    ParsedStopQuery result;
     for (const auto& [key, value] : stop_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -69,8 +70,9 @@ input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
     return result;
 }
 
-input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
-    input::ParsedBusQuery result;
+
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
+    ParsedBusQuery result;
     for (const auto& [key, value] : bus_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -94,6 +96,7 @@ void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& cat
     std::vector<int> bus_query_positions;
     for (size_t i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
+
         if (input_request.at("type").AsString() == "Bus"){
             bus_query_positions.push_back(i);
         } else if (input_request.at("type").AsString() == "Stop"){
@@ -196,6 +199,7 @@ void StatParser::updateResultWithStopInfo(json::Builder& builder, const info::St
         builder.Value(string_node);
     }
     builder.EndArray();
+
 }
 
 void StatParser::updateResultWithMap(json::Builder& builder){

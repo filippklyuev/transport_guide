@@ -94,25 +94,4 @@ namespace info {
 
 } //namespace info
 
-enum class QueryType {
-    STOP,
-    BUS
-};
-
-namespace input {
-
-struct ParsedStopQuery  {
-    std::string_view name;
-    geo::Coordinates coordinates = {};
-    DistanceMap distance_to_stops = {};
-};
-
-struct ParsedBusQuery {
-    std::string_view name;
-    bool is_cycled;
-    std::vector<std::string_view> stops_on_route;
-};
-
-} // namespace input 
-
 } // namespace transport_guide
