@@ -36,7 +36,7 @@ bool TransportCatalogue::IsStopListed(const std::string_view stop_name) const {
 	return GetStopsMap().find(stop_name) != GetStopsMap().end();
 }
 
-info::Bus& TransportCatalogue::GetBusInfo(std::string_view bus_name){ // пока что оставил исключения метода at, чтобы не перегружать код проверками на != nullptr при разыменовывании 
+info::Bus& TransportCatalogue::GetBusInfo(std::string_view bus_name){
 	return GetBusesMap().at(bus_name);
 }
 
