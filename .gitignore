@@ -8,3 +8,8 @@ stat_reader.cpp
 stat_reader.h
 input_reader.cpp
 input_reader.h
+*.json
+log_duration.h
+a.exp
+a.lib
+a.pdb
