@@ -92,7 +92,6 @@ info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;
-    // info::RoutingSettings routing_settings = parseRoutingSettings(routing_settings_);
     for (size_t i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
         if (input_request.at("type").AsString() == "Bus"){
@@ -154,7 +153,6 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
     }
     const auto& route_edges = result->route_edges;
     const double time = result->overall_time;
-    // StartDict()
             builder.Key("items")
                 .StartArray();
                     for (const router::EdgeInfo* edge : route_edges){
@@ -173,13 +171,6 @@ void StatParser::updateResultWithRoute(json::Builder& builder, const std::string
                 builder.EndArray()
             .Key("total_time").Value(json::Node(static_cast<double>(time)));
 }
-
-// void StatParser::processRoute(const info::Bus& bus_info){
-//     graph::Edge<double> edge;
-//     for (int i = 0; i < bus_info.stops.size() - 1; i++){
-        
-//     }
-// }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     json::Builder builder;
