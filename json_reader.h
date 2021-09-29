@@ -15,6 +15,8 @@
 #include "request_handler.h"
 #include "transport_catalogue.h"
 
+namespace transport_guide {
+
 namespace json_reader {
 
 using DistanceMap = std::unordered_map<std::string_view, int>;
@@ -62,3 +64,5 @@ DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops);
 } // namespace parser
 
 } // namespace json_reader
+
+} // namespace transport_guide

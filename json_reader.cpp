@@ -1,5 +1,7 @@
 #include "json_reader.h"
 
+namespace transport_guide {
+
 namespace json_reader {
 
 namespace parser {
@@ -51,8 +53,8 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     return settings;
 }
 
-transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
-    transport_guide::input::ParsedStopQuery result;
+input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request){
+    input::ParsedStopQuery result;
     for (const auto& [key, value] : stop_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -67,8 +69,8 @@ transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_
     return result;
 }
 
-transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
-    transport_guide::input::ParsedBusQuery result;
+input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
+    input::ParsedBusQuery result;
     for (const auto& [key, value] : bus_request){
         if (key == "name"){
             result.name = value.AsString();
@@ -81,7 +83,7 @@ transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_req
     return result;
 }
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
+void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;   
     for (int i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsMap();
@@ -138,14 +140,14 @@ json::Array StatParser::parseStatArray(const json::Array& requests_vector){
     return result;
 }
 
-void StatParser::updateResultWithBusInfo(json::Dict& result, const transport_guide::info::Bus& bus_info){
+void StatParser::updateResultWithBusInfo(json::Dict& result, const info::Bus& bus_info){
     result.emplace(std::make_pair("curvature", json::Node(static_cast<double>(bus_info.curvature))));
     result.emplace(std::make_pair("route_length", json::Node(static_cast<int>(bus_info.factial_route_length))));
     result.emplace(std::make_pair("stop_count", json::Node(static_cast<int>(bus_info.getStopsCount()))));
     result.emplace(std::make_pair("unique_stop_count", json::Node(static_cast<int>(bus_info.getUniqueStopsCount()))));
 }
 
-void StatParser::updateResultWithStopInfo(json::Dict& result, const transport_guide::info::Stop& stop_info){
+void StatParser::updateResultWithStopInfo(json::Dict& result, const info::Stop& stop_info){
     result.emplace(std::make_pair("buses", json::Node(request_handler::getPassingBuses(stop_info))));
 }
 
@@ -180,3 +182,5 @@ std::vector<std::string_view> parseStopsArray(const json::Array& stops){
 } // namespace parser
 
 } // namespace json_reader
+
+} // namespace transport_guide
