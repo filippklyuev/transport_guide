@@ -63,9 +63,9 @@ private:
 
 	info::Stop& GetStopInfo(const std::string_view stop);
 
-	void processStopsOnRoute(info::Bus& bus_info, std::vector<std::string_view> stops_on_route);
-
 	DistanceMap InsertSvsAndGetNewMap(DistanceMap temp_map);
+
+	void updatePassingBusInStops(const info::Bus& bus_info);
 };
 	
 } // namespace transport_guide

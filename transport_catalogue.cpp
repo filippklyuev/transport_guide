@@ -22,10 +22,16 @@ void TransportCatalogue::AddStop(std::string_view temp_stop_name, geo::Coordinat
 
 }
 
+void TransportCatalogue::updatePassingBusInStops(const info::Bus& bus_info){
+    for (const info::Stop* stop : bus_info.getStopsOnRoute()){
+    	GetStopsMap().at(stop->name).passing_buses.insert(&bus_info);
+    }
+}
+
 void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route){
 	std::string_view bus_name = InsertBusName(std::string(bus_name_temp));
-	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled));
-	processStopsOnRoute(GetBusInfo(bus_name), std::move(stops_on_route));
+	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled, stops_map_ ,std::move(stops_on_route)));
+	updatePassingBusInStops(GetBusesMap().at(bus_name));
 }
 
 bool TransportCatalogue::IsBusListed(const std::string_view bus_name) const {
@@ -74,19 +80,6 @@ const std::set<std::string>& TransportCatalogue::GetBusesSet() const {
 
 const std::set<std::string>& TransportCatalogue::GetStopsSet() const {
     return stops_;
-}
-
-void TransportCatalogue::processStopsOnRoute(info::Bus& bus_info, std::vector<std::string_view> stops_on_route){
-	for (auto stop : stops_on_route){
-		bus_info.stops.push_back(&GetStopInfo(stop));
-		bus_info.unique_stops.insert(bus_info.stops.back()->getName());
-		bus_info.updateDistance();
-	}
-	if (!bus_info.is_cycled){
-		bus_info.updateBackRoute();
-	}
-	bus_info.updateCurvature();
-	bus_info.updatePassingBus();
 }
 
 DistanceMap TransportCatalogue::InsertSvsAndGetNewMap(DistanceMap temp_map){

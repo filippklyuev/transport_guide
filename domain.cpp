@@ -12,10 +12,8 @@ std::string_view Stop::getName() const {
 	return name;
 }
 
-void Bus::updatePassingBus(){
-    for (auto& stop : stops){
-        stop->passing_buses.insert(this);
-    }
+const std::vector<const Stop*>& Bus::getStopsOnRoute() const{
+    return stops;
 }
 
 void Bus::updateBackRoute(){
