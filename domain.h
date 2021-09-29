@@ -86,8 +86,6 @@ namespace info {
 
         void updateDistance();
 
-        // void updatePassingBus();
-
         void updateCurvature();
 
     };
