@@ -6,7 +6,7 @@ namespace request_handler {
 
 json::Array getPassingBuses(const StopInfo& stop_info){
     json::Array result;
-    for (const transport_guide::info::Bus* passing_bus : stop_info.passing_buses){
+    for (const info::Bus* passing_bus : stop_info.passing_buses){
         result.push_back(json::Node(std::string(passing_bus->getName())));
     }
     return result;

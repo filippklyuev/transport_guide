@@ -1,7 +1,5 @@
 #pragma once
 #include <iostream>
-#include <optional>
-#include <memory>
 #include <variant>
 #include <vector>
 #include <string>
@@ -12,11 +10,9 @@
 
 #include "domain.h"
 #include "json.h"
-#include "json_builder.h"
 #include "svg.h"
 #include "map_renderer.h"
 #include "request_handler.h"
-#include "transport_router.h"
 #include "transport_catalogue.h"
 
 namespace transport_guide {
@@ -36,7 +32,7 @@ struct ParsedBusQuery {
     std::string_view name;
     bool is_cycled;
     std::vector<std::string_view> stops_on_route;
-};      
+};          
 
 namespace json_reader {
 
@@ -46,38 +42,30 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
-
-info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
-
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
+
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings, info::RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
         catalogue_(catalogue),
-        settings_(settings),
-        routing_settings_(routing_settings)
+        settings_(settings)
     {}
 
-    json::Document parseStatArray(const json::Array& requests_vector);
+    json::Array parseStatArray(const json::Array& requests_vector);
 
 private:
-    std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
-    info::RoutingSettings routing_settings_;
 
-    void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
+    json::Dict parseSingleStatRequest(const json::Dict& request);
 
-    void updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info);
+    void updateResultWithBusInfo(json::Dict& result, const info::Bus& bus_info);
 
-    void updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info);
+    void updateResultWithStopInfo(json::Dict& result, const info::Stop& stop_info);
 
-    void updateResultWithMap(json::Builder& builder);
-
-    void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
-
+    void updateResultWithMap(json::Dict& result);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
