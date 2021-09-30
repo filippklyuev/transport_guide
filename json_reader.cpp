@@ -6,15 +6,15 @@ namespace json_reader {
 
 namespace parser {
 
-void detail::ParseAndInsertColor(svg::Color& empty_color_place, const json::Node& color_node){
+void detail::ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node){
     if (color_node.IsString()){
-        empty_color_place = (color_node.AsString());
+        empty_color = (color_node.AsString());
     } else {
         json::Array color_array = color_node.AsArray();
         if (color_array.size() == 3){
-            empty_color_place = (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
+            empty_color = (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
         } else {
-            empty_color_place = (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
+            empty_color = (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
         }
     }    
 }     
@@ -107,31 +107,25 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
 
 json::Dict StatParser::parseSingleStatRequest(const json::Dict& request){
     json::Dict result;
-    for (const auto& [key, value] : request){
-        if (key == "id"){
-            result.emplace(std::make_pair("request_id", json::Node(value.AsInt())));
-        } else if (key == "type"){
-            if (value.AsString() == "Stop"){
-                std::string_view stop_name = request.at("name").AsString();
-                if (catalogue_.IsStopListed(stop_name)){
-                    updateResultWithStopInfo(result, catalogue_.GetStopInfo(stop_name));
-                    return result;
-                } else {
-                    break;
-                }
-            } else if (value.AsString() == "Bus"){
-                std::string_view bus_name = request.at("name").AsString();
-                if (catalogue_.IsBusListed(bus_name)){
-                    updateResultWithBusInfo(result, catalogue_.GetBusInfo(bus_name));
-                    return result;
-                } else {
-                    break;
-                }
-            } else if (value.AsString() == "Map"){
-                updateResultWithMap(result);
-                return result;
-            }
+
+    result.emplace(std::make_pair("request_id", json::Node(request.at("id").AsInt())));
+
+    const std::string& type = request.at("type").AsString();
+    if (type == "Stop"){
+        std::string_view stop_name = request.at("name").AsString();
+        if (catalogue_.IsStopListed(stop_name)){
+            updateResultWithStopInfo(result, catalogue_.GetStopInfo(stop_name));
+            return result; 
         }
+    } else if (type == "Bus"){
+        std::string_view bus_name = request.at("name").AsString();
+        if (catalogue_.IsBusListed(bus_name)){
+            updateResultWithBusInfo(result, catalogue_.GetBusInfo(bus_name));
+            return result;  
+        }      
+    } else if (type == "Map"){
+        updateResultWithMap(result);
+        return result;
     }
     result.emplace(std::make_pair("error_message", json::Node(static_cast<std::string>("not found"))));
     return result;

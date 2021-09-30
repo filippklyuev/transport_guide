@@ -72,7 +72,7 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
 
 namespace detail {
 
-void ParseAndInsertColor(svg::Color& empty_color_place, const json::Node& color_node);  
+void ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node);  
 
 std::vector<std::string_view> parseStopsArray(const json::Array& stops);
 
