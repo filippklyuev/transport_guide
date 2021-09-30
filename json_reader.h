@@ -42,7 +42,6 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
 ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
@@ -72,6 +71,8 @@ private:
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
 
 namespace detail {
+
+void ParseAndInsertColor(svg::Color& empty_color_place, const json::Node& color_node);  
 
 std::vector<std::string_view> parseStopsArray(const json::Array& stops);
 

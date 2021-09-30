@@ -6,6 +6,19 @@ namespace json_reader {
 
 namespace parser {
 
+void detail::ParseAndInsertColor(svg::Color& empty_color_place, const json::Node& color_node){
+    if (color_node.IsString()){
+        empty_color_place = (color_node.AsString());
+    } else {
+        json::Array color_array = color_node.AsArray();
+        if (color_array.size() == 3){
+            empty_color_place = (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
+        } else {
+            empty_color_place = (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
+        }
+    }    
+}     
+
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings){
     map_renderer::RenderSettings settings;
 
@@ -24,31 +37,15 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     offset_array = render_settings.at("stop_label_offset").AsArray();
     settings.stop_label_offset = svg::Point(offset_array[0].AsDouble(), offset_array[1].AsDouble());
 
-    if (render_settings.at("underlayer_color").IsString()){
-        settings.underlayer_color = (render_settings.at("underlayer_color").AsString());
-    } else {
-        json::Array color_array = render_settings.at("underlayer_color").AsArray();
-        if (color_array.size() == 3){
-            settings.underlayer_color = (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
-        } else {
-            settings.underlayer_color = (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
-        }
-    }
+    const auto& color_node = render_settings.at("underlayer_color");
+    detail::ParseAndInsertColor(settings.underlayer_color, color_node);
 
     settings.underlayer_width = render_settings.at("underlayer_width").AsDouble();
 
     const json::Array& palette_colors = render_settings.at("color_palette").AsArray();
-    for (const auto& color_node : palette_colors){
-        if (color_node.IsString()){
-            settings.color_palette.push_back(color_node.AsString());
-        } else {
-                const json::Array& color_array = color_node.AsArray();
-            if (color_array.size() == 3){ // RGB format
-                settings.color_palette.push_back(svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
-            } else { // RGBA format
-                settings.color_palette.push_back(svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
-            }
-        }
+    settings.color_palette.resize(palette_colors.size());
+    for (int i = 0; i < palette_colors.size(); i++){
+        detail::ParseAndInsertColor(settings.color_palette[i], palette_colors[i]);
     }
     return settings;
 }
