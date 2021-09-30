@@ -161,7 +161,7 @@ void StatParser::updateResultWithMap(json::Dict& result){
 namespace detail {
 
 DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){ // NEW
-    std::unordered_map<std::string_view, int> result;
+    DistanceMap result;
     for (auto& [stop, distance] : distance_to_stops){
         result.emplace(stop, distance.AsInt());
     }
