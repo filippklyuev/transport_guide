@@ -14,11 +14,6 @@ using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace info {
 
-    struct RoutingSettings {
-        int bus_wait_time;
-        double bus_velocity;
-    };
-
     template<typename InfoPtr>
     struct InfoPtrComparator {
         bool operator()(const InfoPtr* lhs,const InfoPtr* rhs) const {

@@ -91,7 +91,7 @@ ParsedBusQuery parseBusRequest(const json::Dict& bus_request){ // NEW
     return result;
 }
 
-void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue){ //NEW
+void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;   
     for (int i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
@@ -99,19 +99,12 @@ void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& cat
             bus_query_positions.push_back(i);
         } else if (input_request.at("type").AsString() == "Stop"){
             auto [name_temp, coordinates, distance_to_stops_temp] = parseStopRequest(input_request);
-            std::string_view stop_name = catalogue.InsertNameSV(name_temp, QueryType::STOP);
-            catalogue.AddStop(stop_name);
-            catalogue.GetStopInfo(stop_name).setName(stop_name).setCoordinates(coordinates).
-                    setDistanceToStops(InsertSvsAndGetNewMap(catalogue, distance_to_stops_temp));   
+            catalogue.AddStop(name_temp, coordinates, std::move(distance_to_stops_temp));
         }
     }
     for (int i = 0; i < bus_query_positions.size(); i++){
-        auto [bus_name_temp, is_cycled, stops_on_route_temp] = parseBusRequest(requests_vector[bus_query_positions[i]].AsDict());
-        std::string_view bus_name = catalogue.InsertNameSV(bus_name_temp, QueryType::BUS);
-        catalogue.AddRoute(bus_name);
-        catalogue.GetRouteInfo(bus_name).setName(bus_name).setIsCycled(is_cycled).
-            setStopsAndDistance(catalogue, std::move(stops_on_route_temp)).
-            updatePassingBus().updateCurvature();
+        auto [bus_name_temp, is_cycled, stops_on_route] = parseBusRequest(requests_vector[bus_query_positions[i]].AsDict());
+            catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route));
     }
 }
 
@@ -132,7 +125,7 @@ json::Dict StatParser::parseSingleStatRequest(const json::Dict& request){
             } else if (value.AsString() == "Bus"){
                 std::string_view bus_name = request.at("name").AsString();
                 if (catalogue_.IsBusListed(bus_name)){
-                    updateResultWithBusInfo(result, catalogue_.GetRouteInfo(bus_name));
+                    updateResultWithBusInfo(result, catalogue_.GetBusInfo(bus_name));
                     return result;
                 } else {
                     break;

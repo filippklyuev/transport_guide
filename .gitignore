@@ -1,4 +1,6 @@
 
+input.txt
+output.txt
 a.exe
 *.txt
 lol.cpp
@@ -9,6 +11,7 @@ input_reader.h
 *.json
 *.exe
 1
+*.exe
 *.lib
 *.pdb
 *.exp

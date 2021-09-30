@@ -42,6 +42,7 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
+
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
 ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
