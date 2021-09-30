@@ -52,21 +52,14 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
 
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request){ //NEW
     ParsedStopQuery result;
-    for (const auto& [key, value] : stop_request){
-        if (key == "name"){
-            result.name = value.AsString();
-        } else if (key == "latitude"){
-            result.coordinates.lat = value.AsDouble();
-        } else if (key == "longitude"){
-            result.coordinates.lng = value.AsDouble();
-        } else if (key == "road_distances"){
-            result.distance_to_stops = detail::GetDistanceToStops(value.AsDict());
-        }
-    }
+    result.name = stop_request.at("name").AsString();
+    result.coordinates.lat = stop_request.at("latitude").AsDouble();
+    result.coordinates.lng = stop_request.at("longitude").AsDouble();
+    result.distance_to_stops = detail::GetDistanceToStops(stop_request.at("road_distances").AsDict());
     return result;
 }
 
-std::vector<std::string_view> detail::parseStopsArray(const json::Array& stops){ // NEW
+std::vector<std::string_view> detail::parseStopsArray(const json::Array& stops){ 
     std::vector<std::string_view> result;
     for (const auto& stop : stops){
         result.push_back(stop.AsString());
@@ -74,17 +67,11 @@ std::vector<std::string_view> detail::parseStopsArray(const json::Array& stops){
     return result;
 }
 
-ParsedBusQuery parseBusRequest(const json::Dict& bus_request){ // NEW
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request){ 
     ParsedBusQuery result;
-    for (const auto& [key, value] : bus_request){
-        if (key == "name"){
-            result.name = value.AsString();
-        } else if (key == "stops"){
-            result.stops_on_route = detail::parseStopsArray(value.AsArray());
-        } else if (key == "is_roundtrip"){
-            result.is_cycled = value.AsBool();
-        }
-    }
+    result.name = bus_request.at("name").AsString();
+    result.stops_on_route = detail::parseStopsArray(bus_request.at("stops").AsArray());
+    result.is_cycled = bus_request.at("is_roundtrip").AsBool();
     return result;
 }
 
@@ -160,7 +147,7 @@ void StatParser::updateResultWithMap(json::Dict& result){
 
 namespace detail {
 
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){ // NEW
+DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){ 
     DistanceMap result;
     for (auto& [stop, distance] : distance_to_stops){
         result.emplace(stop, distance.AsInt());
