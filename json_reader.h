@@ -70,16 +70,6 @@ private:
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
 
-namespace detail {
-
-void ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node);  
-
-std::vector<std::string_view> parseStopsArray(const json::Array& stops);
-
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops);
-
-} // namespace detail
-
 } // namespace parser
 
 } // namespace json_reader

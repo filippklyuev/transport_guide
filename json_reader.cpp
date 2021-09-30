@@ -6,7 +6,7 @@ namespace json_reader {
 
 namespace parser {
 
-void detail::ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node){
+static void ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node){
     if (color_node.IsString()){
         empty_color = (color_node.AsString());
     } else {
@@ -38,16 +38,24 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     settings.stop_label_offset = svg::Point(offset_array[0].AsDouble(), offset_array[1].AsDouble());
 
     const auto& color_node = render_settings.at("underlayer_color");
-    detail::ParseAndInsertColor(settings.underlayer_color, color_node);
+    ParseAndInsertColor(settings.underlayer_color, color_node);
 
     settings.underlayer_width = render_settings.at("underlayer_width").AsDouble();
 
     const json::Array& palette_colors = render_settings.at("color_palette").AsArray();
     settings.color_palette.resize(palette_colors.size());
     for (int i = 0; i < palette_colors.size(); i++){
-        detail::ParseAndInsertColor(settings.color_palette[i], palette_colors[i]);
+        ParseAndInsertColor(settings.color_palette[i], palette_colors[i]);
     }
     return settings;
+}
+
+static DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){ 
+    DistanceMap result;
+    for (auto& [stop, distance] : distance_to_stops){
+        result.emplace(stop, distance.AsInt());
+    }
+    return result;
 }
 
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request){ //NEW
@@ -55,11 +63,11 @@ ParsedStopQuery parseStopRequest(const json::Dict& stop_request){ //NEW
     result.name = stop_request.at("name").AsString();
     result.coordinates.lat = stop_request.at("latitude").AsDouble();
     result.coordinates.lng = stop_request.at("longitude").AsDouble();
-    result.distance_to_stops = detail::GetDistanceToStops(stop_request.at("road_distances").AsDict());
+    result.distance_to_stops = GetDistanceToStops(stop_request.at("road_distances").AsDict());
     return result;
 }
 
-std::vector<std::string_view> detail::parseStopsArray(const json::Array& stops){ 
+static std::vector<std::string_view> parseStopsArray(const json::Array& stops){ 
     std::vector<std::string_view> result;
     for (const auto& stop : stops){
         result.push_back(stop.AsString());
@@ -70,7 +78,7 @@ std::vector<std::string_view> detail::parseStopsArray(const json::Array& stops){
 ParsedBusQuery parseBusRequest(const json::Dict& bus_request){ 
     ParsedBusQuery result;
     result.name = bus_request.at("name").AsString();
-    result.stops_on_route = detail::parseStopsArray(bus_request.at("stops").AsArray());
+    result.stops_on_route = parseStopsArray(bus_request.at("stops").AsArray());
     result.is_cycled = bus_request.at("is_roundtrip").AsBool();
     return result;
 }
@@ -144,18 +152,6 @@ void StatParser::updateResultWithMap(json::Dict& result){
     doc.Render(strm);
     result.emplace(std::make_pair("map", json::Node(std::move(strm.str()))));    
 }
-
-namespace detail {
-
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){ 
-    DistanceMap result;
-    for (auto& [stop, distance] : distance_to_stops){
-        result.emplace(stop, distance.AsInt());
-    }
-    return result;
-}
-
-} // namespace detail
 
 } // namespace parser
 
