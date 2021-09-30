@@ -27,18 +27,16 @@ void Bus::updateBackRoute(){
     geo_route_length *= 2;
 }
 
-void Bus::updateDistance(){
-    if (stops.size() == 1){
-        return ;
-    }
-    int size = stops.size();
-    std::string_view last_stop_name = stops.back()->getName();
-    geo_route_length += geo::ComputeDistance(stops[size - 2]->coordinates, stops.back()->coordinates);
-
-    if (stops[size - 2]->distance_to_stops.count(last_stop_name)){
-        factial_route_length += stops[size - 2]->distance_to_stops.at(last_stop_name);
-    } else {
-        factial_route_length += stops.back()->distance_to_stops.at(stops[size-2]->getName());
+void Bus::calculateDistance(){
+    for (int i = 0; i < stops.size() - 1; i++){
+        const info::Stop* from_stop = stops[i];
+        const info::Stop* to_stop = stops[i + 1];
+        geo_route_length += geo::ComputeDistance(from_stop->coordinates, to_stop->coordinates);
+        if (from_stop->distance_to_stops.count(to_stop->name)){
+            factial_route_length += from_stop->distance_to_stops.at(to_stop->name);
+        } else {
+            factial_route_length += to_stop->distance_to_stops.at(from_stop->name);
+        }
     }
 }
 
