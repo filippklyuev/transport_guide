@@ -26,9 +26,9 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
-input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
 class StatParser {
 public:
