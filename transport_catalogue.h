@@ -27,17 +27,17 @@ public:
 
 	void AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route);
 
-	bool IsBusListed(const std::string_view bus_name) const ;
+	bool IsBusListed(std::string_view bus_name) const ;
 
-	bool IsStopListed(const std::string_view stop_name) const ;
+	bool IsStopListed(std::string_view stop_name) const ;
 
 	const info::Bus& GetBusInfo(std::string_view bus_name) const ;
 
-	const info::Stop& GetStopInfo(const std::string_view stop) const ;
+	const info::Stop& GetStopInfo(std::string_view stop) const ;
 
-	const std::set<std::string>& GetBusesSet() const;
+	const std::set<std::string, std::less<>>& GetBusesSet() const;
 
-	const std::set<std::string>& GetStopsSet() const;
+	const std::set<std::string, std::less<>>& GetStopsSet() const;
 
 	const BusMap& GetBusesMap() const;
 
@@ -45,8 +45,8 @@ public:
 	
 private:
 
-	std::set<std::string> buses_;
-	std::set<std::string> stops_;
+	std::set<std::string, std::less<>> buses_;
+	std::set<std::string, std::less<>> stops_;
 
 	StopMap stops_map_;
 	BusMap buses_map_;
@@ -63,9 +63,9 @@ private:
 
 	info::Stop& GetStopInfo(const std::string_view stop);
 
-	void processStopsOnRoute(info::Bus& bus_info, std::vector<std::string_view> stops_on_route);
-
 	DistanceMap InsertSvsAndGetNewMap(DistanceMap temp_map);
+
+	void updatePassingBusInStops(const info::Bus& bus_info);
 };
 	
 } // namespace transport_guide

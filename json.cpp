@@ -19,6 +19,7 @@ std::string LoadLiteral(std::istream& input) {
 }
 
 Node LoadArray(std::istream& input) {
+    input.get(); // skipping '['
     std::vector<Node> result;
 
     for (char c; input >> c && c != ']';) {
@@ -35,9 +36,10 @@ Node LoadArray(std::istream& input) {
 
 Node LoadDict(std::istream& input) {
     Dict dict;
-
+    input.get(); // skipping '{'
     for (char c; input >> c && c != '}';) {
         if (c == '"') {
+            input.putback(c);
             std::string key = LoadString(input).AsString();
             if (input >> c && c == ':') {
                 if (dict.find(key) != dict.end()) {
@@ -58,6 +60,7 @@ Node LoadDict(std::istream& input) {
 }
 
 Node LoadString(std::istream& input) {
+    input.get(); // skipping '"'
     auto it = std::istreambuf_iterator<char>(input);
     auto end = std::istreambuf_iterator<char>();
     std::string s;
@@ -197,10 +200,13 @@ Node LoadNode(std::istream& input) {
     }
     switch (c) {
         case '[':
+            input.putback(c);
             return LoadArray(input);
         case '{':
+            input.putback(c);
             return LoadDict(input);
         case '"':
+            input.putback(c);
             return LoadString(input);
         case 't':
             // Атрибут [[fallthrough]] (провалиться) ничего не делает, и является

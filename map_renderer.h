@@ -11,17 +11,17 @@
 namespace map_renderer {
 
 struct RenderSettings {
-    double width;                                                                   
-    double height;
-    double padding;
-    double line_width;
-    double stop_radius;
-    int bus_label_font_size;
+    double width = 0.0;                                                                   
+    double height = 0.0;
+    double padding = 0.0;
+    double line_width = 0.0;
+    double stop_radius = 0.0;
+    int bus_label_font_size = 0;
     svg::Point bus_label_offset;
-    int stop_label_font_size;
+    int stop_label_font_size = 0;
     svg::Point stop_label_offset;
     svg::Color underlayer_color;
-    double underlayer_width;
+    double underlayer_width = 0.0;
     std::vector<svg::Color> color_palette;
 };
 
@@ -38,10 +38,10 @@ public:
 private:
 
     struct ScalerStruct{
-        double min_lat;
-        double max_lat;
-        double min_lon;
-        double max_lon;
+        double min_lat = 0.0;
+        double max_lat = 0.0;
+        double min_lon = 0.0;
+        double max_lon = 0.0;
         double zoom_coef = 0.0;
         double padding = 0.0;
     };

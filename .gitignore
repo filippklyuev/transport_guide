@@ -1,7 +1,4 @@
 
-input.txt
-output.txt
-a.exe
 *.txt
 lol.cpp
 stat_reader.cpp
@@ -9,3 +6,9 @@ stat_reader.h
 input_reader.cpp
 input_reader.h
 *.json
+*.exe
+*.lib
+*.pdb
+*.exp
+log_duration.h
+
