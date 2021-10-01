@@ -93,16 +93,20 @@ int TransportRouter::getDistance(const info::Stop* from, const info::Stop* to) c
 }
 
 std::optional<RouteInfo> TransportRouter::GetRouteInfo(std::string_view stop_from, std::string_view stop_to) const {
-	VertexId from = stops_info_.at(stop_from)->id;
-	VertexId to = stops_info_.at(stop_to)->id;
+	// std::cout << "Stop_from = " << stop_from << " with id ";
+	if (stops_info_.count(stop_from) && stops_info_.count(stop_to)){
+		VertexId from = stops_info_.at(stop_from)->id;
+		VertexId to = stops_info_.at(stop_to)->id;
 
-	std::optional<Router::RouteInfo> result = router_->BuildRoute(from, to);
-	if (result){
-		std::vector<const EdgeInfo*> result_vector;
-		for (EdgeId edge : result->edges){
-			result_vector.push_back(&(edges_info_.at(edge)));
+		std::optional<Router::RouteInfo> result = router_->BuildRoute(from, to);
+		if (result){
+			// std::cout << "found result\n";
+			std::vector<const EdgeInfo*> result_vector;
+			for (EdgeId edge : result->edges){
+				result_vector.push_back(&(edges_info_.at(edge)));
+			}
+			return RouteInfo{result->weight, std::move(result_vector)};
 		}
-		return RouteInfo{result->weight, std::move(result_vector)};
 	}
 	return std::nullopt;
 }
