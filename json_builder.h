@@ -16,45 +16,42 @@ class ValueContext;
 class DictItemContext;
 class ValueDictContext;
 
-class DictItemContext{
-private:
-	Builder& builder_;
+class BuilderContext {
 public:
-	DictItemContext(Builder& builder) : builder_(builder)
+	BuilderContext(Builder& builder)
+		: builder_(builder)
 	{}
+protected:	
+	Builder& builder_;
+};
+
+class DictItemContext : protected BuilderContext {
+public:
+	using BuilderContext::BuilderContext;
 	ValueDictContext Key(std::string key);
 	Builder& EndDict();
 };
 
-class ValueContext{
-private:
-	Builder& builder_;
-public:
-	ValueContext(Builder& builder) : builder_(builder)
-	{}
+class ValueContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	ValueContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext StartDict();
 };
 
-class ArrayItemContext{
-private:
-	Builder& builder_;
-public:
-	ArrayItemContext(Builder& builder) : builder_(builder)
-	{}
+class ArrayItemContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	ArrayItemContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext  StartDict();
 	Builder& EndArray();
 };
 
-class ValueDictContext{
-private:
-	Builder& builder_;
-public:
-	ValueDictContext(Builder& builder) : builder_(builder)
-	{}
+class ValueDictContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	DictItemContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext StartDict();	
