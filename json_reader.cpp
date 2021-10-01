@@ -100,36 +100,74 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
     }
 }
 
-void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
-    builder.StartDict();
-    for (const auto& [key, value] : request){
-        if (key == "id"){
-            builder.Key("request_id").Value(value.AsInt());
-        } else if (key == "type"){
-            if (value.AsString() == "Stop"){
-                std::string_view stop_name = request.at("name").AsString();
-                if (catalogue_.IsStopListed(stop_name)){
-                    updateResultWithStopInfo(builder, catalogue_.GetStopInfo(stop_name));
-                    return;
-                } else {
-                    break;
-                }
-            } else if (value.AsString() == "Bus"){
-                std::string_view bus_name = request.at("name").AsString();
-                if (catalogue_.IsBusListed(bus_name)){
-                    updateResultWithBusInfo(builder, catalogue_.GetBusInfo(bus_name));
-                    return;
-                } else {
-                    break;
-                }
-            } else if (value.AsString() == "Map"){
-                updateResultWithMap(builder);
-                return ;
+bool StatParser::isValidRequest(const json::Dict& request, QueryType type){
+    if (type == QueryType::STOP || type == QueryType::BUS){
+        std::string_view name = request.at("name").AsString();
+        if (type == QueryType::STOP){
+            if (!catalogue_.IsStopListed(name)){
+                return false;
+            }
+        } else {
+            if (!catalogue_.IsBusListed(name)){
+                return false;
             }
         }
     }
-    builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
-    return ;
+    // If request_type is MAP request is always valid
+    return true;
+}
+
+ QueryType StatParser::defineRequestType(std::string_view type){
+    if (type == "Stop"){
+        return QueryType::STOP;
+    } else if (type == "Bus"){
+        return QueryType::STOP;
+    } else {
+        return QueryType::MAP;
+    }
+}
+
+json::Node StatParser::getMapAsNode(){
+    std::stringstream strm;
+    map_renderer::MapRenderer renderer(catalogue_, settings_);
+    svg::Document doc = renderer.GetSvgDocument();
+    doc.Render(strm);
+    return json::Node(static_cast<std::string>(strm.str()));
+}
+
+void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
+    QueryType request_type = defineRequestType(request.at("type").AsString());
+    if (isValidRequest(request, request_type)){
+        if (request_type == QueryType::STOP || request_type == QueryType::BUS){
+            std::string_view name = request.at("name").AsString();
+            if (request_type == QueryType::STOP){
+                const info::Stop& stop_info = catalogue_.GetStopInfo(name);
+                builder.StartDict()
+                    .Key("buses").StartArray();
+                        for (const auto& bus_string_node : request_handler::getPassingBuses(stop_info)){
+                             builder.Value(bus_string_node);
+                        }
+                        builder.EndArray()
+                .EndDict();
+            } else {
+                const info::Bus& bus_info = catalogue_.GetBusInfo(name);
+                builder.StartDict()
+                    .Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
+                    .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
+                    .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
+                    .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())))
+                .EndDict();
+            }
+        } else { 
+            builder.StartDict()
+                .Key("map").Value(getMapAsNode())
+            .EndDict();
+        }
+    } else {
+        builder.StartDict()
+            .Key("error_message").Value(json::Node(static_cast<std::string>("not found")))
+        .EndDict();        
+    }
 }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector){
@@ -137,53 +175,10 @@ json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     builder.StartArray();
         for (const auto& request : requests_vector){
             parseSingleStatRequest(request.AsDict(), builder);
-            builder.EndDict();
         }
         builder.EndArray();
     return json::Document(builder.Build());
 }
-
-void StatParser::updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info){
-    builder.Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
-            .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
-            .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
-            .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
-}
-
-void StatParser::updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info){
-    builder.Key("buses").StartArray();
-    for (const auto& string_node : request_handler::getPassingBuses(stop_info)){
-        builder.Value(string_node);
-    }
-    builder.EndArray();
-}
-
-void StatParser::updateResultWithMap(json::Builder& builder){
-    std::stringstream strm;
-    map_renderer::MapRenderer renderer(catalogue_, settings_);
-    svg::Document doc = renderer.GetSvgDocument();
-    doc.Render(strm);
-    builder.Key("map").Value(json::Node(static_cast<std::string>(std::move(strm.str()))));
-}
-namespace detail {
-
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){
-    std::unordered_map<std::string_view, int> result;
-    for (auto& [stop, distance] : distance_to_stops){
-        result.emplace(stop, distance.AsInt());
-    }
-    return result;
-}
-
-std::vector<std::string_view> parseStopsArray(const json::Array& stops){
-    std::vector<std::string_view> result;
-    for (const auto& stop : stops){
-        result.push_back(stop.AsString());
-    }
-    return result;
-}
-
-} // namespace detail
 
 } // namespace parser
 

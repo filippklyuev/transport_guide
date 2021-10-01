@@ -20,7 +20,8 @@ namespace transport_guide {
 
 enum class QueryType {
     STOP,
-    BUS
+    BUS,
+    MAP
 };
 
 struct ParsedStopQuery  {
@@ -67,6 +68,12 @@ private:
     void updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info);
 
     void updateResultWithMap(json::Builder& builder);
+
+    json::Node getMapAsNode();
+
+    QueryType defineRequestType(std::string_view type);
+
+    bool isValidRequest(const json::Dict& request, QueryType type);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
