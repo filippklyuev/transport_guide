@@ -121,7 +121,7 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type){
     if (type == "Stop"){
         return QueryType::STOP;
     } else if (type == "Bus"){
-        return QueryType::STOP;
+        return QueryType::BUS;
     } else {
         return QueryType::MAP;
     }
@@ -137,37 +137,33 @@ json::Node StatParser::getMapAsNode(){
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
     QueryType request_type = defineRequestType(request.at("type").AsString());
+    builder.StartDict()
+           .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())));
     if (isValidRequest(request, request_type)){
         if (request_type == QueryType::STOP || request_type == QueryType::BUS){
             std::string_view name = request.at("name").AsString();
             if (request_type == QueryType::STOP){
                 const info::Stop& stop_info = catalogue_.GetStopInfo(name);
-                builder.StartDict()
-                    .Key("buses").StartArray();
+                    builder.Key("buses").StartArray();
                         for (const auto& bus_string_node : request_handler::getPassingBuses(stop_info)){
                              builder.Value(bus_string_node);
                         }
-                        builder.EndArray()
-                .EndDict();
+                        builder.EndArray();
             } else {
                 const info::Bus& bus_info = catalogue_.GetBusInfo(name);
-                builder.StartDict()
-                    .Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
-                    .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
-                    .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
-                    .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())))
-                .EndDict();
+
+                builder.Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
+                .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
+                .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
+                .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
             }
         } else { 
-            builder.StartDict()
-                .Key("map").Value(getMapAsNode())
-            .EndDict();
+            builder.Key("map").Value(getMapAsNode());
         }
     } else {
-        builder.StartDict()
-            .Key("error_message").Value(json::Node(static_cast<std::string>("not found")))
-        .EndDict();        
+        builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
     }
+    builder.EndDict();  
 }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector){
