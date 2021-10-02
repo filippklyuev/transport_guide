@@ -44,7 +44,7 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
 
     const json::Array& palette_colors = render_settings.at("color_palette").AsArray();
     settings.color_palette.resize(palette_colors.size());
-    for (int i = 0; i < palette_colors.size(); i++){
+    for (size_t i = 0; i < palette_colors.size(); i++){
         ParseAndInsertColor(settings.color_palette[i], palette_colors[i]);
     }
     return settings;
@@ -85,7 +85,7 @@ ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
 
 void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;   
-    for (int i = 0; i < requests_vector.size(); i++){
+    for (size_t i = 0; i < requests_vector.size(); i++){
         const json::Dict& input_request = requests_vector[i].AsDict();
         if (input_request.at("type").AsString() == "Bus"){
             bus_query_positions.push_back(i);
@@ -94,7 +94,7 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
             catalogue.AddStop(name_temp, coordinates, std::move(distance_to_stops_temp));
         }
     }
-    for (int i = 0; i < bus_query_positions.size(); i++){
+    for (size_t i = 0; i < bus_query_positions.size(); i++){
         auto [bus_name_temp, is_cycled, stops_on_route] = parseBusRequest(requests_vector[bus_query_positions[i]].AsDict());
             catalogue.AddRoute(bus_name_temp, is_cycled, std::move(stops_on_route));
     }

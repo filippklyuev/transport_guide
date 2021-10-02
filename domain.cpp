@@ -17,7 +17,7 @@ const std::vector<const Stop*>& Bus::getStopsOnRoute() const{
 }
 
 void Bus::updateBackRoute(){
-    for (int i = stops.size() - 2; i >= 0; i--){
+    for (int i = static_cast<int>(stops.size() - 2); i >= 0; i--){
         if (stops[i + 1]->distance_to_stops.count(stops[i]->getName())){
             factial_route_length += stops[i + 1]->distance_to_stops.at(stops[i]->getName());
         } else {
@@ -28,7 +28,7 @@ void Bus::updateBackRoute(){
 }
 
 void Bus::calculateDistance(){
-    for (int i = 0; i < stops.size() - 1; i++){
+    for (size_t i = 0; i < stops.size() - 1; i++){
         const info::Stop* from_stop = stops[i];
         const info::Stop* to_stop = stops[i + 1];
         geo_route_length += geo::ComputeDistance(from_stop->coordinates, to_stop->coordinates);
