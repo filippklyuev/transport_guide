@@ -1,7 +1,5 @@
 #pragma once
 #include <iostream>
-#include <optional>
-#include <memory>
 #include <variant>
 #include <vector>
 #include <string>
@@ -16,14 +14,14 @@
 #include "svg.h"
 #include "map_renderer.h"
 #include "request_handler.h"
-#include "transport_router.h"
 #include "transport_catalogue.h"
 
 namespace transport_guide {
 
 enum class QueryType {
     STOP,
-    BUS
+    BUS,
+    MAP
 };
 
 struct ParsedStopQuery  {
@@ -36,7 +34,7 @@ struct ParsedBusQuery {
     std::string_view name;
     bool is_cycled;
     std::vector<std::string_view> stops_on_route;
-};      
+};              
 
 namespace json_reader {
 
@@ -46,27 +44,22 @@ namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
-
-info::RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
-
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
+
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings, info::RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
         catalogue_(catalogue),
-        settings_(settings),
-        routing_settings_(routing_settings)
+        settings_(settings)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
-    std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
-    info::RoutingSettings routing_settings_;
 
     void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
 
@@ -76,19 +69,14 @@ private:
 
     void updateResultWithMap(json::Builder& builder);
 
-    void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
+    json::Node getMapAsNode();
 
+    QueryType defineRequestType(std::string_view type);
+
+    bool isValidRequest(const json::Dict& request, QueryType type);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
-
-namespace detail {
-
-std::vector<std::string_view> parseStopsArray(const json::Array& stops);
-
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops);
-
-} // namespace detail
 
 } // namespace parser
 

@@ -4,14 +4,14 @@ namespace transport_guide {
 
 std::string_view TransportCatalogue::InsertStopName(std::string stop_name){
 	if (IsStopListed(stop_name)){
-		return *stops_.find(stop_name);
+		return *stops_.find(std::string_view(stop_name));
 	}
 	return *stops_.insert(std::move(stop_name)).first;
 }
 
 std::string_view TransportCatalogue::InsertBusName(std::string bus_name){
 	if (IsBusListed(bus_name)){
-		return *buses_.find(bus_name);
+		return *buses_.find(std::string_view(bus_name));
 	}
 	return *buses_.insert(std::move(bus_name)).first;
 }
@@ -34,11 +34,11 @@ void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled
 	updatePassingBusInStops(GetBusesMap().at(bus_name));
 }
 
-bool TransportCatalogue::IsBusListed(const std::string_view bus_name) const {
+bool TransportCatalogue::IsBusListed(std::string_view bus_name) const {
 	return GetBusesMap().find(bus_name) != GetBusesMap().end();
 }
 
-bool TransportCatalogue::IsStopListed(const std::string_view stop_name) const {
+bool TransportCatalogue::IsStopListed(std::string_view stop_name) const {
 	return GetStopsMap().find(stop_name) != GetStopsMap().end();
 }
 
@@ -50,11 +50,11 @@ const info::Bus& TransportCatalogue::GetBusInfo(std::string_view bus_name) const
 	return GetBusesMap().at(bus_name);
 }
 
-const info::Stop& TransportCatalogue::GetStopInfo(const std::string_view stop) const {
+const info::Stop& TransportCatalogue::GetStopInfo(std::string_view stop) const {
 	return GetStopsMap().at(stop);
 }
 
-info::Stop& TransportCatalogue::GetStopInfo(const std::string_view stop){
+info::Stop& TransportCatalogue::GetStopInfo(std::string_view stop){
 	return GetStopsMap().at(stop);
 }
 
@@ -74,11 +74,11 @@ const TransportCatalogue::BusMap& TransportCatalogue::GetBusesMap() const {
 	return buses_map_;
 }
 
-const std::set<std::string>& TransportCatalogue::GetBusesSet() const {
+const std::set<std::string, std::less<>>& TransportCatalogue::GetBusesSet() const {
     return buses_;
 }
 
-const std::set<std::string>& TransportCatalogue::GetStopsSet() const {
+const std::set<std::string, std::less<>>& TransportCatalogue::GetStopsSet() const {
     return stops_;
 }
 

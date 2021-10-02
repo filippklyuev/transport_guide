@@ -14,11 +14,6 @@ using DistanceMap = std::unordered_map<std::string_view, int>;
 
 namespace info {
 
-    struct RoutingSettings {
-        int bus_wait_time;
-        double bus_velocity;
-    };
-
     template<typename InfoPtr>
     struct InfoPtrComparator {
         bool operator()(const InfoPtr* lhs,const InfoPtr* rhs) const {
@@ -56,8 +51,9 @@ namespace info {
             for (auto stop : stops_on_route){
                 stops.push_back(&(stops_map.at(stop)));
                 unique_stops.insert(stops.back()->getName());
-                updateDistance();
+                
             }
+            calculateDistance();
             if (!is_cycled){
                 updateBackRoute();
             }
@@ -84,7 +80,7 @@ namespace info {
 
         void updateBackRoute();
 
-        void updateDistance();
+        void calculateDistance();
 
         void updateCurvature();
 
