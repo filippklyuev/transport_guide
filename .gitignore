@@ -11,3 +11,4 @@ input_reader.h
 *.pdb
 *.exp
 log_duration.h
+*.json

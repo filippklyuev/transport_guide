@@ -83,6 +83,13 @@ ParsedBusQuery parseBusRequest(const json::Dict& bus_request){
     return result;
 }
 
+RoutingSettings parseRoutingSettings(const json::Dict& routing_settings){
+    RoutingSettings result;
+    result.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
+    result.bus_velocity = routing_settings.at("bus_velocity").AsDouble();
+    return result;
+}
+
 void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue){
     std::vector<int> bus_query_positions;   
     for (size_t i = 0; i < requests_vector.size(); i++){
@@ -113,7 +120,7 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type){
             }
         }
     }
-    // If request_type is MAP request is always valid
+    // If request_type is MAP/ROUTE request is always valid
     return true;
 }
 
@@ -122,8 +129,10 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type){
         return QueryType::STOP;
     } else if (type == "Bus"){
         return QueryType::BUS;
-    } else {
+    } else if (type == "MAP"){
         return QueryType::MAP;
+    } else {
+        return QueryType::ROUTE;
     }
 }
 
@@ -134,6 +143,37 @@ json::Node StatParser::getMapAsNode(){
     doc.Render(strm);
     return json::Node(static_cast<std::string>(strm.str()));
 }
+
+void StatParser::updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to){
+    if (!router_manager_){
+        router_manager_ = std::make_unique<router::TransportRouter>(catalogue_, routing_settings_);
+    }
+    std::optional<router::RouteInfo> result = router_manager_->GetRouteInfo(from, to);
+    if (!result.has_value()){
+        builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
+        return ;
+    }
+    const auto& route_edges = result->route_edges;
+    const double time = result->overall_time;
+            builder.Key("items")
+                .StartArray();
+                    for (const router::EdgeInfo* edge : route_edges){
+                        builder.StartDict()
+                                .Key("stop_name").Value(json::Node(static_cast<std::string>(edge->from_stop)))
+                                .Key("time").Value(json::Node(static_cast<double>(router_manager_->getWaitWeight())))
+                                .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
+                        .EndDict()
+                        .StartDict()
+                            .Key("bus").Value(json::Node(static_cast<std::string>(edge->bus_name)))
+                            .Key("span_count").Value(json::Node(static_cast<int>(edge->span)))
+                            .Key("time").Value(json::Node(static_cast<double>(edge->weight - router_manager_->getWaitWeight())))
+                            .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
+                        .EndDict();
+                    }
+                builder.EndArray()
+            .Key("total_time").Value(json::Node(static_cast<double>(time)));
+}
+
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
     QueryType request_type = defineRequestType(request.at("type").AsString());
@@ -157,8 +197,10 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
                 .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
                 .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
             }
-        } else { 
+        } else if (request_type == QueryType::MAP){ 
             builder.Key("map").Value(getMapAsNode());
+        } else {
+            updateResultWithRoute(builder, request.at("from").AsString(), request.at("to").AsString());
         }
     } else {
         builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));

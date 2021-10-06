@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <iostream>
 #include <variant>
 #include <vector>
@@ -13,6 +14,7 @@
 #include "json_builder.h"
 #include "svg.h"
 #include "map_renderer.h"
+#include "transport_router.h"
 #include "request_handler.h"
 #include "transport_catalogue.h"
 
@@ -21,7 +23,8 @@ namespace transport_guide {
 enum class QueryType {
     STOP,
     BUS,
-    MAP
+    MAP,
+    ROUTE
 };
 
 struct ParsedStopQuery  {
@@ -48,18 +51,23 @@ ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
 ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
+RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
+
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings, RoutingSettings routing_settings) :
         catalogue_(catalogue),
-        settings_(settings)
+        settings_(settings),
+        routing_settings_(routing_settings)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
+    std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue& catalogue_;
     map_renderer::RenderSettings settings_;
+    RoutingSettings routing_settings_;
 
     void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
 
@@ -74,6 +82,8 @@ private:
     QueryType defineRequestType(std::string_view type);
 
     bool isValidRequest(const json::Dict& request, QueryType type);
+
+    void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
