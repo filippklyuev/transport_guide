@@ -67,7 +67,7 @@ private:
 
     void updateResultWithMap(json::Builder& builder);
 
-    json::Node getMapAsNode();
+    svg::Document getSvgDoc();
 
     QueryType defineRequestType(std::string_view type);
 

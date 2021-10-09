@@ -127,43 +127,97 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type){
     }
 }
 
-json::Node StatParser::getMapAsNode(){
-    std::stringstream strm;
+svg::Document StatParser::getSvgDoc(){
     map_renderer::MapRenderer renderer(catalogue_, settings_);
-    svg::Document doc = renderer.GetSvgDocument();
+    return renderer.GetSvgDocument();
+}
+
+// void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
+//     QueryType request_type = defineRequestType(request.at("type").AsString());
+//     builder.StartDict()
+//            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())));
+//     if (isValidRequest(request, request_type)){
+//         if (request_type == QueryType::STOP || request_type == QueryType::BUS){
+//             std::string_view name = request.at("name").AsString();
+//             if (request_type == QueryType::STOP){
+//                 const info::Stop& stop_info = catalogue_.GetStopInfo(name);
+//                     builder.Key("buses").StartArray();
+//                         for (const auto& bus_string_node : request_handler::getPassingBuses(stop_info)){
+//                              builder.Value(bus_string_node);
+//                         }
+//                         builder.EndArray();
+//             } else {
+//                 const info::Bus& bus_info = catalogue_.GetBusInfo(name);
+
+//                 builder.Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
+//                 .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
+//                 .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
+//                 .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
+//             }
+//         } else { 
+//             builder.Key("map").Value(json::Node(static_cast<std::string>(getSvgDocAsStr())));
+//         }
+//     } else {
+//         builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
+//     }
+//     builder.EndDict();  
+// }
+
+static std::string SvgToStr(svg::Document doc){
+    std::stringstream strm;
     doc.Render(strm);
-    return json::Node(static_cast<std::string>(strm.str()));
+    return std::move(strm.str());
 }
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
+    // Решил оставить много дублирований и одну большую функцию в угоду наглядности builder
     QueryType request_type = defineRequestType(request.at("type").AsString());
-    builder.StartDict()
-           .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())));
-    if (isValidRequest(request, request_type)){
-        if (request_type == QueryType::STOP || request_type == QueryType::BUS){
-            std::string_view name = request.at("name").AsString();
-            if (request_type == QueryType::STOP){
-                const info::Stop& stop_info = catalogue_.GetStopInfo(name);
-                    builder.Key("buses").StartArray();
-                        for (const auto& bus_string_node : request_handler::getPassingBuses(stop_info)){
-                             builder.Value(bus_string_node);
-                        }
-                        builder.EndArray();
-            } else {
-                const info::Bus& bus_info = catalogue_.GetBusInfo(name);
+    if (!isValidRequest(request, request_type)){
 
-                builder.Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
-                .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
-                .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
-                .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())));
-            }
-        } else { 
-            builder.Key("map").Value(getMapAsNode());
-        }
-    } else {
-        builder.Key("error_message").Value(json::Node(static_cast<std::string>("not found")));
+        builder.StartDict()
+               .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+               .Key("error_message").Value(json::Node(static_cast<std::string>("not found")))
+        .EndDict();
+
+        return;       
     }
-    builder.EndDict();  
+    switch (request_type){
+        case QueryType::STOP : {
+            std::string_view name = request.at("name").AsString();
+            const info::Stop& stop_info = catalogue_.GetStopInfo(name);
+
+            builder.StartDict()
+                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+                   .Key("buses").StartArray();
+                   for (const auto& bus_name_node : request_handler::getPassingBuses(stop_info)){
+                                builder.Value(bus_name_node);
+                   }
+                   builder.EndArray()
+            .EndDict();
+            break;
+        }
+        case QueryType::BUS : {
+            std::string_view name = request.at("name").AsString();
+            const info::Bus& bus_info = catalogue_.GetBusInfo(name);
+
+            builder.StartDict()
+                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+                   .Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature)))
+                   .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factial_route_length)))
+                   .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.getStopsCount())))
+                   .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.getUniqueStopsCount())))
+            .EndDict();
+            break;
+        }
+        case QueryType::MAP : {
+
+            builder.StartDict()
+                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+                   .Key("map").Value(json::Node(static_cast<std::string>(SvgToStr(getSvgDoc()))))
+            .EndDict();
+            break;
+        }
+    }
 }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector){
