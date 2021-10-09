@@ -20,7 +20,11 @@ namespace transport_guide {
 enum class QueryType {
     STOP,
     BUS
-};
+};     
+
+namespace json_reader {
+
+namespace parser {
 
 struct ParsedStopQuery  {
     std::string_view name;
@@ -32,11 +36,7 @@ struct ParsedBusQuery {
     std::string_view name;
     bool is_cycled;
     std::vector<std::string_view> stops_on_route;
-};          
-
-namespace json_reader {
-
-namespace parser {
+};         
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
