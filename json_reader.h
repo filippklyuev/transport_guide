@@ -36,8 +36,6 @@ struct ParsedBusQuery {
 
 namespace json_reader {
 
-using DistanceMap = std::unordered_map<std::string_view, int>;
-
 namespace parser {
 
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
