@@ -41,11 +41,7 @@ void Bus::calculateDistance(){
 }
 
 void Bus::updateCurvature(){
-    if (geo_route_length != 0){
-        curvature = factial_route_length / geo_route_length;
-    } else {
-        curvature = 0;
-    }
+    curvature = factial_route_length / geo_route_length;
 }
 
 

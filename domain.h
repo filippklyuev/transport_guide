@@ -55,7 +55,9 @@ namespace info {
             if (!is_cycled){
                 updateBackRoute();
             }
-            updateCurvature();
+            if (stops.size() != 1){
+                updateCurvature();
+            }
         }
 
         std::string_view name;
