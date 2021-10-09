@@ -51,9 +51,9 @@ private:
 	StopMap stops_map_;
 	BusMap buses_map_;
 
-	std::string_view  InsertBusName(std::string bus_name);
+	std::string_view  InsertBusName(std::string_view bus_name);
 
-	std::string_view  InsertStopName(std::string stop_name);
+	std::string_view  InsertStopName(std::string_view stop_name);
 
 	StopMap& GetStopsMap();
 

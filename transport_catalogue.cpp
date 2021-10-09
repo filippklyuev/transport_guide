@@ -2,22 +2,22 @@
 
 namespace transport_guide {
 
-std::string_view TransportCatalogue::InsertStopName(std::string stop_name){
+std::string_view TransportCatalogue::InsertStopName(std::string_view stop_name){
 	if (IsStopListed(stop_name)){
-		return *stops_.find(std::string_view(stop_name));
+		return *stops_.find(stop_name);
 	}
-	return *stops_.insert(std::move(stop_name)).first;
+	return *stops_.insert(std::string(stop_name)).first;
 }
 
-std::string_view TransportCatalogue::InsertBusName(std::string bus_name){
+std::string_view TransportCatalogue::InsertBusName(std::string_view bus_name){
 	if (IsBusListed(bus_name)){
-		return *buses_.find(std::string_view(bus_name));
+		return *buses_.find(bus_name);
 	}
-	return *buses_.insert(std::move(bus_name)).first;
+	return *buses_.insert(std::string(bus_name)).first;
 }
 
-void TransportCatalogue::AddStop(std::string_view temp_stop_name, geo::Coordinates coords, info::DistanceMap&& distance_map){
-	std::string_view stop_name = InsertStopName(std::string(temp_stop_name));
+void TransportCatalogue::AddStop(std::string_view temp_stop_name, geo::Coordinates coords, DistanceMap&& distance_map){
+	std::string_view stop_name = InsertStopName(temp_stop_name);
 	GetStopsMap().emplace(stop_name, info::Stop(stop_name, coords, InsertSvsAndGetNewMap(std::move(distance_map))));
 
 }
@@ -29,7 +29,7 @@ void TransportCatalogue::updatePassingBusInStops(const info::Bus& bus_info){
 }
 
 void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route){
-	std::string_view bus_name = InsertBusName(std::string(bus_name_temp));
+	std::string_view bus_name = InsertBusName(bus_name_temp);
 	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled, stops_map_ ,std::move(stops_on_route)));
 	updatePassingBusInStops(GetBusesMap().at(bus_name));
 }
@@ -85,7 +85,7 @@ const std::set<std::string, std::less<>>& TransportCatalogue::GetStopsSet() cons
 DistanceMap TransportCatalogue::InsertSvsAndGetNewMap(DistanceMap temp_map){
     DistanceMap result;
     for (auto [stop_name_temp, distance] : temp_map){
-        result.emplace(std::make_pair(InsertStopName(std::string(stop_name_temp)), distance));
+        result.emplace(std::make_pair(InsertStopName(stop_name_temp), distance));
     }
     return result;
 }

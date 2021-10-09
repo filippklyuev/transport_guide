@@ -23,8 +23,6 @@ namespace info {
 
     struct Bus;
 
-    using DistanceMap = std::unordered_map<std::string_view, int>;
-
     struct Stop {
 
         Stop(std::string_view name_, geo::Coordinates coordinates_, DistanceMap distance_to_stops_)
@@ -57,7 +55,9 @@ namespace info {
             if (!is_cycled){
                 updateBackRoute();
             }
-            updateCurvature();
+            if (stops.size() != 1){
+                updateCurvature();
+            }
         }
 
         std::string_view name;

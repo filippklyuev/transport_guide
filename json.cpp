@@ -195,18 +195,15 @@ Node LoadNumber(std::istream& input) {
 
 Node LoadNode(std::istream& input) {
     char c;
-    if (!(input >> c)) {
+    if (!(c = (input >> std::ws).peek())) {
         throw ParsingError("Unexpected EOF"s);
     }
     switch (c) {
         case '[':
-            input.putback(c);
             return LoadArray(input);
         case '{':
-            input.putback(c);
             return LoadDict(input);
         case '"':
-            input.putback(c);
             return LoadString(input);
         case 't':
             // Атрибут [[fallthrough]] (провалиться) ничего не делает, и является
@@ -217,13 +214,10 @@ Node LoadNode(std::istream& input) {
             // литералов true либо false
             [[fallthrough]];
         case 'f':
-            input.putback(c);
             return LoadBool(input);
         case 'n':
-            input.putback(c);
             return LoadNull(input);
         default:
-            input.putback(c);
             return LoadNumber(input);
     }
 }
