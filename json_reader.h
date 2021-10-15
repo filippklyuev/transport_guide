@@ -26,8 +26,6 @@ enum class QueryType {
 
 namespace json_reader {
 
-namespace parser {
-
 struct ParsedStopQuery  {
     std::string_view name;
     geo::Coordinates coordinates = {};
@@ -75,8 +73,6 @@ private:
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
-
-} // namespace parser
 
 } // namespace json_reader
 

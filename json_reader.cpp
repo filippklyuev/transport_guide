@@ -4,8 +4,6 @@ namespace transport_guide {
 
 namespace json_reader {
 
-namespace parser {
-
 static void ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node){
     if (color_node.IsString()){
         empty_color = (color_node.AsString());
@@ -230,7 +228,7 @@ json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     return json::Document(builder.Build());
 }
 
-} // namespace parser
+} // n
 
 } // namespace json_reader
 
