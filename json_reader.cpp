@@ -124,7 +124,7 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
         return QueryType::STOP;
     } else if (type == "Bus"){
         return QueryType::BUS;
-    } else if (type == "MAP"){
+    } else if (type == "Map"){
         return QueryType::MAP;
     } else {
         return QueryType::ROUTE;
