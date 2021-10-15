@@ -56,7 +56,7 @@ static DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops){
     return result;
 }
 
-ParsedStopQuery parseStopRequest(const json::Dict& stop_request){ //NEW
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request){ 
     ParsedStopQuery result;
     result.name = stop_request.at("name").AsString();
     result.coordinates.lat = stop_request.at("latitude").AsDouble();
@@ -99,20 +99,16 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
 }
 
 bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const {
-    if (type == QueryType::STOP || type == QueryType::BUS){
-        std::string_view name = request.at("name").AsString();
-        if (type == QueryType::STOP){
-            if (!catalogue_.IsStopListed(name)){
-                return false;
-            }
-        } else {
-            if (!catalogue_.IsBusListed(name)){
-                return false;
-            }
-        }
+    if (type == QueryType::STOP){
+        return catalogue_.IsStopListed(request.at("name").AsString());
+    } 
+    if (type == QueryType::BUS){
+        return catalogue_.IsBusListed(request.at("name").AsString());
     }
-    // If request_type is MAP request is always valid
-    return true;
+    if (type == QueryType::MAP){
+        return true;
+    }
+    return false;
 }
 
  QueryType StatParser::defineRequestType(std::string_view type) const {
