@@ -46,9 +46,9 @@ ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
+    StatParser(const TransportCatalogue& catalogue,map_renderer::RenderSettings&& settings) :
         catalogue_(catalogue),
-        settings_(settings)
+        settings_(std::move(settings))
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);

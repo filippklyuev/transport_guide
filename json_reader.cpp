@@ -228,8 +228,6 @@ json::Document StatParser::parseStatArray(const json::Array& requests_vector){
     return json::Document(builder.Build());
 }
 
-} // n
-
 } // namespace json_reader
 
 } // namespace transport_guide
