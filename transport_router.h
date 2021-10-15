@@ -89,9 +89,9 @@ private:
 		}
 	
 		void Reset(){
-			double weight = wait_weight_;
-			int span = 0;
-			int distance = 0;		
+			weight = wait_weight_;
+			span = 0;
+			distance = 0;		
 		}
 	
 		const double wait_weight_;
