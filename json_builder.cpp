@@ -2,7 +2,6 @@
 
 using namespace json;
 
-
 ValueDictContext DictItemContext::Key(std::string key){
 	builder_.Key(std::move(key));
 	return ValueDictContext(builder_);
@@ -68,7 +67,7 @@ ArrayItemContext Builder::StartArray(){
 }
 
 ValueDictContext Builder::Key(std::string key){
-	checkDocumentCompletion("EndArray");
+	checkDocumentCompletion("Key");
 	if (!(nodes_stack_.back()->IsDict())){
 		throw std::logic_error("Вызов Key не при открытом словаре");
 	}
