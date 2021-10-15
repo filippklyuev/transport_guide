@@ -57,7 +57,7 @@ public:
         routing_settings_(std::move(routing_settings))
     {}
 
-    json::Document parseStatArray(const json::Array& requests_vector) const;
+    json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
     std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
@@ -65,7 +65,7 @@ private:
     const map_renderer::RenderSettings settings_;
     const RoutingSettings routing_settings_;
 
-    void parseSingleStatRequest(const json::Dict& request, json::Builder& builder) const;
+    void parseSingleStatRequest(const json::Dict& request, json::Builder& builder);
 
     svg::Document getSvgDoc() const;
 
@@ -79,7 +79,7 @@ private:
 
     void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 
-    void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
+    void parseRouteRequest(const json::Dict& request, json::Builder& builder);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
