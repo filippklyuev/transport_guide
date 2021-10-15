@@ -4,8 +4,6 @@ namespace transport_guide {
 
 namespace router {
 
-using MapOfRoutes = std::map<std::string_view, Route>;
-
 MapOfRoutes TransportRouter::assignVerticesGetRoutes(){
 	size_t vertices_count = 0;
 	MapOfRoutes routes;
@@ -31,43 +29,39 @@ MapOfRoutes TransportRouter::assignVerticesGetRoutes(){
 void TransportRouter::connectVertexToReachableNoTransfer(const Route& route_info, const int from_position, std::string_view bus_name){
 	const auto& vertex_info_vector = route_info.route;
 	const VertexInfo* from = vertex_info_vector[from_position];
-	double weight = wait_weight_;
-	int span = 0;
-	int distance = 0;
+	TransportRouter::RouteDetails route_details(wait_weight_);
 	if (!route_info.is_cycled){
 		if (from_position > 0){
 			for (int i = from_position - 1; i >= 0; i--){
 				const VertexInfo* to = vertex_info_vector[i];
 				int distance_between_adjacent_stops =  getDistance(vertex_info_vector[i + 1]->stop_info, to->stop_info);
-				distance += distance_between_adjacent_stops;
-				double weight_between_adjacent_stops = calculateWeight(distance_between_adjacent_stops);
-				weight += weight_between_adjacent_stops;
-				
-				span += 1;
+				updateRouteDetails(distance_between_adjacent_stops, route_details);
 				if (from != to){
-					edges_info_.emplace(graph_->AddEdge({from->id, to->id, weight})
-							, EdgeInfo{bus_name, span, weight, from->stop_info->name, to->stop_info->name});
+					edges_info_.emplace(graph_->AddEdge({from->id, to->id, route_details.weight})
+							, EdgeInfo{bus_name, route_details.span, route_details.weight, from->stop_info->name, to->stop_info->name});
 				}
 			}
 		}
-		weight = wait_weight_;
-		span = 0;
-		distance = 0;
 	}
+	route_details.Reset();
 	if (from_position < vertex_info_vector.size() - 1){
 		for (int i = from_position + 1; i < vertex_info_vector.size(); i++){
 			const VertexInfo* to = vertex_info_vector[i];
 			int distance_between_adjacent_stops = getDistance(vertex_info_vector[i - 1]->stop_info, to->stop_info);
-			distance += distance_between_adjacent_stops;
-			double weight_between_adjacent_stops = calculateWeight(distance_between_adjacent_stops);
-			weight += weight_between_adjacent_stops;
-			span += 1;
+			updateRouteDetails(distance_between_adjacent_stops, route_details);
 			if (from != to){
-				edges_info_.emplace(graph_->AddEdge({from->id, to->id, weight})
-						, EdgeInfo{bus_name, span, weight, from->stop_info->name, to->stop_info->name});
+				edges_info_.emplace(graph_->AddEdge({from->id, to->id, route_details.weight})
+						, EdgeInfo{bus_name, route_details.span, route_details.weight, from->stop_info->name, to->stop_info->name});
 			}
 		}
 	}
+}
+
+void TransportRouter::updateRouteDetails(int distance_between_adjacent_stops, TransportRouter::RouteDetails& route_details) const {
+	route_details.distance += distance_between_adjacent_stops;
+	double weight_between_adjacent_stops = calculateWeight(distance_between_adjacent_stops);
+	route_details.weight += weight_between_adjacent_stops;
+	route_details.span += 1;
 }
 
 void TransportRouter::fillGraphWithEdges(const MapOfRoutes& routes){
@@ -93,14 +87,12 @@ int TransportRouter::getDistance(const info::Stop* from, const info::Stop* to) c
 }
 
 std::optional<RouteInfo> TransportRouter::GetRouteInfo(std::string_view stop_from, std::string_view stop_to) const {
-	// std::cout << "Stop_from = " << stop_from << " with id ";
 	if (stops_info_.count(stop_from) && stops_info_.count(stop_to)){
 		VertexId from = stops_info_.at(stop_from)->id;
 		VertexId to = stops_info_.at(stop_to)->id;
 
 		std::optional<Router::RouteInfo> result = router_->BuildRoute(from, to);
 		if (result){
-			// std::cout << "found result\n";
 			std::vector<const EdgeInfo*> result_vector;
 			for (EdgeId edge : result->edges){
 				result_vector.push_back(&(edges_info_.at(edge)));

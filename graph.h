@@ -42,12 +42,10 @@ private:
 template <typename Weight>
 DirectedWeightedGraph<Weight>::DirectedWeightedGraph(size_t vertex_count)
     : incidence_lists_(vertex_count) {
-        // std::cout << "Initialized with " << vertex_count << " vertexes\n";
 }
 
 template <typename Weight>
 EdgeId DirectedWeightedGraph<Weight>::AddEdge(const Edge<Weight>& edge) {
-    // std::cout << "Adding edge from " << edge.from << " to " << edge.to << " with weight " << edge.weight << " and id = " << edges_.size() <<'\n';
     edges_.push_back(edge);
     const EdgeId id = edges_.size() - 1;
     incidence_lists_.at(edge.from).push_back(id);
@@ -74,4 +72,5 @@ typename DirectedWeightedGraph<Weight>::IncidentEdgesRange
 DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
     return ranges::AsRange(incidence_lists_.at(vertex));
 }
+
 }  // namespace graph
