@@ -51,10 +51,10 @@ RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings&& routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
         catalogue_(catalogue),
         settings_(std::move(settings)),
-        routing_settings_(std::move(routing_settings))
+        routing_settings_(routing_settings)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
