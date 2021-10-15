@@ -4,15 +4,15 @@ namespace transport_guide {
 
 namespace json_reader {
 
-static void ParseAndInsertColor(svg::Color& empty_color, const json::Node& color_node){
+static svg::Color ParseColor(const json::Node& color_node){
     if (color_node.IsString()){
-        empty_color = (color_node.AsString());
+        return color_node.AsString();
     } else {
         json::Array color_array = color_node.AsArray();
         if (color_array.size() == 3){
-            empty_color = (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
+            return (svg::Rgb(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt()));
         } else {
-            empty_color = (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
+            return (svg::Rgba(color_array[0].AsInt(), color_array[1].AsInt(), color_array[2].AsInt(), color_array[3].AsDouble()));
         }
     }    
 }     
@@ -36,14 +36,14 @@ map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settin
     settings.stop_label_offset = svg::Point(offset_array[0].AsDouble(), offset_array[1].AsDouble());
 
     const auto& color_node = render_settings.at("underlayer_color");
-    ParseAndInsertColor(settings.underlayer_color, color_node);
+    settings.underlayer_color = ParseColor(color_node);
 
     settings.underlayer_width = render_settings.at("underlayer_width").AsDouble();
 
     const json::Array& palette_colors = render_settings.at("color_palette").AsArray();
     settings.color_palette.resize(palette_colors.size());
     for (size_t i = 0; i < palette_colors.size(); i++){
-        ParseAndInsertColor(settings.color_palette[i], palette_colors[i]);
+        settings.color_palette[i] = ParseColor(palette_colors[i]);
     }
     return settings;
 }
