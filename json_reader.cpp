@@ -160,6 +160,7 @@ void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& bui
         const auto& route_edges = result->route_edges;
         const double time = result->overall_time;
         builder.StartDict()
+               .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
                .Key("items")
                     .StartArray();
                     for (const router::EdgeInfo* edge : route_edges){
