@@ -55,7 +55,7 @@ namespace info {
             if (!is_cycled){
                 updateBackRoute();
             }
-            if (stops.size() != 1){
+            if (stops.size() > 1){
                 updateCurvature();
             }
         }
