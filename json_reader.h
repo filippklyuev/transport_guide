@@ -27,6 +27,8 @@ enum class QueryType {
     ROUTE
 };
 
+namespace json_reader {
+
 struct ParsedStopQuery  {
     std::string_view name;
     geo::Coordinates coordinates = {};
@@ -39,12 +41,6 @@ struct ParsedBusQuery {
     std::vector<std::string_view> stops_on_route;
 };              
 
-namespace json_reader {
-
-using DistanceMap = std::unordered_map<std::string_view, int>;
-
-namespace parser {
-
 void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
 ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
@@ -55,40 +51,38 @@ RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings settings, RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings&& routing_settings) :
         catalogue_(catalogue),
-        settings_(settings),
-        routing_settings_(routing_settings)
+        settings_(std::move(settings)),
+        routing_settings_(std::move(routing_settings))
     {}
 
-    json::Document parseStatArray(const json::Array& requests_vector);
+    json::Document parseStatArray(const json::Array& requests_vector) const;
 
 private:
     std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue& catalogue_;
-    map_renderer::RenderSettings settings_;
-    RoutingSettings routing_settings_;
+    const map_renderer::RenderSettings settings_;
+    const RoutingSettings routing_settings_;
 
-    void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
+    void parseSingleStatRequest(const json::Dict& request, json::Builder& builder) const;
 
-    void updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info);
+    svg::Document getSvgDoc() const;
 
-    void updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info);
+    QueryType defineRequestType(std::string_view type) const;
 
-    void updateResultWithMap(json::Builder& builder);
+    bool isValidRequest(const json::Dict& request, QueryType type) const;
 
-    json::Node getMapAsNode();
+    void parseStopRequest(const json::Dict& request, json::Builder& builder) const;
 
-    QueryType defineRequestType(std::string_view type);
+    void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
 
-    bool isValidRequest(const json::Dict& request, QueryType type);
+    void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 
     void updateResultWithRoute(json::Builder& builder, const std::string& from, const std::string& to);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
-
-} // namespace parser
 
 } // namespace json_reader
 

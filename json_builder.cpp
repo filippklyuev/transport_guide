@@ -2,7 +2,6 @@
 
 using namespace json;
 
-
 ValueDictContext DictItemContext::Key(std::string key){
 	builder_.Key(std::move(key));
 	return ValueDictContext(builder_);
@@ -12,45 +11,48 @@ Builder& DictItemContext::EndDict(){
 	return builder_.EndDict();
 }
 
-
 ValueContext ValueContext::Value(Node value){
 	builder_.Value(std::move(value));
 	return ValueContext(builder_);
 }
+
 ArrayItemContext ValueContext::StartArray(){
 	return builder_.StartArray();
 }
+
 DictItemContext ValueContext::StartDict(){
 	return builder_.StartDict();
 }
-
 
 ArrayItemContext ArrayItemContext::Value(Node value){
 	builder_.Value(std::move(value));
 	return ArrayItemContext(builder_);
 }
+
 ArrayItemContext ArrayItemContext::StartArray(){
 	return builder_.StartArray();
 }
+
 DictItemContext ArrayItemContext::StartDict(){
 	return builder_.StartDict();
 }
+
 Builder& ArrayItemContext::EndArray(){
 	return builder_.EndArray();
 }
-
 
 DictItemContext ValueDictContext::Value(Node value){
 	builder_.Value(std::move(value));
 	return DictItemContext(builder_);
 }
+
 ArrayItemContext ValueDictContext::StartArray(){
 	return builder_.StartArray();
 }
+
 DictItemContext ValueDictContext::StartDict(){
 	return builder_.StartDict();
 }
-
 
 DictItemContext Builder::StartDict(){
 	checkDocumentCompletion("Dict");
@@ -65,7 +67,7 @@ ArrayItemContext Builder::StartArray(){
 }
 
 ValueDictContext Builder::Key(std::string key){
-	checkDocumentCompletion("EndArray");
+	checkDocumentCompletion("Key");
 	if (!(nodes_stack_.back()->IsDict())){
 		throw std::logic_error("Вызов Key не при открытом словаре");
 	}
