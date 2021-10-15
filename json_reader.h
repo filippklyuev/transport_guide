@@ -51,25 +51,26 @@ public:
         settings_(std::move(settings))
     {}
 
-    json::Document parseStatArray(const json::Array& requests_vector);
+    json::Document parseStatArray(const json::Array& requests_vector) const;
 
 private:
     const TransportCatalogue& catalogue_;
-    map_renderer::RenderSettings settings_;
+    const map_renderer::RenderSettings settings_;
 
-    void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
+    void parseSingleStatRequest(const json::Dict& request, json::Builder& builder) const;
 
-    void updateResultWithBusInfo(json::Builder& builder, const info::Bus& bus_info);
+    svg::Document getSvgDoc() const;
 
-    void updateResultWithStopInfo(json::Builder& builder, const info::Stop& stop_info);
+    QueryType defineRequestType(std::string_view type) const;
 
-    void updateResultWithMap(json::Builder& builder);
+    bool isValidRequest(const json::Dict& request, QueryType type) const;
 
-    svg::Document getSvgDoc();
+    void parseStopRequest(const json::Dict& request, json::Builder& builder) const;
 
-    QueryType defineRequestType(std::string_view type);
+    void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
 
-    bool isValidRequest(const json::Dict& request, QueryType type);
+    void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
+
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
