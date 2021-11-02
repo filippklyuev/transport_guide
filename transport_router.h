@@ -18,8 +18,8 @@
 namespace transport_guide {
 
 struct RoutingSettings {
-    int bus_wait_time;
-    double bus_velocity;
+    int bus_wait_time = 0;
+    double bus_velocity = 0.0;
 };
 
 namespace router {
@@ -32,7 +32,7 @@ using EdgeId = size_t;
 
 
 struct VertexInfo {
-	VertexId id;
+	VertexId id = 0;
 	const info::Stop* stop_info;
 };
 
@@ -43,14 +43,14 @@ struct Route {
 
 struct EdgeInfo {
 	std::string_view bus_name;
-	int span;
-	double weight;
+	int span = 0;
+	double weight = 0.0;
 	std::string_view from_stop;
 	std::string_view to_stop;
 };
 
 struct RouteInfo {
-	double overall_time;
+	double overall_time = 0.0;
 	std::vector<const EdgeInfo*> route_edges;
 };
 
@@ -76,8 +76,8 @@ public:
 
 private:
 	const TransportCatalogue& catalogue_;
-	double wait_weight_;
-	double bus_velocity_;
+	double wait_weight_ = 0.0;
+	double bus_velocity_ - 0.0;
 	std::unique_ptr<Graph> graph_;
 	std::unique_ptr<Router> router_;
 
@@ -94,10 +94,10 @@ private:
 			distance = 0;		
 		}
 	
-		const double wait_weight_;
-		double weight;
-		int span;
-		int distance;
+		const double wait_weight_ = 0.0;
+		double weight = 0.0;
+		int span = 0;
+		int distance = 0;
 	};	
 
 	std::unordered_map<VertexId, VertexInfo> vertices_info_;
