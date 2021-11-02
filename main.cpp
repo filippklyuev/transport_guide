@@ -13,7 +13,6 @@ void Test(){
     auto render_settings = transport_guide::json_reader::parseRenderSettings(all_requests.at("render_settings").AsDict());
     auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
     transport_guide::json_reader::StatParser stat_parser(catalogue, std::move(render_settings), routing_settings);
-    transport_guide::json_reader::updateCatalogue(all_requests.at("base_requests").AsArray(),  catalogue);
     json::Document result_to_print(stat_parser.parseStatArray(all_requests.at("stat_requests").AsArray()));
     json::Print(result_to_print, std::cout);    
 }
