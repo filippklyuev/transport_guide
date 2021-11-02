@@ -4,22 +4,26 @@ namespace transport_guide {
 
 namespace router {
 
-MapOfRoutes TransportRouter::assignVerticesGetRoutes(){
+void TransportRouter::assignVertices(){
 	size_t vertices_count = 0;
+	for (const auto& [bus_name, bus_info] : catalogue_.GetBusesMap()){
+		for (const info::Stop* stop : bus_info.stops){
+			if (stops_info_.count(stop->name) == 0){
+				vertices_info_.emplace(vertices_count, VertexInfo({vertices_count, stop}));
+				const VertexInfo* info_ptr = &(vertices_info_.at(vertices_count));
+				stops_info_.emplace(stop->name, info_ptr);
+				vertices_count += 1;
+			}
+		}
+	}	
+}
+
+MapOfRoutes TransportRouter::getRoutes() const {
 	MapOfRoutes routes;
 	for (const auto& [bus_name, bus_info] : catalogue_.GetBusesMap()){
 		std::vector<const VertexInfo*> route;
 		for (const info::Stop* stop : bus_info.stops){
-			const VertexInfo* info_ptr;
-			if (stops_info_.count(stop->name) == 0){
-				vertices_info_.emplace(vertices_count, VertexInfo({vertices_count, stop}));
-				info_ptr = &(vertices_info_.at(vertices_count));
-				stops_info_.emplace(stop->name, info_ptr);
-				vertices_count += 1;
-			} else {
-				info_ptr = stops_info_.at(stop->name);
-			}
-			route.push_back(info_ptr);
+			route.push_back(stops_info_.at(stop->name));
 		}
 		routes.emplace(bus_name, Route{bus_info.is_cycled, std::move(route)});
 	}

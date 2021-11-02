@@ -64,7 +64,8 @@ public:
 		, wait_weight_(routing_settings.bus_wait_time)
 		, bus_velocity_(routing_settings.bus_velocity)
 		{
-			MapOfRoutes routes = assignVerticesGetRoutes();
+			assignVertices();
+			MapOfRoutes routes = getRoutes();
 			graph_ = std::make_unique<Graph>(vertices_info_.size());
 			fillGraphWithEdges(std::move(routes));
 			router_ = std::make_unique<Router>(*graph_);
@@ -77,7 +78,7 @@ public:
 private:
 	const TransportCatalogue& catalogue_;
 	double wait_weight_ = 0.0;
-	double bus_velocity_ - 0.0;
+	double bus_velocity_ = 0.0;
 	std::unique_ptr<Graph> graph_;
 	std::unique_ptr<Router> router_;
 
@@ -106,7 +107,11 @@ private:
 
 	void updateRouteDetails(int distance_between_adjacent_stops, TransportRouter::RouteDetails& route_details) const;
 
-	MapOfRoutes assignVerticesGetRoutes();
+	// MapOfRoutes assignVerticesGetRoutes();
+
+	void assignVertices();
+
+	MapOfRoutes getRoutes() const ;
 
 	void connectVertexToReachableNoTransfer(const Route& route_info, const int from_position, std::string_view bus_name);
 
