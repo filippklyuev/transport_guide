@@ -5,14 +5,12 @@ namespace transport_guide {
 namespace router {
 
 void TransportRouter::assignVertices(){
-	size_t vertices_count = 0;
 	for (const auto& [bus_name, bus_info] : catalogue_.GetBusesMap()){
 		for (const info::Stop* stop : bus_info.stops){
 			if (stops_info_.count(stop->name) == 0){
-				vertices_info_.emplace(vertices_count, VertexInfo({vertices_count, stop}));
-				const VertexInfo* info_ptr = &(vertices_info_.at(vertices_count));
+				vertices_info_.push_back(VertexInfo({vertices_info_.size(), stop}));
+				const VertexInfo* info_ptr = &(vertices_info_.at(vertices_info_.size() - 1));
 				stops_info_.emplace(stop->name, info_ptr);
-				vertices_count += 1;
 			}
 		}
 	}	

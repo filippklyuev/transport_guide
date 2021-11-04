@@ -64,6 +64,7 @@ public:
 		, wait_weight_(routing_settings.bus_wait_time)
 		, bus_velocity_(routing_settings.bus_velocity)
 		{
+			vertices_info_.reserve(catalogue.GetStopsSet().size());
 			assignVertices();
 			MapOfRoutes routes = getRoutes();
 			graph_ = std::make_unique<Graph>(vertices_info_.size());
@@ -101,13 +102,11 @@ private:
 		int distance = 0;
 	};	
 
-	std::unordered_map<VertexId, VertexInfo> vertices_info_;
+	std::vector<VertexInfo> vertices_info_;
 	std::unordered_map<std::string_view,const VertexInfo*> stops_info_;
 	std::unordered_map<EdgeId, EdgeInfo> edges_info_;
 
 	void updateRouteDetails(int distance_between_adjacent_stops, TransportRouter::RouteDetails& route_details) const;
-
-	// MapOfRoutes assignVerticesGetRoutes();
 
 	void assignVertices();
 
