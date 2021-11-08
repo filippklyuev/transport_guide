@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <functional>
 #include <optional>
 #include <map>
 #include <memory>
@@ -83,30 +84,33 @@ private:
 	std::unique_ptr<Graph> graph_;
 	std::unique_ptr<Router> router_;
 
-	struct RouteDetails {
-		explicit RouteDetails(double wait_weight)
-			: wait_weight_(wait_weight)
-		{
-			Reset();
-		}
-	
-		void Reset(){
-			weight = wait_weight_;
-			span = 0;
-			distance = 0;		
-		}
-	
-		const double wait_weight_ = 0.0;
-		double weight = 0.0;
-		int span = 0;
-		int distance = 0;
-	};	
-
 	std::vector<VertexInfo> vertices_info_;
 	std::unordered_map<std::string_view,const VertexInfo*> stops_info_;
 	std::unordered_map<EdgeId, EdgeInfo> edges_info_;
 
-	void updateRouteDetails(int distance_between_adjacent_stops, TransportRouter::RouteDetails& route_details) const;
+
+	template<typename O>
+	void processOneDirection(std::vector<const VertexInfo*> vertex_vector,const int from_pos, const int lim
+													,std::string_view bus_name, O op){
+		int distance = 0;
+		double weight = wait_weight_;
+		int span = 0;
+		
+		const VertexInfo* from = vertex_vector[from_pos];
+	
+		int i = from_pos;
+		for (op(i); i != lim; op(i)){
+			const VertexInfo* to = vertex_vector[i];
+			int distance_between_adjacent_stops = getDistance(vertex_vector[i < from_pos ? i + 1 : i - 1]->stop_info, to->stop_info);
+			distance += distance_between_adjacent_stops;
+			weight += calculateWeight(distance_between_adjacent_stops);
+			span += 1;
+			if (from != to){
+				edges_info_.emplace(graph_->AddEdge({from->id, to->id, weight})
+						, EdgeInfo{bus_name, span, weight, from->stop_info->name, to->stop_info->name});
+			}
+		}
+	}
 
 	void assignVertices();
 
