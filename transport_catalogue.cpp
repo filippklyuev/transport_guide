@@ -18,7 +18,7 @@ std::string_view TransportCatalogue::InsertBusName(std::string_view bus_name){
 
 void TransportCatalogue::AddStop(std::string_view temp_stop_name, geo::Coordinates coords, DistanceMap&& distance_map){
 	std::string_view stop_name = InsertStopName(temp_stop_name);
-	GetStopsMap().emplace(stop_name, info::Stop(stop_name, coords, InsertSvsAndGetNewMap(std::move(distance_map))));
+	GetStopsMap().emplace(stop_name, info::Stop(stop_name, coords, InsertSvsAndGetNewMap(std::move(distance_map)), GetStopsMap().size()));
 
 }
 
@@ -30,7 +30,7 @@ void TransportCatalogue::updatePassingBusInStops(const info::Bus& bus_info){
 
 void TransportCatalogue::AddRoute(std::string_view bus_name_temp, bool is_cycled, std::vector<std::string_view>&& stops_on_route){
 	std::string_view bus_name = InsertBusName(bus_name_temp);
-	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled, stops_map_ ,std::move(stops_on_route)));
+	GetBusesMap().emplace(bus_name, info::Bus(bus_name, is_cycled, stops_map_ ,std::move(stops_on_route), GetBusesMap().size()));
 	updatePassingBusInStops(GetBusesMap().at(bus_name));
 }
 

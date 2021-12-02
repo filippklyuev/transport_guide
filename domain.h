@@ -25,16 +25,18 @@ namespace info {
 
     struct Stop {
 
-        Stop(std::string_view name_, geo::Coordinates coordinates_, DistanceMap distance_to_stops_)
+        Stop(std::string_view name_, geo::Coordinates coordinates_, DistanceMap distance_to_stops_, int id)
             : name(name_)
             , coordinates(coordinates_)
             , distance_to_stops(distance_to_stops_)
+            , id_(id)
             {}
 
         std::string_view name = {};
         geo::Coordinates coordinates = {};
         DistanceMap distance_to_stops = {};
         std::set<const Bus*, InfoPtrComparator<Bus>> passing_buses = {};
+        int id_ = 0;
 
         std::string_view getName() const;
     };
@@ -42,9 +44,10 @@ namespace info {
     using StopMap = std::map<std::string_view, info::Stop>;
 
     struct Bus {
-        Bus(std::string_view name_, bool is_cycled_, const StopMap& stops_map, std::vector<std::string_view> stops_on_route)
+        Bus(std::string_view name_, bool is_cycled_, const StopMap& stops_map, std::vector<std::string_view> stops_on_route, int id)
             : name(name_)
             , is_cycled(is_cycled_)
+            , id_(id)
         {
             for (auto stop : stops_on_route){
                 stops.push_back(&(stops_map.at(stop)));
@@ -67,6 +70,7 @@ namespace info {
         double geo_route_length = 0.0;
         double curvature = 0.0;
         int64_t factial_route_length = 0;
+        int id_ = 0;
 
         const std::vector<const Stop*>& getStopsOnRoute() const;
 
