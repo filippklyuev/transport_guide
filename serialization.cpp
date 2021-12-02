@@ -3,16 +3,12 @@
 namespace transport_guide {	
 
 void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue_proto::TransportCatalogue& proto_catalogue){
-	// proto_catalogue.stop_name.Resize(stops_map.size());
-	//google::protobuf::RepeatedPtrField<catalogue_proto::Stop>* stops_ptr = proto_catalogue.mutable_stop();
-	////proto_catalogue.mutable_stop()->Resize(stop_map.size(), std::nullopt);
-	//stops_ptr->Resize(stop_map.size());
-	// proto_catalogue.stop.Resize(stop_map.size());
-	//google::protobuf::RepeatedPtrField<catalogue_proto::Stop*> stops_temp;
+
 	proto_catalogue.mutable_stop()->Reserve(stop_map.size());
+	for (int i = 0; i < stop_map.size(); i++){
+		proto_catalogue.add_stop(); // Бред, но у protobuf::RepeatedPtrField не нашел адекватного способа сделать resize :(
+	}
 	for (const auto& [name, info] : stop_map){
-		// proto_catalogue.set_stop_name(info.id_, std::string(name));
-		// catalogue_proto::Stop* stop = mutable_stops_temp(info.id_);
 		catalogue_proto::Stop* stop = proto_catalogue.mutable_stop(info.id_);
 		stop->set_name(std::string(name));
 		stop->set_lattitude(info.coordinates.lat);
@@ -21,31 +17,34 @@ void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue
 			stop->add_bus_index(bus->id_);
 		}
 	}
-	// proto_catalogue.mutable_stop()->Swap(&stops_temp);
 }
 
-// void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_proto::TransportCatalogue& proto_catalogue){
-// 	// google::protobuf::RepeatedPtrField<catalogue_proto::Bus>* buses_ptr = proto_catalogue.mutable_bus();
-// 	//buses_ptr->Resize(bus_map.size());
-// 	proto_catalogue.mutable_bus()->Resize(bus_map.size());	
-// 	// proto_catalogue.bus.Resize(bus_map.size());
-// 	for (const auto& [name, info] : bus_map){
-// 		catalogue_proto::Bus* bus = proto_catalogue.mutable_bus(info.id_);
-// 		bus->set_name(std::string(name));
-// 		bus->set_factual_route_length(info.factial_route_length);
-// 		bus->set_geo_route_length(info.geo_route_length);
-// 		bus->set_curvature(info.curvature);
-// 		bus->set_unique_stops_count(info.unique_stops.size());
-// 		for (const transport_guide::info::Stop* stop : info.stops){
-// 			bus->add_stop_index(stop->id_);
-// 		}
-// 	}
-// }
+void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_proto::TransportCatalogue& proto_catalogue){
+	proto_catalogue.mutable_bus()->Reserve(bus_map.size());
+	for (int i = 0; i < bus_map.size(); i++){
+		proto_catalogue.add_bus();
+	}	
+	for (const auto& [name, info] : bus_map){
+		catalogue_proto::Bus* bus = proto_catalogue.mutable_bus(info.id_);
+		bus->set_name(std::string(name));
+		bus->set_factual_route_length(info.factial_route_length);
+		bus->set_geo_route_length(info.geo_route_length);
+		bus->set_curvature(info.curvature);
+		bus->set_unique_stops_count(info.unique_stops.size());
+		for (const transport_guide::info::Stop* stop : info.stops){
+			bus->add_stop_index(stop->id_);
+		}
+	}
+}
 
 catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue){
 	catalogue_proto::TransportCatalogue proto_catalogue;
 	updateProtoWithStops(catalogue.GetStopsMap(), proto_catalogue);
-	// updateProtoWithBuses(catalogue.GetBusesMap(), proto_catalogue);
+	updateProtoWithBuses(catalogue.GetBusesMap(), proto_catalogue);
+	// for (const auto stop : proto_catalogue.stop()){
+	// 	std::cout << stop.name() <<'\n';
+	// }
+	// while (1){}
 	return proto_catalogue;
 }
 

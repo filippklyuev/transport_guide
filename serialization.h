@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
+#include <iostream>
 #include <optional>
 #include "transport_catalogue.h"
 #include "domain.h"
