@@ -8,8 +8,6 @@
 #include "request_handler.h"
 #include "serialization.h"
 
-#include <transport_catalogue.pb.h>
-
 void TestOld(){
     json::Document input_json = json::Load(std::cin);
     transport_guide::TransportCatalogue catalogue;
@@ -43,7 +41,7 @@ int main(int argc, char* argv[]) {
         transport_guide::json_reader::updateCatalogue(all_requests.at("base_requests").AsArray(),  catalogue);
         auto render_settings = transport_guide::json_reader::parseRenderSettings(all_requests.at("render_settings").AsDict());
         auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
-        string filename = all_requests.at("serialization_settings").AsDict().at("file");
+        std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
         transport_guide::SerializeTransportCatalogue(filename, catalogue);      
     } else if (mode == "process_requests"sv) {
 

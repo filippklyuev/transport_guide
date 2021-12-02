@@ -20,6 +20,6 @@ message Stop {
 }
 
 message TransportCatalogue {
-	repeated Bus bus = 3;
-	repeated Stop stop = 4;
+	repeated Bus bus = 1;
+	repeated Stop stop = 2;
 }
