@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package catalogue_proto;
+
+message Bus {
+	string name = 1;
+	double factual_route_length = 2;
+	double geo_route_length = 3;
+	double curvature = 4;
+	int32 unique_stops_count = 5;
+	repeated int32 stop_index = 6;
+	
+}
+
+message Stop {
+	string name = 1;
+	double lattitude = 2;
+	double longtitude = 3;
+	repeated int32 bus_index = 4;
+}
+
+message TransportCatalogue {
+	repeated Bus bus = 3;
+	repeated Stop stop = 4;
+}
