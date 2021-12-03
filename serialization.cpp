@@ -48,11 +48,45 @@ catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogu
 	return proto_catalogue;
 }
 
-void SerializeTransportCatalogue(const std::filesystem::path filename, 
+void SerializeTransportCatalogue(const std::filesystem::path& filename, 
 									const TransportCatalogue& catalogue){
 	catalogue_proto::TransportCatalogue proto_catalogue = createProtoCatalogue(catalogue);
 	std::ofstream ofs(filename, std::ios::binary);
 	proto_catalogue.SerializeToOstream(&ofs);
+}
+
+TransportCatalogue DeserializeTransportCatalogue(const std::filesystem::path& filename){
+	std::ifstream ifs(filename);
+	catalogue_proto::TransportCatalogue proto_catalogue;
+	TransportCatalogue catalogue;
+	if (!proto_catalogue.ParseFromInput(&ifs)){
+		return catalogue;
+	}
+	parseStopsFromProto(proto_catalogue, catalogue);
+	parseBusesFromProto(proto_catalogue, catalogue);
+	return catalogue;
+}
+
+void parseStopsFromProto(const catalogue_proto::TransportCatalogue& proto_catalogue, TransportCatalogue& catalogue){
+	for (int i = 0; i < proto_catalogue.stop_size(); i++){
+		const catalogue_proto::Stop& stop = proto_catalogue.stop(i);
+		catalogue.AddStop(stop.get_name(), geo::Coordinates{stop.get_lattitude(), stop.get_longtitude()}, {});
+	}
+}
+
+void parseBusesFromProto(const catalogue_proto::TransportCatalogue& proto_catalogue, TransportCatalogue& catalogue){
+	for (int i = 0; i < proto_catalogue.bus_size(); i++){
+		const catalogue_proto::Bus& bus = proto_catalogue.bus(i);
+		catalogue.AddRoute(bus.get_name(), false, getStopsVector(bus, proto_catalogue));
+	}
+}
+
+std::vector<std::string_view> getStopsVector(const catalogue_proto::Bus& bus, const catalogue_proto::TransportCatalogue& proto_catalogue){
+	std::vector<std::string_view> stop_vector;
+	for (int i = 0; i < bus.stop_index_size(); i++){
+		stop_vector.push_back(proto_catalogue.stop(bus.stop_index(i)).get_name());
+	}
+	return stop_vector;
 }
 
 } // namespace transport_guide

@@ -20,4 +20,12 @@ void SerializeTransportCatalogue(const std::filesystem::path filename,
 
 catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue);
 
+TransportCatalogue DeserializeTransportCatalogue(const std::filesystem::path& filename);
+
+void parseStopsFromProto(const catalogue_proto::TransportCatalogue& proto_catalogue, TransportCatalogue& catalogue);
+
+void parseBusesFromProto(const catalogue_proto::TransportCatalogue& proto_catalogue, TransportCatalogue& catalogue);
+
+std::vector<std::string_view> getStopsVector(const catalogue_proto::Bus& bus,const catalogue_proto::TransportCatalogue& proto_catalogue);
+
 } // namespace transport_guide

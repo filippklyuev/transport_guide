@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string_view>
+#include <transport_catalogue.pb.h>
 #include "json.h"
 #include "json_reader.h"
 #include "transport_router.h"
@@ -44,7 +45,15 @@ int main(int argc, char* argv[]) {
         std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
         transport_guide::SerializeTransportCatalogue(filename, catalogue);      
     } else if (mode == "process_requests"sv) {
-
+        std::filesystem::path filename;
+        std::getline(std::cin, filename);
+        json::Document output_json = json::Load(std::cin);
+        const json::Dict& output_requests = input_json.GetRoot().AsDict();
+        assert(filename == std::filesystem::path(output_requests.at("serialization_settings").AsDict().at("file").AsString()));
+        transport_guide::TransportCatalogue catalogue = transport_guide::DeserializeTransportCatalogue(filename);
+        transport_guide::json_reader::StatParser stat_parser(catalogue, {}, {});
+        json::Document result_to_print(stat_parser.parseStatArray(output_requests.at("stat_requests").AsArray()));
+        json::Print(result_to_print, std::cout);
         // process requests here
 
     } else {
