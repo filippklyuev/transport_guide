@@ -25,6 +25,9 @@ namespace info {
 
     struct Stop {
 
+        Stop()
+        {}
+
         Stop(std::string_view name_, geo::Coordinates coordinates_, DistanceMap distance_to_stops_, int id)
             : name(name_)
             , coordinates(coordinates_)
@@ -44,6 +47,9 @@ namespace info {
     using StopMap = std::map<std::string_view, info::Stop>;
 
     struct Bus {
+        Bus()
+        {}
+
         Bus(std::string_view name_, bool is_cycled_, const StopMap& stops_map, std::vector<std::string_view> stops_on_route, int id)
             : name(name_)
             , is_cycled(is_cycled_)
@@ -66,7 +72,7 @@ namespace info {
         std::string_view name;
         std::unordered_set<std::string_view> unique_stops = {};
         std::vector<const Stop*> stops = {};
-        bool is_cycled;
+        bool is_cycled = false;
         double geo_route_length = 0.0;
         double curvature = 0.0;
         int64_t factial_route_length = 0;

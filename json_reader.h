@@ -9,6 +9,7 @@
 #include <utility>
 #include <unordered_map>
 
+#include <transport_catalogue.pb.h>
 #include "domain.h"
 #include "json.h"
 #include "json_builder.h"
@@ -51,17 +52,22 @@ RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue* catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
         catalogue_(catalogue),
         settings_(std::move(settings)),
         routing_settings_(routing_settings)
+    {}
+
+    StatParser(const catalogue_proto::TransportCatalogue* proto_catalogue)
+        : proto_catalogue_(proto_catalogue)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
     std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
-    const TransportCatalogue& catalogue_;
+    const TransportCatalogue* catalogue_ = nullptr;
+    const catalogue_proto::TransportCatalogue* proto_catalogue_ = nullptr;
     const map_renderer::RenderSettings settings_;
     const RoutingSettings routing_settings_;
 
@@ -75,7 +81,11 @@ private:
 
     void parseStopRequest(const json::Dict& request, json::Builder& builder) const;
 
+    void parseStopRequestProto(const json::Dict& request, json::Builder& builder) const;
+
     void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
+
+    void parseBusRequestProto(const json::Dict& request, json::Builder& builder) const;
 
     void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 

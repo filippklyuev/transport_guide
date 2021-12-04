@@ -9,7 +9,7 @@ message Bus {
 	double curvature = 4;
 	int32 unique_stops_count = 5;
 	repeated int32 stop_index = 6;
-	
+	bool is_cycled = 7;	
 }
 
 message Stop {
@@ -20,6 +20,8 @@ message Stop {
 }
 
 message TransportCatalogue {
-	repeated Bus bus = 1;
-	repeated Stop stop = 2;
+	map<string, uint32> stop_index = 1;
+	map<string, uint32> bus_index = 2;
+	repeated Bus bus = 3;
+	repeated Stop stop = 4;
 }
