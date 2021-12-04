@@ -120,9 +120,11 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
 }
 
  QueryType StatParser::defineRequestType(std::string_view type) const {
+    // std::cout << "defineRequestType " << type << '\n';  
     if (type == "Stop"){
         return QueryType::STOP;
     } else if (type == "Bus"){
+        // std::cout << "YAY\n";
         return QueryType::BUS;
     } else if (type == "Map"){
         return QueryType::MAP;
@@ -203,11 +205,15 @@ void StatParser::parseStopRequest(const json::Dict& request, json::Builder& buil
 
 void StatParser::parseStopRequestProto(const json::Dict& request, json::Builder& builder) const {
     std::string name = request.at("name").AsString();
+    // std::cout << "Exit\n";
     const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(proto_catalogue_->stop_index().at(name));
+    // std::cout << "Passed\n";
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("buses").StartArray();
-           for (int i = 0; stop_info.bus_index_size(); i++){
+           // std::cout << stop_info.bus_index_size() << " size of bus_array\n";
+           for (int i = 0; i < stop_info.bus_index_size(); i++){
+                        // std::cout << i << '\n';
                         builder.Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(stop_info.bus_index(i)).name())));
            }
            builder.EndArray()
@@ -254,16 +260,19 @@ void StatParser::parseMapRequest(const json::Dict& request, json::Builder& build
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
     QueryType request_type = defineRequestType(request.at("type").AsString());
-    if (!isValidRequest(request, request_type)){
-        HandleError(request, builder);
-        return;   
+    if (catalogue_ != nullptr){
+        if (!isValidRequest(request, request_type)){
+            HandleError(request, builder);
+            return;   
+        }
     }
     switch (request_type){
-        case QueryType::STOP : {            
+        case QueryType::STOP : {
+       
             catalogue_ != nullptr ? parseStopRequest(request, builder) : parseStopRequestProto(request, builder);
             break;
         }
-        case QueryType::BUS : {
+        case QueryType::BUS : {     
             catalogue_ != nullptr ? parseBusRequest(request, builder) : parseBusRequestProto(request, builder);
             break;
         }
@@ -281,8 +290,11 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
 json::Document StatParser::parseStatArray(const json::Array& requests_vector) {
     json::Builder builder;
     builder.StartArray();
+    // int i =0;
         for (const auto& request : requests_vector){
+            // std::cout << i << '\n';
             parseSingleStatRequest(request.AsDict(), builder);
+            // i++;
         }
         builder.EndArray();
     return json::Document(builder.Build());

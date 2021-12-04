@@ -45,11 +45,12 @@ int main(int argc, char* argv[]) {
         std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
         transport_guide::SerializeTransportCatalogue(filename, catalogue);      
     } else if (mode == "process_requests"sv) {
-        std::string filename;
-        std::getline(std::cin, filename);
+        // std::string filename;
+        // std::getline(std::cin, filename);
         json::Document output_json = json::Load(std::cin);
         const json::Dict& output_requests = output_json.GetRoot().AsDict();
-        assert(filename == std::filesystem::path(output_requests.at("serialization_settings").AsDict().at("file").AsString()));
+        
+        std::string filename = output_requests.at("serialization_settings").AsDict().at("file").AsString();
         // json::Document result_to_print = DeserializeAndProcessOutputRequests(filename, output_requests);
         catalogue_proto::TransportCatalogue proto_catalogue = transport_guide::DeserializeCatalogue(filename);
         transport_guide::json_reader::StatParser stat_parser(&proto_catalogue);
