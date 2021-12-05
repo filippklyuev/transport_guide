@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
         transport_guide::TransportCatalogue catalogue;
         const json::Dict& all_requests = input_json.GetRoot().AsDict();
         transport_guide::json_reader::updateCatalogue(all_requests.at("base_requests").AsArray(),  catalogue);
-        auto render_settings = transport_guide::json_reader::parseRenderSettings(all_requests.at("render_settings").AsDict());
-        auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
+        // auto render_settings = transport_guide::json_reader::parseRenderSettings(all_requests.at("render_settings").AsDict());
+        // auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
         std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
         transport_guide::SerializeTransportCatalogue(filename, catalogue);      
     } else if (mode == "process_requests"sv) {
