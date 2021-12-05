@@ -14,7 +14,7 @@ svg::Document MapRenderer::GetSvgDocument(){
     return document;
 }
 
-void MapRenderer::makeScalerOfCatalogue(){
+void MapRenderer::makeScalerOfCatalogue(){ // RENAME!!!!!!!!!!
     bool begin = true;
     for (const auto& [bus_name, info] : catalogue_->GetBusesMap()){
         for (const auto& stop : info.stops){
@@ -34,20 +34,20 @@ void MapRenderer::makeScalerOfCatalogue(){
                 else if (crds.lng > scaler_.max_lon) { scaler_.max_lon = crds.lng; }
         }
     }
-    double width_zoom_coef = 0.0; 
-    double height_zoom_coef = 0.0;
-    if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
-        width_zoom_coef = (settings_.width - 2 * settings_.padding) / (scaler_.max_lon - scaler_.min_lon);
-    }
-    if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
-        height_zoom_coef = (settings_.height - 2 * settings_.padding) / (scaler_.max_lat - scaler_.min_lat);
-    }
-    if (width_zoom_coef < height_zoom_coef){
-        scaler_.zoom_coef = width_zoom_coef;
-    } else {
-        scaler_.zoom_coef = height_zoom_coef;
-    }
-    scaler_.padding = settings_.padding;        
+    // double width_zoom_coef = 0.0; 
+    // double height_zoom_coef = 0.0;
+    // if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
+    //     width_zoom_coef = (settings_.width - 2 * settings_.padding) / (scaler_.max_lon - scaler_.min_lon);
+    // }
+    // if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
+    //     height_zoom_coef = (settings_.height - 2 * settings_.padding) / (scaler_.max_lat - scaler_.min_lat);
+    // }
+    // if (width_zoom_coef < height_zoom_coef){
+    //     scaler_.zoom_coef = width_zoom_coef;
+    // } else {
+    //     scaler_.zoom_coef = height_zoom_coef;
+    // }
+    // scaler_.padding = settings_.padding;        
 }
 
 //REFACTOR TO ELIMINATE DOUBLE CODE!1111111111111111111111111
@@ -72,23 +72,24 @@ void MapRenderer::makeScalerOfProtoCatalogue(){
                 else if (crds.lng > scaler_.max_lon) { scaler_.max_lon = crds.lng; }            
         }
     }
-    double width_zoom_coef = 0.0; 
-    double height_zoom_coef = 0.0;
-    if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
-        width_zoom_coef = (proto_catalogue_->render_settings().width() - 2 * proto_catalogue_->render_settings().padding()) 
-                            / (scaler_.max_lon - scaler_.min_lon);
-    }
-    if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
-        height_zoom_coef = (proto_catalogue_->render_settings().height() - 2 * proto_catalogue_->render_settings().padding()) 
-                        / (scaler_.max_lat - scaler_.min_lat);
-    }
-    if (width_zoom_coef < height_zoom_coef){
-        scaler_.zoom_coef = width_zoom_coef;
-    } else {
-        scaler_.zoom_coef = height_zoom_coef;
-    }
-    scaler_.padding = proto_catalogue_->render_settings().padding();         
 }
+//     double width_zoom_coef = 0.0; 
+//     double height_zoom_coef = 0.0;
+//     if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
+//         width_zoom_coef = (proto_catalogue_->render_settings().width() - 2 * proto_catalogue_->render_settings().padding()) 
+//                             / (scaler_.max_lon - scaler_.min_lon);
+//     }
+//     if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
+//         height_zoom_coef = (proto_catalogue_->render_settings().height() - 2 * proto_catalogue_->render_settings().padding()) 
+//                         / (scaler_.max_lat - scaler_.min_lat);
+//     }
+//     if (width_zoom_coef < height_zoom_coef){
+//         scaler_.zoom_coef = width_zoom_coef;
+//     } else {
+//         scaler_.zoom_coef = height_zoom_coef;
+//     }
+//     scaler_.padding = proto_catalogue_->render_settings().padding();         
+// }
 
 void MapRenderer::makeScaler(){
     if (catalogue_){
@@ -96,7 +97,20 @@ void MapRenderer::makeScaler(){
     } else {
         makeScalerOfProtoCatalogue();
     }
-
+    double width_zoom_coef = 0.0; 
+    double height_zoom_coef = 0.0;
+    if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
+        width_zoom_coef = (settings_.width - 2 * settings_.padding) / (scaler_.max_lon - scaler_.min_lon);
+    }
+    if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
+        height_zoom_coef = (settings_.height - 2 * settings_.padding) / (scaler_.max_lat - scaler_.min_lat);
+    }
+    if (width_zoom_coef < height_zoom_coef){
+        scaler_.zoom_coef = width_zoom_coef;
+    } else {
+        scaler_.zoom_coef = height_zoom_coef;
+    }
+    scaler_.padding = settings_.padding;        
 }
 
 svg::Text MapRenderer::getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates){
@@ -169,11 +183,13 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
                 route.AddPoint(GetSvgPoint(geo::Coordinates(stop.lattitude(), stop.longtitude())));
             }            
         }
-        const auto& color_palette_proto = proto_catalogue_->render_settings().color_palette();
-        int palette_size = proto_catalogue_->render_settings().color_palette_size();
-        svg::Color color = getSvgColorOfProto(color_palette_proto(route_counter % size));
-        polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(color)
-            .SetStrokeWidth(proto_catalogue_->render_settings().line_width())
+        // const auto& color_palette_proto = proto_catalogue_->render_settings().color_palette();
+        // int palette_size = proto_catalogue_->render_settings().color_palette_size();
+        // svg::Color color = getSvgColorOfProto(color_palette_proto(route_counter % size));
+        // polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(color)
+        //     .SetStrokeWidth(proto_catalogue_->render_settings().line_width())
+        //     .SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
+        polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(settings_.color_palette[route_counter % settings_.color_palette.size()]).SetStrokeWidth(settings_.line_width)
             .SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
         route_counter += 1;
 
@@ -227,22 +243,18 @@ void MapRenderer::parseStopCirclesAndNamesProto(){
         svg::Circle circle;
         stop_circles_.push_back(circle.SetCenter(
             GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
-            .SetRadius(proto_catalogue_->render_settings().stop_radius())
-            .SetFillColor(svg::Color("white")));
+            .SetRadius(settings_.stop_radius).SetFillColor(svg::Color("white")));
 
         svg::Text underliner, stoptext;
         stop_names_.push_back(underliner.SetPosition(
             GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
-            .SetOffset(getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset())).
-            SetFontSize(proto_catalogue_->render_settings().stop_label_font_size()).SetFontFamily("Verdana")
-            .SetData(stop_info.name()).SetFillColor(proto_catalogue_->render_settings().underlayer_color()).
-            SetStrokeColor(getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color())).SetStrokeWidth(proto_catalogue_->render_settings().underlayer_width())
-            .SetStrokeLineCap(svg::StrokeLineCap::ROUND).
-            SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
+            .SetOffset(settings_.stop_label_offset).SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana")
+            .SetData(stop_info.name()).SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color)
+            .SetStrokeWidth(settings_.underlayer_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
 
-            stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
-            .SetOffset(getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset())).
-            SetFontSize(proto_catalogue_->render_settings().stop_label_font_size()).SetFontFamily("Verdana").SetData(stop_info.name()).SetFillColor(svg::Color("black")));
+        stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
+            .SetOffset(settings_.stop_label_offset).
+            SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana").SetData(stop_info.name()).SetFillColor(svg::Color("black")));
     }     
 }
 

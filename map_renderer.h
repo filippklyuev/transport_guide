@@ -35,7 +35,24 @@ public:
 
     MapRenderer(const catalogue_proto::TransportCatalogue* proto_catalogue) :
         proto_catalogue_(proto_catalogue)
-    {}
+    {
+        settings_.width = proto_catalogue_->render_settings().width();
+        settings_.height = proto_catalogue_->render_settings().height();
+        settings_.padding = proto_catalogue_->render_settings().padding();
+        settings_.line_width = proto_catalogue_->render_settings().line_width();
+        settings_.stop_radius = proto_catalogue_->render_settings().stop_radius();
+        settings_.bus_label_font_size = proto_catalogue_->render_settings().bus_label_font_size();
+        settings_.bus_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().bus_label_offset());
+        settings_.stop_label_font_size = proto_catalogue_->render_settings().stop_label_font_size();
+        settings_.stop_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset());
+        settings_.underlayer_color = getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color());
+        settings_.underlayer_width = proto_catalogue_->render_settings().underlayer_width();
+        for (int i = 0; i < proto_catalogue_->render_settings().color_palette_size(); i++){
+            settings_.color_palette.push_back(
+                getSvgColorOfProto(proto_catalogue_->render_settings().color_palette(i))
+            );
+        }
+    }
 
     svg::Document GetSvgDocument();
 
@@ -91,5 +108,7 @@ private:
 }; 
 
 svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color);
+
+svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto);
 
 }//namespace map_renderer
