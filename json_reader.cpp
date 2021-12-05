@@ -306,11 +306,11 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
             break;
         }
         case QueryType::MAP : {
-            parseMapRequest(request, builder);
+            // parseMapRequest(request, builder);
             break;
         }
         case QueryType::ROUTE : {
-            parseRouteRequest(request, builder);
+            // parseRouteRequest(request, builder);
             break;
         }
     }
