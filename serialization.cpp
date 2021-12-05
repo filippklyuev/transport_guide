@@ -45,10 +45,61 @@ void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_p
 	}
 }
 
-catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue){
+catalogue_proto::Color getProtoColor(const svg::Color& color){
+	catalogue_proto::Color proto_color;
+	if (std::holds_alternative<svg::Rgb>(color)){
+		catalogue_proto::RGB* rgb_proto = proto_color.mutable_rgb();
+		const svg::Rgb& rgb = std::get<svg::Rgb>(color);
+		rgb_proto->set_red(rgb.red);
+		rgb_proto->set_green(rgb.green);
+		rgb_proto->set_blue(rgb.blue);
+	} else if (std::holds_alternative<svg::Rgba>(color)){
+		catalogue_proto::RGBA* rgba_proto = proto_color.mutable_rgba();
+		const svg::Rgba& rgba = std::get<svg::Rgba>(color);
+		rgba_proto->set_red(rgba.red);
+		rgba_proto->set_green(rgba.green);
+		rgba_proto->set_blue(rgba.blue);
+		rgba_proto->set_opacity(rgba.opacity);
+	} else {
+		const std::string& str = std::get<std::string>(color);
+		proto_color.set_str(str);
+	}
+	return proto_color;
+}
+
+catalogue_proto::Point getProtoPoint(svg::Point point){
+	catalogue_proto::Point proto_point;
+	proto_point.set_x(point.x);
+	proto_point.set_y(point.y);
+	return proto_point;
+}
+
+void updateProtoWithRenderSettings(const map_renderer::RenderSettings& render_settings
+	 							, catalogue_proto::TransportCatalogue& proto_catalogue){
+	catalogue_proto::RenderSettings* settings = proto_catalogue.mutable_render_settings();
+	settings->color_pallette.Reserve(render_settings.color_palette.size());
+	settings->set_width(render_settings.width);
+	settings->set_height(render_settings.height);
+	settings->set_padding(render_settings.padding);
+	settings->set_line_width(render_settings.line_width);
+	settings->set_stop_radius(render_settings.stop_radius);
+	settings->set_bus_label_font_size(render_settings.bus_label_font_size);
+	settings->set_bus_label_offset(getProtoPoint(render_settings.bus_label_offset));
+	settings->set_stop_labe_font_size(render_settings.stop_labe_font_size);
+	settings->set_stop_label_offset(getProtoPoint(render_settings.stop_label_offset));
+	settings->set_underlayer_color(getProtoColor(render_settings.underlayer_color));
+	settings->set_underlayer_width(render_settings.underlayer_width);
+	for (int i = 0; i < render_settings.color_palette.size(); i++){
+		settings->add_color_pallete(getProtoColor(render_settings.color_palette[i]));
+	}
+}
+
+catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue
+														, const map_renderer::RenderSettings& render_settings){
 	catalogue_proto::TransportCatalogue proto_catalogue;
 	updateProtoWithStops(catalogue.GetStopsMap(), proto_catalogue);
 	updateProtoWithBuses(catalogue.GetBusesMap(), proto_catalogue);
+	updateProtoWithRenderSettings(render_settings, proto_catalogue);
 	// for (const auto stop : proto_catalogue.stop()){
 	// 	std::cout << stop.name() <<'\n';
 	// }
@@ -57,8 +108,8 @@ catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogu
 }
 
 void SerializeTransportCatalogue(const std::filesystem::path filename, 
-									const TransportCatalogue& catalogue){
-	catalogue_proto::TransportCatalogue proto_catalogue = createProtoCatalogue(catalogue);
+									const TransportCatalogue& catalogue,const map_renderer::RenderSettings& render_settings){
+	catalogue_proto::TransportCatalogue proto_catalogue = createProtoCatalogue(catalogue, render_settings);
 	std::ofstream ofs(filename, std::ios::binary);
 	proto_catalogue.SerializeToOstream(&ofs);
 }

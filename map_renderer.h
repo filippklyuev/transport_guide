@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <transport_catalogue.pb.h>
 #include "transport_catalogue.h"
 #include "geo.h"
 #include "svg.h"
@@ -27,13 +28,16 @@ struct RenderSettings {
 
 class MapRenderer {
 public:
-    MapRenderer(const transport_guide::TransportCatalogue& catalogue, RenderSettings settings) :
+    MapRenderer(const transport_guide::TransportCatalogue* catalogue, RenderSettings settings) :
         catalogue_(catalogue),
         settings_(settings)
-    {
-    }
-    svg::Document GetSvgDocument();
+    {}
 
+    MapRenderer(const catalogue_proto::TransportCatalogue* proto_catalogue) :
+        proto_catalogue_(proto_catalogue),
+    {}
+
+    svg::Document GetSvgDocument();
 
 private:
 
@@ -46,8 +50,9 @@ private:
         double padding = 0.0;
     };
 
-    const transport_guide::TransportCatalogue& catalogue_;
-    RenderSettings settings_;
+    const transport_guide::TransportCatalogue* catalogue_ = nullptr;
+    const catalogue_proto::TransportCatalogue* proto_catalogue_ = nullptr;
+    RenderSettings settings_ = {};
     ScalerStruct scaler_;
     std::vector<svg::Polyline> polylines_;
     std::vector<svg::Text> route_names_;
@@ -70,11 +75,21 @@ private:
     svg::Text getBusnameText(const std::string& bus_name, geo::Coordinates coordinates, int route_counter);
     
     void parsePolylinesAndRouteNames();
+
+    void parsePolylinesAndRouteNamesProto();
+
+    void parseStopCirclesAndNamesProto();
     
     void parseStopCirclesAndNames();
     
     svg::Point GetSvgPoint(geo::Coordinates stop_coordinates);
 
+    void makeScalerOfProtoCatalogue();
+
+    void makeScalerOfCatalogue();
+
 }; 
+
+svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color);
 
 }//namespace map_renderer

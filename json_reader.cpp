@@ -141,7 +141,11 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
 }
 
 svg::Document StatParser::getSvgDoc() const {
-    map_renderer::MapRenderer renderer(*catalogue_, settings_);
+    if (catalogue_){
+        map_renderer::MapRenderer renderer(catalogue_, settings_);
+    } else {
+        map_renderer::MapRenderer renderer(proto_catalogue_);
+    }
     return renderer.GetSvgDocument();
 }
 
@@ -306,7 +310,7 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
             break;
         }
         case QueryType::MAP : {
-            // parseMapRequest(request, builder);
+            parseMapRequest(request, builder);
             break;
         }
         case QueryType::ROUTE : {

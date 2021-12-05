@@ -20,9 +20,17 @@ void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue
 void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_proto::TransportCatalogue& proto_catalogue);
 
 void SerializeTransportCatalogue(const std::filesystem::path filename,
-									const TransportCatalogue& catalogue);
+									const TransportCatalogue& catalogue, const map_renderer::RenderSettings& render_settings);
 
-catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue);
+catalogue_proto::Color getProtoColor(const svg::Color& color);
+
+catalogue_proto::Point getProtoPoint(svg::Point point);
+
+void updateProtoWithRenderSettings(const map_renderer::RenderSettings& render_settings
+	 							, catalogue_proto::TransportCatalogue& proto_catalogue);
+
+catalogue_proto::TransportCatalogue createProtoCatalogue(const TransportCatalogue& catalogue
+														, const map_renderer::RenderSettings& render_settings);
 
 json::Document DeserializeAndProcessOutputRequests(const std::filesystem::path filename, const json::Dict& output_requests);
 
