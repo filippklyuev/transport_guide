@@ -77,20 +77,22 @@ catalogue_proto::Point getProtoPoint(svg::Point point){
 void updateProtoWithRenderSettings(const map_renderer::RenderSettings& render_settings
 	 							, catalogue_proto::TransportCatalogue& proto_catalogue){
 	catalogue_proto::RenderSettings* settings = proto_catalogue.mutable_render_settings();
-	settings->color_pallette.Reserve(render_settings.color_palette.size());
+	// settings->color_palette().Reserve(render_settings.color_palette.size());
 	settings->set_width(render_settings.width);
 	settings->set_height(render_settings.height);
 	settings->set_padding(render_settings.padding);
 	settings->set_line_width(render_settings.line_width);
 	settings->set_stop_radius(render_settings.stop_radius);
 	settings->set_bus_label_font_size(render_settings.bus_label_font_size);
-	settings->set_bus_label_offset(getProtoPoint(render_settings.bus_label_offset));
-	settings->set_stop_labe_font_size(render_settings.stop_labe_font_size);
-	settings->set_stop_label_offset(getProtoPoint(render_settings.stop_label_offset));
-	settings->set_underlayer_color(getProtoColor(render_settings.underlayer_color));
+	*settings->mutable_bus_label_offset() = getProtoPoint(render_settings.bus_label_offset);
+	settings->set_stop_label_font_size(render_settings.stop_label_font_size);
+	*settings->mutable_stop_label_offset() = getProtoPoint(render_settings.stop_label_offset);
+	*settings->mutable_underlayer_color() = getProtoColor(render_settings.underlayer_color);
 	settings->set_underlayer_width(render_settings.underlayer_width);
 	for (int i = 0; i < render_settings.color_palette.size(); i++){
-		settings->add_color_pallete(getProtoColor(render_settings.color_palette[i]));
+		settings->add_color_palette();
+		*settings->mutable_color_palette(i) = getProtoColor(render_settings.color_palette[i]);
+		// settings->add_color_pallete(getProtoColor(render_settings.color_palette[i]));
 	}
 }
 

@@ -11,6 +11,7 @@
 #include "domain.h"
 #include "json.h"
 #include "json_builder.h"
+#include "map_renderer.h"
 #include "geo.h"
 
 namespace transport_guide {

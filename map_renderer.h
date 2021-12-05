@@ -11,6 +11,7 @@
 
 namespace map_renderer {
 
+
 struct RenderSettings {
     double width = 0.0;                                                                   
     double height = 0.0;
@@ -25,6 +26,10 @@ struct RenderSettings {
     double underlayer_width = 0.0;
     std::vector<svg::Color> color_palette;
 };
+
+svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color);
+
+svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto);
 
 class MapRenderer {
 public:
@@ -106,9 +111,5 @@ private:
     void makeScalerOfCatalogue();
 
 }; 
-
-svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color);
-
-svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto);
 
 }//namespace map_renderer
