@@ -107,10 +107,18 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
 
 bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const {
     if (type == QueryType::STOP){
-        return catalogue_->IsStopListed(request.at("name").AsString());
+        if (catalogue_){
+            return catalogue_->IsStopListed(request.at("name").AsString());
+        } else {
+            return proto_stops_map_->count(request.at("name").AsString());
+        }
     } 
     if (type == QueryType::BUS){
-        return catalogue_->IsBusListed(request.at("name").AsString());
+        if (catalogue_){
+            return catalogue_->IsBusListed(request.at("name").AsString());
+        } else {
+            return proto_buses_map_->count(request.at("name").AsString());
+        }
     }
     if (type == QueryType::MAP){
         return true;
@@ -124,7 +132,6 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
     if (type == "Stop"){
         return QueryType::STOP;
     } else if (type == "Bus"){
-        // std::cout << "YAY\n";
         return QueryType::BUS;
     } else if (type == "Map"){
         return QueryType::MAP;
@@ -188,7 +195,7 @@ void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& bui
 void StatParser::parseStopRequest(const json::Dict& request, json::Builder& builder) const {
     std::string_view name = request.at("name").AsString();
     // if (catalogue_ != nullptr){
-        const info::Stop& stop_info = catalogue_->GetStopInfo(name);
+    const info::Stop& stop_info = catalogue_->GetStopInfo(name);
     // } else {
     //     const info::Stop stop_info = GetStopInfoFromProto(name);
     // }
@@ -205,9 +212,7 @@ void StatParser::parseStopRequest(const json::Dict& request, json::Builder& buil
 
 void StatParser::parseStopRequestProto(const json::Dict& request, json::Builder& builder) const {
     std::string name = request.at("name").AsString();
-    // std::cout << "Exit\n";
-    const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(proto_catalogue_->stop_index().at(name));
-    // std::cout << "Passed\n";
+    const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(proto_stops_map_->at(name));
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("buses").StartArray();
@@ -239,7 +244,7 @@ void StatParser::parseBusRequest(const json::Dict& request, json::Builder& build
 
 void StatParser::parseBusRequestProto(const json::Dict& request, json::Builder& builder) const {
     std::string name = request.at("name").AsString();
-    const catalogue_proto::Bus& bus_info = proto_catalogue_->bus(proto_catalogue_->bus_index().at(name));
+    const catalogue_proto::Bus& bus_info = proto_catalogue_->bus(proto_buses_map_->at(name));
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature())))
@@ -258,17 +263,41 @@ void StatParser::parseMapRequest(const json::Dict& request, json::Builder& build
     .EndDict();   
 }
 
-void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
-    QueryType request_type = defineRequestType(request.at("type").AsString());
-    if (catalogue_ != nullptr){
-        if (!isValidRequest(request, request_type)){
-            HandleError(request, builder);
-            return;   
-        }
-    }
+void StatParser::initializeProtoMap(QueryType request_type){
     switch (request_type){
         case QueryType::STOP : {
-       
+            if (!proto_stops_map_.has_value()){
+                proto_stops_map_.emplace(std::unordered_map<std::string_view, int>{});
+                for (int i = 0; i < proto_catalogue_->stop_size(); i++){
+                    proto_stops_map_->emplace(proto_catalogue_->stop(i).name(), i);
+                }
+            }
+            break ;
+        }
+        case QueryType::BUS : {
+            if (!proto_buses_map_.has_value()){
+                proto_buses_map_.emplace(std::unordered_map<std::string_view, int>{});
+                for (int i = 0; i < proto_catalogue_->bus_size(); i++){
+                    proto_buses_map_->emplace(proto_catalogue_->bus(i).name(), i);
+                }
+            }
+            break;
+        }
+
+    }
+}
+
+void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
+    QueryType request_type = defineRequestType(request.at("type").AsString());
+    if (catalogue_ == nullptr){
+        initializeProtoMap(request_type);
+    }
+    if (!isValidRequest(request, request_type)){
+        HandleError(request, builder);
+        return;   
+    }
+    switch (request_type){
+        case QueryType::STOP : {       
             catalogue_ != nullptr ? parseStopRequest(request, builder) : parseStopRequestProto(request, builder);
             break;
         }

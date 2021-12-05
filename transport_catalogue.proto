@@ -20,8 +20,6 @@ message Stop {
 }
 
 message TransportCatalogue {
-	map<string, uint32> stop_index = 1;
-	map<string, uint32> bus_index = 2;
 	repeated Bus bus = 3;
 	repeated Stop stop = 4;
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <variant>
 #include <vector>
+#include <optional>
 #include <string>
 #include <sstream>
 #include <string_view>
@@ -68,6 +69,8 @@ private:
     std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
     const TransportCatalogue* catalogue_ = nullptr;
     const catalogue_proto::TransportCatalogue* proto_catalogue_ = nullptr;
+    std::optional<std::unordered_map<std::string_view, int>> proto_stops_map_ = std::nullopt;
+    std::optional<std::unordered_map<std::string_view, int>> proto_buses_map_ = std::nullopt;
     const map_renderer::RenderSettings settings_;
     const RoutingSettings routing_settings_;
 
@@ -90,6 +93,8 @@ private:
     void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 
     void parseRouteRequest(const json::Dict& request, json::Builder& builder);
+
+    void initializeProtoMap(QueryType request_type);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);

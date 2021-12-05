@@ -17,8 +17,8 @@ void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue
 		for (const transport_guide::info::Bus* bus : info.passing_buses){
 			stop->add_bus_index(bus->id_);
 		}
-		auto& map = *proto_catalogue.mutable_stop_index();
-		map[std::string(name)] = info.id_;
+		// auto& map = *proto_catalogue.mutable_stop_index();
+		// map[std::string(name)] = info.id_;
 		// (*proto_catalogue.stop_index())[std::string(name)] = info.id_;
 	}
 }
@@ -39,8 +39,8 @@ void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_p
 		for (const transport_guide::info::Stop* stop : info.stops){
 			bus->add_stop_index(stop->id_);
 		}
-		auto& map = *proto_catalogue.mutable_bus_index();
-		map[std::string(name)] = info.id_;
+		// auto& map = *proto_catalogue.mutable_bus_index();
+		// map[std::string(name)] = info.id_;
 		// (*proto_catalogue.bus_index())[std::string(name)] = info.id_;
 	}
 }
