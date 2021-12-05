@@ -50,12 +50,12 @@ message RenderSettings {
 	double line_width = 4;
 	double stop_radius = 5;
 	int32 bus_label_font_size = 6;
-	Point bus_label_offset = 5;
-	int32 stop_label_font_size = 6;
-	Point stop_label_offset = 7;
-	Color underlayer_color = 8;
-	double underlayer_width = 9;
-	repeated Color color_palette = 10;
+	Point bus_label_offset = 7;
+	int32 stop_label_font_size = 8;
+	Point stop_label_offset = 9;
+	Color underlayer_color = 10;
+	double underlayer_width = 11;
+	repeated Color color_palette = 12;
 }
 
 message TransportCatalogue {

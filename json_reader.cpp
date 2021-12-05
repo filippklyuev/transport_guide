@@ -143,10 +143,12 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
 svg::Document StatParser::getSvgDoc() const {
     if (catalogue_){
         map_renderer::MapRenderer renderer(catalogue_, settings_);
+        return renderer.GetSvgDocument();
     } else {
         map_renderer::MapRenderer renderer(proto_catalogue_);
+        return renderer.GetSvgDocument();
     }
-    return renderer.GetSvgDocument();
+    
 }
 
 static std::string SvgToStr(svg::Document doc){

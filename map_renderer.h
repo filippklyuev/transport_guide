@@ -34,7 +34,7 @@ public:
     {}
 
     MapRenderer(const catalogue_proto::TransportCatalogue* proto_catalogue) :
-        proto_catalogue_(proto_catalogue),
+        proto_catalogue_(proto_catalogue)
     {}
 
     svg::Document GetSvgDocument();

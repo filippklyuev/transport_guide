@@ -156,11 +156,11 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
         const catalogue_proto::Stop& last_stop = proto_catalogue_->stop(info.stop_index(info.stop_index_size() - 1));
         if (geo::Coordinates(first_stop.lattitude(), first_stop.longtitude())
                              != geo::Coordinates(last_stop.lattitude(), last_stop.longtitude())){
-            route_names_->push_back(
-                getBusnameUnder(bus_name, geo::Coordinates(last_stop->lattitude(), last_stop->longtitude()))
+            route_names_.push_back(
+                getBusnameUnder(bus_name, geo::Coordinates(last_stop.lattitude(), last_stop.longtitude()))
             );
-            route_names_->push_back(
-                getBusnameText(bus_name, geo::Coordinates(last_stop->lattitude(), last_stop->longtitude()), route_counter)
+            route_names_.push_back(
+                getBusnameText(bus_name, geo::Coordinates(last_stop.lattitude(), last_stop.longtitude()), route_counter)
             );
         }
         if (info.is_cycled() == false){
@@ -170,7 +170,7 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
             }            
         }
         const auto& color_palette_proto = proto_catalogue_->render_settings().color_palette();
-        int palette_size = proto_catalogue_->render_settings().color_palette_size()
+        int palette_size = proto_catalogue_->render_settings().color_palette_size();
         svg::Color color = getSvgColorOfProto(color_palette_proto(route_counter % size));
         polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(color)
             .SetStrokeWidth(proto_catalogue_->render_settings().line_width())
@@ -212,6 +212,10 @@ void MapRenderer::parsePolylinesAndRouteNames(){
     }
 }
 
+svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto){
+    return svg::Point(point_proto.x(), point_proto.y());
+}
+
 void MapRenderer::parseStopCirclesAndNamesProto(){
     stop_circles_.reserve(proto_catalogue_->stop_size());
     stop_names_.reserve(proto_catalogue_->stop_size());
@@ -229,7 +233,7 @@ void MapRenderer::parseStopCirclesAndNamesProto(){
         svg::Text underliner, stoptext;
         stop_names_.push_back(underliner.SetPosition(
             GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
-            .SetOffset(proto_catalogue_->render_settings().stop_label_offset()).
+            .SetOffset(getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset())).
             SetFontSize(proto_catalogue_->render_settings().stop_label_font_size()).SetFontFamily("Verdana")
             .SetData(stop_info.name()).SetFillColor(proto_catalogue_->render_settings().underlayer_color()).
             SetStrokeColor(getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color())).SetStrokeWidth(proto_catalogue_->render_settings().underlayer_width())
@@ -237,7 +241,7 @@ void MapRenderer::parseStopCirclesAndNamesProto(){
             SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
 
             stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
-            .SetOffset(proto_catalogue_->render_settings().stop_label_offset()).
+            .SetOffset(getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset())).
             SetFontSize(proto_catalogue_->render_settings().stop_label_font_size()).SetFontFamily("Verdana").SetData(stop_info.name()).SetFillColor(svg::Color("black")));
     }     
 }
