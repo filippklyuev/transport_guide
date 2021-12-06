@@ -41,9 +41,11 @@ int main(int argc, char* argv[]) {
         const json::Dict& all_requests = input_json.GetRoot().AsDict();
         transport_guide::json_reader::updateCatalogue(all_requests.at("base_requests").AsArray(),  catalogue);
         auto render_settings = transport_guide::json_reader::parseRenderSettings(all_requests.at("render_settings").AsDict());
-        // auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
+        auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
         std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
-        transport_guide::SerializeTransportCatalogue(filename, catalogue, render_settings);      
+        transport_guide::Serializer serializer(filename, catalogue, render_settings, routing_settings);
+        serializer.SerializeTransportCatalogue();
+        // SerializeTransportCatalogue(filename, catalogue, render_settings, routing_settings);      
     } else if (mode == "process_requests"sv) {
         json::Document output_json = json::Load(std::cin);
         const json::Dict& output_requests = output_json.GetRoot().AsDict();
