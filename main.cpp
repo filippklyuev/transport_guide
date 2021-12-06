@@ -52,8 +52,12 @@ int main(int argc, char* argv[]) {
         transport_guide::json_reader::StatParser stat_parser(&proto_catalogue);
         json::Document result_to_print(stat_parser.parseStatArray(output_requests.at("stat_requests").AsArray()));
         json::Print(result_to_print, std::cout);
+        // transport_guide::request_handler::printSvgDoc(std::cout, result_to_print);
+    } else if (mode == "test"sv){
+        json::Document answer = json::Load(std::cin);
+        transport_guide::request_handler::printSvgDoc(std::cout, answer);
     } else {
         PrintUsage();
-        return 1;
+        return 1;        
     }
 }

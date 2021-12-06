@@ -89,9 +89,14 @@ void updateProtoWithRenderSettings(const map_renderer::RenderSettings& render_se
 	*settings->mutable_stop_label_offset() = getProtoPoint(render_settings.stop_label_offset);
 	*settings->mutable_underlayer_color() = getProtoColor(render_settings.underlayer_color);
 	settings->set_underlayer_width(render_settings.underlayer_width);
+	std::cerr << "Serialization\n";
 	for (int i = 0; i < render_settings.color_palette.size(); i++){
 		settings->add_color_palette();
 		*settings->mutable_color_palette(i) = getProtoColor(render_settings.color_palette[i]);
+		// std::cerr << i << " " << (render_settings.color_palette[i], svg::StrokeLineCap::ROUND )<< '\n';
+		std::cerr << i << " ";
+		std::visit(svg::ColorPrinter{std::cerr}, render_settings.color_palette[i]);
+		std::cerr << '\n';
 		// settings->add_color_pallete(getProtoColor(render_settings.color_palette[i]));
 	}
 }
