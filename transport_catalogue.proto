@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "map_renderer.proto";
+
 package catalogue_proto;
 
 message Bus {
@@ -17,45 +19,6 @@ message Stop {
 	double lattitude = 2;
 	double longtitude = 3;
 	repeated int32 bus_index = 4;
-}
-
-message Point {
-	double x = 1;
-	double y = 2;
-}
-
-message RGB {
-	int32 red = 1;
-	int32 green = 2;
-	int32 blue = 3;
-}
-
-message RGBA {
-	int32 red = 1;
-	int32 green = 2;
-	int32 blue = 3;
-	double opacity = 4;	
-}
-
-message Color {
-	RGB rgb = 1;
-	RGBA rgba = 2;
-	string str = 3;
-}
-
-message RenderSettings {
-	double width = 1;
-	double height = 2;
-	double padding = 3;
-	double line_width = 4;
-	double stop_radius = 5;
-	int32 bus_label_font_size = 6;
-	Point bus_label_offset = 7;
-	int32 stop_label_font_size = 8;
-	Point stop_label_offset = 9;
-	Color underlayer_color = 10;
-	double underlayer_width = 11;
-	repeated Color color_palette = 12;
 }
 
 message TransportCatalogue {
