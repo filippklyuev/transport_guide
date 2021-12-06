@@ -9,6 +9,7 @@
 #include <iostream>
 #include <optional>
 #include "transport_catalogue.h"
+#include "transport_router.h"
 #include "domain.h"
 #include "json.h"
 #include "json_builder.h"
@@ -38,7 +39,7 @@ private:
 	catalogue_proto::TransportCatalogue proto_catalogue;
 
 
-	catalogue_proto::TransportCatalogue createProtoCatalogue();
+	void createProtoCatalogue();
 
 	void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map);
 

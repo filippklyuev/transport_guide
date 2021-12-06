@@ -4,7 +4,7 @@ namespace transport_guide {
 
 
 void Serializer::SerializeTransportCatalogue(){
-	catalogue_proto::TransportCatalogue proto_catalogue = createProtoCatalogue();
+	createProtoCatalogue();
 	std::ofstream ofs(filename_, std::ios::binary);
 	proto_catalogue.SerializeToOstream(&ofs);
 }
@@ -13,7 +13,7 @@ void Serializer::createProtoCatalogue(){
 	updateProtoWithStops(catalogue_.GetStopsMap());
 	updateProtoWithBuses(catalogue_.GetBusesMap());
 	updateProtoWithRenderSettings();
-	updateProtoWithRouter(TransportRouter(catalogue_, render_settings_));
+	// updateProtoWithRouter(TransportRouter(catalogue_, render_settings_));
 }
 
 void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map){
@@ -31,7 +31,7 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 			stop->add_bus_index(bus->id_);
 		}
 		for (const auto& [stop_name, distance] : info.distance_to_stops){
-			(*stop->stopid_distance)[stop_map.at(stop_name).id_] = distance;
+			(*stop->mutable_stopid_distance())[stop_map.at(stop_name).id_] = distance;
 		}
 	}
 }
@@ -110,6 +110,7 @@ catalogue_proto::TransportCatalogue DeserializeCatalogue(const std::filesystem::
 	if (!proto_catalogue.ParseFromIstream(&ifs)){
 		return {};
 	}
+	std::cerr << proto_catalogue.stop(0).stopid_distance_size() << '\n';
 	return proto_catalogue;
 }
 
