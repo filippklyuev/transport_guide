@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <optional>
 #include <utility>
 #include <transport_catalogue.pb.h>
 #include "transport_catalogue.h"
@@ -52,14 +53,16 @@ public:
         settings_.stop_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset());
         settings_.underlayer_color = getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color());
         settings_.underlayer_width = proto_catalogue_->render_settings().underlayer_width();
-        std::cerr << "Deserialization\n";
+        // std::cerr << "Deserialization\n";
         for (int i = 0; i < proto_catalogue_->render_settings().color_palette_size(); i++){
             settings_.color_palette.push_back(
                 getSvgColorOfProto(proto_catalogue_->render_settings().color_palette(i))
             );
-        std::cerr << i << " ";
-        std::visit(svg::ColorPrinter{std::cerr}, settings_.color_palette[i]);
-        std::cerr << '\n';            
+        // std::cerr << i << " ";
+        // std::visit(svg::ColorPrinter{std::cerr}, settings_.color_palette[i]);
+        // std::cerr << '\n';
+        InitilizeCatalogueMap(proto_catalogue_->bus(), bus_index_map_);
+        InitilizeCatalogueMap(proto_catalogue_->stop(), stop_index_map_);
         }
     }
 
@@ -78,6 +81,8 @@ private:
 
     const transport_guide::TransportCatalogue* catalogue_ = nullptr;
     const catalogue_proto::TransportCatalogue* proto_catalogue_ = nullptr;
+    std::optional<std::map<std::string_view, int>> bus_index_map_ = std::nullopt;
+    std::optional<std::map<std::string_view, int>> stop_index_map_ = std::nullopt;
     RenderSettings settings_ = {};
     ScalerStruct scaler_;
     std::vector<svg::Polyline> polylines_;
@@ -89,6 +94,13 @@ private:
     void addObjectsToDoc(IterIt begin, IterIt end, svg::Document& document){
         for (auto it = begin; it != end; it++){
             document.Add(std::move(*it));
+        }
+    }
+
+    template<typename Repeated, Map>
+    void InitilizeCatalogueMaps(const Repeated& repeated, Map& map){
+        for (int i = 0; i < repeated_size(); i++){
+            
         }
     }
 
