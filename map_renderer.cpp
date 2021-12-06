@@ -149,8 +149,9 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
     polylines_.reserve(proto_catalogue_->bus_size());
     route_names_.reserve(proto_catalogue_->bus_size());
     int route_counter = 0;
-    for (int i = 0; i < proto_catalogue_->bus_size(); i++){
-        const catalogue_proto::Bus& info = proto_catalogue_->bus(i);
+    // for (int i = 0; i < proto_catalogue_->bus_size(); i++){
+    for (const auto& [name, index] : *bus_index_map_){
+        const catalogue_proto::Bus& info = proto_catalogue_->bus(index);
         const std::string& bus_name = info.name();
         if (info.stop_index_size() == 0){
             continue ;
@@ -235,8 +236,9 @@ svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto){
 void MapRenderer::parseStopCirclesAndNamesProto(){
     stop_circles_.reserve(proto_catalogue_->stop_size());
     stop_names_.reserve(proto_catalogue_->stop_size());
-    for (int i = 0; i < proto_catalogue_->stop_size(); i++){
-        const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(i);
+    // for (int i = 0; i < proto_catalogue_->stop_size(); i++){
+    for (const auto& [name, index] : *stop_index_map_){
+        const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(index);
         if (stop_info.bus_index_size() == 0){
             continue ;
         }

@@ -61,8 +61,10 @@ public:
         // std::cerr << i << " ";
         // std::visit(svg::ColorPrinter{std::cerr}, settings_.color_palette[i]);
         // std::cerr << '\n';
+        // std::cout << stop_index_map_.has_value() << '\n';
         InitilizeCatalogueMap(proto_catalogue_->bus(), bus_index_map_);
         InitilizeCatalogueMap(proto_catalogue_->stop(), stop_index_map_);
+        // std::cout << (*stop_index_map_).size() << '\n';
         }
     }
 
@@ -97,10 +99,11 @@ private:
         }
     }
 
-    template<typename Repeated, Map>
-    void InitilizeCatalogueMaps(const Repeated& repeated, Map& map){
-        for (int i = 0; i < repeated_size(); i++){
-            
+    template<typename Repeated,typename Map>
+    void InitilizeCatalogueMap(const Repeated& repeated, Map& map){
+        map.emplace(std::map<std::string_view, int>{});
+        for (int i = 0; i < repeated.size(); i++){
+            map->emplace(repeated.at(i).name(), i);
         }
     }
 
