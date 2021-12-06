@@ -19,6 +19,7 @@ message Stop {
 	double lattitude = 2;
 	double longtitude = 3;
 	repeated int32 bus_index = 4;
+	map<int32, int32> stopid_distance = 5;
 }
 
 message TransportCatalogue {

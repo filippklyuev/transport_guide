@@ -30,6 +30,9 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 		for (const transport_guide::info::Bus* bus : info.passing_buses){
 			stop->add_bus_index(bus->id_);
 		}
+		for (const auto& [stop_name, distance] : info.distance_to_stops){
+			(*stop->stopid_distance)[stop_map.at(stop_name).id_] = distance;
+		}
 	}
 }
 
