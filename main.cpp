@@ -44,8 +44,7 @@ int main(int argc, char* argv[]) {
         auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
         std::string filename = all_requests.at("serialization_settings").AsDict().at("file").AsString();
         transport_guide::Serializer serializer(filename, catalogue, render_settings, routing_settings);
-        serializer.SerializeTransportCatalogue();
-        // SerializeTransportCatalogue(filename, catalogue, render_settings, routing_settings);      
+        serializer.SerializeTransportCatalogue();      
     } else if (mode == "process_requests"sv) {
         json::Document output_json = json::Load(std::cin);
         const json::Dict& output_requests = output_json.GetRoot().AsDict();
