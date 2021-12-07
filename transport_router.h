@@ -77,6 +77,12 @@ public:
 
 	double getWaitWeight() const;
 
+	double getBusVelocity() const;
+
+	const std::vector<VertexInfo>& getVerticesInfo() const ;
+
+	const std::unordered_map<EdgeId, EdgeInfo> getEdgesInfo() const ;
+
 private:
 	const TransportCatalogue& catalogue_;
 	double wait_weight_ = 0.0;

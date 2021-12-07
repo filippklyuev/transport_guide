@@ -13,7 +13,7 @@ void Serializer::createProtoCatalogue(){
 	updateProtoWithStops(catalogue_.GetStopsMap());
 	updateProtoWithBuses(catalogue_.GetBusesMap());
 	updateProtoWithRenderSettings();
-	// updateProtoWithRouter(TransportRouter(catalogue_, render_settings_));
+	updateProtoWithRouter(router::TransportRouter(catalogue_, render_settings_));
 }
 
 void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map){
@@ -75,6 +75,72 @@ void Serializer::updateProtoWithRenderSettings(){
 	}
 }
 
+void Serializer::updateProtoWithRouter(router::TransportRouter router){
+	catalogue_proto::TransportRouter* pr_router = proto_catalogue->mutable_router();
+	pr_router->set_wait_weight(router.getWaitWeight());
+	pr_router->set_bus_velocity(router.getBusVelocity());
+	updateProtoRouterWithVerticesInfo(router.getVerticesInfo(), pr_router); // write function
+	updateProtoRouterWithEdgesInfo(router.getEdgesInfo(), pr_router); //
+	fillProtoGraph(router, pr_router->mutable_graph()); // write function
+}
+
+void Serializer::updateProtoRouterWithVerticesInfo(const std::vector<router::VertexInfo>& vertices_info,
+						catalogue_proto::TransportRouter* pr_router) const {
+	for (const router::VertexInfo& vertex_info : vertices_info){
+		catalogue_proto::VertexInfo pr_vert_info;
+		pr_vert_info.set_stop_array_index(vertex_info.stop_info->id_);
+		pr_router->add_vertices_info(pr_vert_info);
+	}
+}
+
+void Serializer::updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
+								catalogue_proto::TransportRouter* pr_router) const {
+	for (int i = 0; i < edges_info.size(); i++){ // reserve 
+		pr_router->add_edges_info();
+	}
+	for (const auto& [edge_id, edge_info] : edges_info){
+		catalogue_proto::EdgeInfo* pr_edge_info = pr_router->mutable_edges_info(static_cast<int>(edge_id));
+		pr_edge_info->set_bus_array_index(catalogue.GetBusInfo(edge_info.bus_name).id_);
+		pr_edge_info->set_span(edge_info.span);
+		pr_edge_info->set_weight(edge_info.weight);
+		pr_edge_info->set_from_stop_index(catalogue.GetStopInfo(edge_info.from_stop).id_);
+		pr_edge_info->set_to_stop_index(catalogue.GetStopInfo(edge_info.to_stop).id_);
+	}
+}
+
+void Serializer::fillProtoGraph(const router::TransportRouter& router, graph_proto::Graph* graph) const {
+	for (int i = 0; i < router.graph_->GetEdgeCount(); i++){
+		const graph::Edge<double>& edge = router.graph_->GetEdge(i);
+		graph_proto::Edge pr_edge;
+		pr_edge.set_vertex_from(static_cast<int>(edge.from));
+		pr_edge.set_vertex_to(static_cast<int>(edge.to));
+		pr_edge.set_weight(edge.weight);
+		graph->add_edge(pr_edge);
+	}
+	const router::RoutesInternalData& routes_internal_data_matrix = router.router_->getRoutesInternalData();
+	for (int i = 0; i < routes_internal_data_matrix.size(); i++){
+		graph->add_routes_internal_data_matrix();
+		graph_proto::RoutesInternalData* pr_routes_internal_data = graph->mutable_routes_internal_data_matrix(i);
+		const std::vector<std::optional<RouteInternalData>> routes_internal_data = routes_internal_data_matrix[i];
+		for (int j = 0; j < routes_internal_data.size(); j++){
+			pr_routes_internal_data->add_route_internal_data();
+			graph_proto::RouteInternalData* pr_route_internal_data = mutable_route_internal_data(j);
+			if (routes_internal_data[j].has_value()){
+				pr_route_internal_data->set_exists(true);
+				pr_route_internal_data->set_weight(routes_internal_data[j]->weight);
+				if (routes_internal_data[j]->prev_edge.has_value()){
+					pr_route_internal_data->set_prev_exists(true);
+					pr_route_internal_data->set_prev_edge_id(static_cast<int>(routes_internal_data[j]->prev_edge));
+				} else {
+					pr_route_internal_data->set_prev_exists(false);
+				}
+			} else {
+				pr_route_internal_data->set_exists(false);
+			}
+		}
+	}
+}
+
 catalogue_proto::Color getProtoColor(const svg::Color& color){
 	catalogue_proto::Color proto_color;
 	if (std::holds_alternative<svg::Rgb>(color)){
@@ -110,7 +176,6 @@ catalogue_proto::TransportCatalogue DeserializeCatalogue(const std::filesystem::
 	if (!proto_catalogue.ParseFromIstream(&ifs)){
 		return {};
 	}
-	std::cerr << proto_catalogue.stop(0).stopid_distance_size() << '\n';
 	return proto_catalogue;
 }
 

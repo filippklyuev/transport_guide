@@ -24,6 +24,7 @@ message Stop {
 
 message TransportCatalogue {
 	RenderSettings render_settings = 1;
+	TransportRouter router = 2;
 	repeated Bus bus = 3;
 	repeated Stop stop = 4;
 }

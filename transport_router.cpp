@@ -61,6 +61,18 @@ int TransportRouter::getDistance(const info::Stop* from, const info::Stop* to) c
     }
 }
 
+double TransportRouter::getBusVelocity() const {
+	return bus_velocity_;
+}
+
+const std::vector<VertexInfo>& TransportRouter::getVerticesInfo() const {
+	return vertices_info_;
+}
+
+const std::unordered_map<EdgeId, EdgeInfo> getEdgesInfo() const {
+	return edges_info_;
+}
+
 std::optional<RouteInfo> TransportRouter::GetRouteInfo(std::string_view stop_from, std::string_view stop_to) const {
 	if (stops_info_.count(stop_from) && stops_info_.count(stop_to)){
 		VertexId from = stops_info_.at(stop_from)->id;

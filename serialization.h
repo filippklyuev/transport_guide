@@ -8,6 +8,9 @@
 #include <vector>
 #include <iostream>
 #include <optional>
+#include <unordered_map>
+#include "graph.h"
+#include "router.h"
 #include "transport_catalogue.h"
 #include "transport_router.h"
 #include "domain.h"
@@ -45,7 +48,15 @@ private:
 
 	void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map);	
 
-	void updateProtoWithRenderSettings();	
+	void updateProtoWithRenderSettings();
+
+	void updateProtoRouterWithVerticesInfo(const std::vector<router::VertexInfo>& vertices_info,
+								catalogue_proto::TransportRouter* pr_router) const;
+
+	void updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
+								catalogue_proto::TransportRouter* pr_router) const;
+
+	void fillProtoGraph(const router::TransportRouter& router, graph_proto::Graph* graph) const;
 };
 
 catalogue_proto::Color getProtoColor(const svg::Color& color);

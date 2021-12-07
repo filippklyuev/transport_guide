@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package graph_proto;
+
+message Edge {
+	int32 vertex_from = 1;
+	int32 vertex_to = 2;
+	double weight = 3;
+}
+
+message RouteInternalData {
+	int32 prev_edge_id = 1;
+	bool prev_exists = 2;
+	double weight = 3;
+	bool exists = 4;
+}
+
+message RoutesInternalData {
+	repeated RouteInternalData route_internal_data = 1;
+}
+
+message RouteInfo {
+	double overall_time = 1;
+	repeated int32 edge_index = 2;
+}
+
+message Graph {
+	repeated Edge edge = 1;
+	repeated RoutesInternalData routes_internal_data_matrix = 2;
+}

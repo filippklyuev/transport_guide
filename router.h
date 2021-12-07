@@ -30,6 +30,8 @@ public:
 
     std::optional<RouteInfo> BuildRoute(VertexId from, VertexId to) const;
 
+
+
 private:
     struct RouteInternalData {
         Weight weight;
@@ -79,6 +81,11 @@ private:
     static constexpr Weight ZERO_WEIGHT{};
     const Graph& graph_;
     RoutesInternalData routes_internal_data_;
+public:
+    const RoutesInternalData& getRoutesInternalData() const {
+        return routes_internal_data_;
+    }
+
 };
 
 template <typename Weight>
