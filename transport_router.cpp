@@ -28,6 +28,14 @@ MapOfRoutes TransportRouter::getRoutes() const {
 	return routes;
 }
 
+const Graph& TransportRouter::getGraph() const {
+	return *graph_;
+}
+
+const Router& TransportRouter::getRouter() const {
+	return *router_;
+}
+
 
 void TransportRouter::connectVertexToReachableNoTransfer(const Route& route_info, const int from_position, std::string_view bus_name){
 	const auto& vertex_vector = route_info.route;
@@ -69,7 +77,7 @@ const std::vector<VertexInfo>& TransportRouter::getVerticesInfo() const {
 	return vertices_info_;
 }
 
-const std::unordered_map<EdgeId, EdgeInfo> getEdgesInfo() const {
+const std::unordered_map<EdgeId, EdgeInfo> TransportRouter::getEdgesInfo() const {
 	return edges_info_;
 }
 

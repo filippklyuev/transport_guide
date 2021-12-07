@@ -83,6 +83,10 @@ public:
 
 	const std::unordered_map<EdgeId, EdgeInfo> getEdgesInfo() const ;
 
+	const Graph& getGraph() const;
+
+	const Router& getRouter() const;
+
 private:
 	const TransportCatalogue& catalogue_;
 	double wait_weight_ = 0.0;

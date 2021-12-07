@@ -25,7 +25,7 @@ class Serializer {
 public:
 	Serializer(const std::filesystem::path filename
 				, const TransportCatalogue& catalogue,const map_renderer::RenderSettings& render_settings
-				, const RoutingSettings& routing_settings)
+				, RoutingSettings routing_settings)
 		: filename_(filename)
 		, catalogue_(catalogue)
 		, render_settings_(render_settings)
@@ -38,7 +38,7 @@ private:
 	const std::filesystem::path filename_;
 	const TransportCatalogue& catalogue_;
 	const map_renderer::RenderSettings& render_settings_;
-	const RoutingSettings routing_settings_;
+	RoutingSettings routing_settings_;
 	catalogue_proto::TransportCatalogue proto_catalogue;
 
 
@@ -55,6 +55,8 @@ private:
 
 	void updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
 								catalogue_proto::TransportRouter* pr_router) const;
+
+	void updateProtoWithRouter();
 
 	void fillProtoGraph(const router::TransportRouter& router, graph_proto::Graph* graph) const;
 };

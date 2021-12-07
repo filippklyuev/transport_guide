@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "map_renderer.proto";
+import "transport_router.proto";
 
 package catalogue_proto;
 
