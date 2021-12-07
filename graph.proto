@@ -21,7 +21,8 @@ message RoutesInternalData {
 
 message RouteInfo {
 	double overall_time = 1;
-	repeated int32 edge_index = 2;
+	repeated int32 edge_index_reversed = 2;
+	bool exists = 3;
 }
 
 message Graph {

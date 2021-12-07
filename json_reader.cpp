@@ -195,7 +195,72 @@ void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& bui
                .Key("total_time").Value(json::Node(static_cast<double>(time)))
         .EndDict();       
     }
+}
 
+static catalogue_proto::graph_proto::RouteInfo buildProtoRoute(int id_from, int id_to
+    , const catalogue_proto::graph_proto::Graph& graph){
+    const auto& route_internal_data = graph.routes_internal_data_matrix(id_from).route_internal_data(id_to);
+    catalogue_proto::graph_proto::RouteInfo route_info;
+    if (route_internal_data.exists()){
+        route_info.set_overall_time(routes_internal_data.weight());
+        bool prev_exists = route_internal_data.prev_exists();
+        if (prev_exists){
+            for (int edge_id = route_internal_data.prev_edge_id(); prev_exists;
+                edge_id = graph.routes_internal_data_matrix(id_from)
+                                .route_internal_data(graph.edge(edge_id).vertex_from()).prev_edge_id()){
+                route_info.add_edge_index_reversed(edge_id);
+                prev_exists = graph.routes_internal_data_matrix(id_from)
+                                .route_internal_data(graph.edge(edge_id).vertex_from()).prev_exists();
+            }
+        }
+        route_info.set_exists(true);
+        return route_info;
+    }
+    route_info.set_exists(false);
+    return route_info;
+}
+
+static std::vector<const catalogue_proto::EdgeInfo&> getProtoEdgesVector(const catalogue_proto::graph_proto::RouteInfo& route
+                                                                    , const catalogue_proto::TransportRouter& router){
+    std::vector<const catalogue_proto::EdgeInfo&> route_edges;
+    for (int i = route.edge_index_reversed_size() - 1; i >= 0; i--){
+        route_edges.push_back(router.edges_info(route.edge_index_reversed(i)));
+    }
+    return route_edges;
+}
+
+void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder& builder){
+    const catalogue_proto::TransportRouter& router = proto_catalogue_->router();
+    const catalogue_proto::graph_proto::Graph& graph = router.graph();
+    if (proto_stops_map_.count(request.at("from").AsString()) && proto_stops_map_.count(request.at("to").AsString())){
+        int id_from = proto_stops_map_.at(request.at("from").AsString());
+        int id_to = proto_stops_map_.at(request.at("to").AsString());
+        catalogue_proto::graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
+        if (route.exists()){
+            std::vector<const catalogue_proto::EdgeInfo&> route_edges = getProtoEdgesVector(route, router);
+            builder.StartDict()
+                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+                   .Key("items")
+                        .StartArray();
+                        for (const auto& edge : route_edges){
+                            builder.StartDict()
+                                .Key("stop_name").Value(json::Node(static_cast<std::string>(proto_catalogue_->stop(edge->from_stop_index()).name())))
+                                .Key("time").Value(json::Node(static_cast<double>(router.wait_weight())))
+                                .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
+                            .EndDict()
+                            .StartDict()
+                                .Key("bus").Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(edge->bus_array_index()).name())))
+                                .Key("span_count").Value(json::Node(static_cast<int>(edge->span())))
+                                .Key("time").Value(json::Node(static_cast<double>(edge->weight() - router.wait_weight())))
+                                .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
+                            .EndDict();
+                        }
+                        builder.EndArray()
+                    .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
+                .EndDict();
+        }
+    }
+    HandleError(request, builder);
 }
 
 void StatParser::parseStopRequest(const json::Dict& request, json::Builder& builder) const {
@@ -316,7 +381,7 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
             break;
         }
         case QueryType::ROUTE : {
-            // parseRouteRequest(request, builder);
+            catalogue_ != nullptr ? parseRouteRequest(request, builder); : parseRouteRequestProto(request, builder);
             break;
         }
     }
