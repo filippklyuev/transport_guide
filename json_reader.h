@@ -94,6 +94,8 @@ private:
 
     void parseRouteRequest(const json::Dict& request, json::Builder& builder);
 
+    void parseRouteRequestProto(const json::Dict& request, json::Builder& builder);
+
     void initializeProtoMap(QueryType request_type);
 };
 
