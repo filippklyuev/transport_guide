@@ -13,7 +13,7 @@ json::Array getPassingBuses(const StopInfo& stop_info){
 }
 
 void printSvgDoc(std::ostream& out, const json::Document& doc_to_print){
-    out << doc_to_print.GetRoot().AsArray()[2].AsDict().at("map").AsString();
+    out << doc_to_print.GetRoot().AsArray()[3].AsDict().at("map").AsString();
 }
 
 } // namespace request handler

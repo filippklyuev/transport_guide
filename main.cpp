@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
     } else if (mode == "test"sv){
         json::Document answer = json::Load(std::cin);
         transport_guide::request_handler::printSvgDoc(std::cout, answer);
+        // TestOld();
     } else {
         PrintUsage();
         return 1;        

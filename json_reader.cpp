@@ -236,6 +236,7 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
         int id_from = (*proto_stops_map_).at(request.at("from").AsString());
         int id_to = (*proto_stops_map_).at(request.at("to").AsString());
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
+        
         if (route.exists()){
             std::vector<catalogue_proto::EdgeInfo> route_edges = getProtoEdgesVector(route, router);
             builder.StartDict()
@@ -259,6 +260,7 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
                     .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
                 .EndDict();
         }
+        return ;
     }
     HandleError(request, builder);
 }
