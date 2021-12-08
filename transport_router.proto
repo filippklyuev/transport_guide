@@ -5,11 +5,11 @@ import "graph.proto";
 package catalogue_proto;
 
 message EdgeInfo {
-	uint64 bus_array_index = 1;
-	uint64 span = 2;
+	uint32 bus_array_index = 1;
+	int32 span = 2;
 	double weight = 3;
-	uint64 from_stop_index = 4;
-	uint64 to_stop_index = 5;
+	uint32 from_stop_index = 4;
+	uint32 to_stop_index = 5;
 }
 
 message TransportRouter {

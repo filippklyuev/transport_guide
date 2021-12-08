@@ -9,7 +9,7 @@ message Edge {
 }
 
 message RouteInternalData {
-	uint64 prev_edge_id = 1;
+	uint32 prev_edge_id = 1;
 	bool prev_exists = 2;
 	double weight = 3;
 	bool exists = 4;
@@ -21,7 +21,7 @@ message RoutesInternalData {
 
 message RouteInfo {
 	double overall_time = 1;
-	repeated uint64 edge_index_reversed = 2;
+	repeated uint32 edge_index_reversed = 2;
 	bool exists = 3;
 }
 
