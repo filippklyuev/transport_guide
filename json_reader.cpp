@@ -235,7 +235,7 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
     if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
         int id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
         // int id_to = (*proto_stops_map_).at(request.at("to").AsString());
-        int id_to =proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
+        int id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
         
         if (route.exists()){
@@ -260,8 +260,8 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
                         builder.EndArray()
                     .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
                 .EndDict();
-        }
-        return ;
+            return ;
+        }        
     }
     HandleError(request, builder);
 }
