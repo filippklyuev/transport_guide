@@ -237,35 +237,37 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
 
     }
     if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
-        size_t id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
-        // int id_to = (*proto_stops_map_).at(request.at("to").AsString());
-        size_t id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
-        // std::cerr << "found ids\n";
-        graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
-        
-        if (route.exists()){
-            std::vector<catalogue_proto::EdgeInfo> route_edges = getProtoEdgesVector(route, router);
-            builder.StartDict()
-                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
-                   .Key("items")
-                        .StartArray();
-                        for (const auto& edge : route_edges){
-                            builder.StartDict()
-                                .Key("stop_name").Value(json::Node(static_cast<std::string>(proto_catalogue_->stop(edge.from_stop_index()).name())))
-                                .Key("time").Value(json::Node(static_cast<double>(router.wait_weight())))
-                                .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
-                            .EndDict()
-                            .StartDict()
-                                .Key("bus").Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(edge.bus_array_index()).name())))
-                                .Key("span_count").Value(json::Node(static_cast<int>(edge.span())))
-                                .Key("time").Value(json::Node(static_cast<double>(edge.weight() - router.wait_weight())))
-                                .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
-                            .EndDict();
-                        }
-                        builder.EndArray()
-                    .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
-                .EndDict();
-            return ;
+        int from_id_catalogue = (*proto_stops_map_).at(request.at("from").AsString());
+        int to_id_catalogue = (*proto_stops_map_).at(request.at("to").AsString());
+        if (proto_catalogue_->router().stop_id_vertex_id().contains(from_id_catalogue) && proto_catalogue_->router().stop_id_vertex_id().contains(to_id_catalogue)){
+            int id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
+            int id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
+            graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
+            // std::cerr << "route built\n";
+            if (route.exists()){
+                std::vector<catalogue_proto::EdgeInfo> route_edges = getProtoEdgesVector(route, router);
+                builder.StartDict()
+                       .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+                       .Key("items")
+                            .StartArray();
+                            for (const auto& edge : route_edges){
+                                builder.StartDict()
+                                    .Key("stop_name").Value(json::Node(static_cast<std::string>(proto_catalogue_->stop(edge.from_stop_index()).name())))
+                                    .Key("time").Value(json::Node(static_cast<double>(router.wait_weight())))
+                                    .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
+                                .EndDict()
+                                .StartDict()
+                                    .Key("bus").Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(edge.bus_array_index()).name())))
+                                    .Key("span_count").Value(json::Node(static_cast<int>(edge.span())))
+                                    .Key("time").Value(json::Node(static_cast<double>(edge.weight() - router.wait_weight())))
+                                    .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
+                                .EndDict();
+                            }
+                            builder.EndArray()
+                        .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
+                    .EndDict();
+                return ;
+            }
         }        
     }
     // std::cerr << "Error\n";
