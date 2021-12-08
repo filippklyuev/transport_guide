@@ -56,6 +56,9 @@ void TransportRouter::fillGraphWithEdges(const MapOfRoutes& routes){
 }
 
 double TransportRouter::calculateWeight(int distance) const {
+	if (bus_velocity_ == 0.0){
+		return 0.0;
+	}
 	return (static_cast<double>(distance) / (bus_velocity_ / 6.0 * 100.0));
 }
 
