@@ -96,7 +96,9 @@ private:
 
     void parseRouteRequestProto(const json::Dict& request, json::Builder& builder);
 
-    void initializeProtoMap();
+    void initializeProtoNameMaps();
+
+    bool isProtoRouteValid(const json::Dict& request) const;
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
