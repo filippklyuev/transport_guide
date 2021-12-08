@@ -232,10 +232,15 @@ static std::vector<catalogue_proto::EdgeInfo> getProtoEdgesVector(const graph_pr
 void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder& builder){
     const catalogue_proto::TransportRouter& router = proto_catalogue_->router();
     const graph_proto::Graph& graph = router.graph();
+    // std::cerr << "initialized\n";
+    if (!proto_stops_map_.has_value()){
+
+    }
     if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
         size_t id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
         // int id_to = (*proto_stops_map_).at(request.at("to").AsString());
         size_t id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
+        // std::cerr << "found ids\n";
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
         
         if (route.exists()){
@@ -263,6 +268,7 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
             return ;
         }        
     }
+    // std::cerr << "Error\n";
     HandleError(request, builder);
 }
 
@@ -337,53 +343,52 @@ void StatParser::parseMapRequest(const json::Dict& request, json::Builder& build
     .EndDict();   
 }
 
-void StatParser::initializeProtoMap(QueryType request_type){
-    switch (request_type){
-        case QueryType::STOP : {
-            if (!proto_stops_map_.has_value()){
-                proto_stops_map_.emplace(std::unordered_map<std::string_view, int>{});
-                for (int i = 0; i < proto_catalogue_->stop_size(); i++){
-                    proto_stops_map_->emplace(proto_catalogue_->stop(i).name(), i);
-                }
-            }
-            break ;
+void StatParser::initializeProtoMap(){
+    if (!proto_stops_map_.has_value()){
+        proto_stops_map_.emplace(std::unordered_map<std::string_view, int>{});
+        for (int i = 0; i < proto_catalogue_->stop_size(); i++){
+            proto_stops_map_->emplace(proto_catalogue_->stop(i).name(), i);
         }
-        case QueryType::BUS : {
-            if (!proto_buses_map_.has_value()){
-                proto_buses_map_.emplace(std::unordered_map<std::string_view, int>{});
-                for (int i = 0; i < proto_catalogue_->bus_size(); i++){
-                    proto_buses_map_->emplace(proto_catalogue_->bus(i).name(), i);
-                }
-            }
-            break;
+    }
+    if (!proto_buses_map_.has_value()){
+        proto_buses_map_.emplace(std::unordered_map<std::string_view, int>{});
+        for (int i = 0; i < proto_catalogue_->bus_size(); i++){
+            proto_buses_map_->emplace(proto_catalogue_->bus(i).name(), i);
         }
-
     }
 }
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
     QueryType request_type = defineRequestType(request.at("type").AsString());
     if (catalogue_ == nullptr){
-        initializeProtoMap(request_type);
+        if (!proto_buses_map_.has_value() || !proto_stops_map_.has_value()){
+            initializeProtoMap();
+            // std::cerr << "initialized proto map\n";
+        }
     }
     if (!isValidRequest(request, request_type)){
+        // std::cerr << "is not valid\n";
         HandleError(request, builder);
         return;   
     }
     switch (request_type){
-        case QueryType::STOP : {       
+        case QueryType::STOP : {
+            // std::cerr << "parsing stop\n";       
             catalogue_ != nullptr ? parseStopRequest(request, builder) : parseStopRequestProto(request, builder);
             break;
         }
-        case QueryType::BUS : {     
+        case QueryType::BUS : {
+            // std::cerr << "parsing bus\n";       
             catalogue_ != nullptr ? parseBusRequest(request, builder) : parseBusRequestProto(request, builder);
             break;
         }
         case QueryType::MAP : {
+            // std::cerr << "parsing map\n";    
             parseMapRequest(request, builder);
             break;
         }
         case QueryType::ROUTE : {
+            // std::cerr << "parsing route\n";    
             catalogue_ != nullptr ? parseRouteRequest(request, builder) : parseRouteRequestProto(request, builder);
             break;
         }
@@ -393,13 +398,14 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
 json::Document StatParser::parseStatArray(const json::Array& requests_vector) {
     json::Builder builder;
     builder.StartArray();
-    // int i =0;
+    int i =0;
         for (const auto& request : requests_vector){
-            // std::cout << i << '\n';
+            // std::cerr << i << '\n';
             parseSingleStatRequest(request.AsDict(), builder);
-            // i++;
+            i++;
         }
         builder.EndArray();
+        // std::cerr<< "finished\n";
     return json::Document(builder.Build());
 }
 

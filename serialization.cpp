@@ -104,6 +104,7 @@ void Serializer::updateProtoRouterWithEdgesInfo(const std::unordered_map<router:
 		pr_router->add_edges_info();
 	}
 	for (const auto& [edge_id, edge_info] : edges_info){
+		// std::cerr << edge_id << '\n';
 		catalogue_proto::EdgeInfo* pr_edge_info = pr_router->mutable_edges_info(static_cast<size_t>(edge_id));
 		pr_edge_info->set_bus_array_index(catalogue_.GetBusInfo(edge_info.bus_name).id_);
 		pr_edge_info->set_span(edge_info.span);

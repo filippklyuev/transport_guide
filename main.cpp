@@ -50,7 +50,9 @@ int main(int argc, char* argv[]) {
         const json::Dict& output_requests = output_json.GetRoot().AsDict();
         std::string filename = output_requests.at("serialization_settings").AsDict().at("file").AsString();
         catalogue_proto::TransportCatalogue proto_catalogue = transport_guide::DeserializeCatalogue(filename);
+        // std::cerr << "Deserialized\n";
         transport_guide::json_reader::StatParser stat_parser(&proto_catalogue);
+        // std::cerr << "stat_parser created\n";
         json::Document result_to_print(stat_parser.parseStatArray(output_requests.at("stat_requests").AsArray()));
         json::Print(result_to_print, std::cout);
         // transport_guide::request_handler::printSvgDoc(std::cout, result_to_print);

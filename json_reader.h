@@ -96,7 +96,7 @@ private:
 
     void parseRouteRequestProto(const json::Dict& request, json::Builder& builder);
 
-    void initializeProtoMap(QueryType request_type);
+    void initializeProtoMap();
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
