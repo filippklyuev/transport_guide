@@ -93,7 +93,7 @@ void Serializer::updateProtoRouterWithVerticesInfo(const std::vector<router::Ver
 		// catalogue_proto::VertexInfo *pr_vert_info = pr_router->mutable_vertex_ids(i);
 		// pr_vert_info->set_stop_array_index(vertex_info.stop_info->id_);
 		// i++;
-		(*pr_router->mutable_stop_id_vertex_info())
+		(*pr_router->mutable_stop_id_vertex_id())
 					[vertex_info.stop_info->id_] = vertex_info.id;
 	}
 }

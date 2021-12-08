@@ -233,9 +233,9 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
     const catalogue_proto::TransportRouter& router = proto_catalogue_->router();
     const graph_proto::Graph& graph = router.graph();
     if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
-        int id_from = proto_catalogue_->router().stop_id_vertex_info_at((*proto_stops_map_).at(request.at("from").AsString()));
+        int id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
         // int id_to = (*proto_stops_map_).at(request.at("to").AsString());
-        int id_to =proto_catalogue_->router().stop_id_vertex_info_at((*proto_stops_map_).at(request.at("to").AsString()));
+        int id_to =proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
         
         if (route.exists()){

@@ -4,10 +4,6 @@ import "graph.proto";
 
 package catalogue_proto;
 
-message VertexInfo {
-	int32 vertex_id = 1;
-}
-
 message EdgeInfo {
 	int32 bus_array_index = 1;
 	int32 span = 2;
@@ -19,7 +15,7 @@ message EdgeInfo {
 message TransportRouter {
 	double wait_weight = 1;
 	double bus_velocity = 2;
-	map <int32, VertexInfo> stop_id_vertex_info = 3;
+	map <int32, int32> stop_id_vertex_id = 3;
 	repeated EdgeInfo edges_info = 4;
 	graph_proto.Graph graph = 5;
 }
