@@ -14,7 +14,7 @@ svg::Document MapRenderer::GetSvgDocument(){
     return document;
 }
 
-void MapRenderer::makeScalerOfCatalogue(){ // RENAME!!!!!!!!!!
+void MapRenderer::makeScalerOfCatalogue(){
     bool begin = true;
     for (const auto& [bus_name, info] : catalogue_->GetBusesMap()){
         for (const auto& stop : info.stops){
@@ -33,24 +33,8 @@ void MapRenderer::makeScalerOfCatalogue(){ // RENAME!!!!!!!!!!
             if (crds.lng < scaler_.min_lon) { scaler_.min_lon = crds.lng; }
                 else if (crds.lng > scaler_.max_lon) { scaler_.max_lon = crds.lng; }
         }
-    }
-    // double width_zoom_coef = 0.0; 
-    // double height_zoom_coef = 0.0;
-    // if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
-    //     width_zoom_coef = (settings_.width - 2 * settings_.padding) / (scaler_.max_lon - scaler_.min_lon);
-    // }
-    // if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
-    //     height_zoom_coef = (settings_.height - 2 * settings_.padding) / (scaler_.max_lat - scaler_.min_lat);
-    // }
-    // if (width_zoom_coef < height_zoom_coef){
-    //     scaler_.zoom_coef = width_zoom_coef;
-    // } else {
-    //     scaler_.zoom_coef = height_zoom_coef;
-    // }
-    // scaler_.padding = settings_.padding;        
+    }     
 }
-
-//REFACTOR TO ELIMINATE DOUBLE CODE!1111111111111111111111111
 
 void MapRenderer::makeScalerOfProtoCatalogue(){
     bool begin = true;
@@ -73,23 +57,6 @@ void MapRenderer::makeScalerOfProtoCatalogue(){
         }
     }
 }
-//     double width_zoom_coef = 0.0; 
-//     double height_zoom_coef = 0.0;
-//     if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
-//         width_zoom_coef = (proto_catalogue_->render_settings().width() - 2 * proto_catalogue_->render_settings().padding()) 
-//                             / (scaler_.max_lon - scaler_.min_lon);
-//     }
-//     if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
-//         height_zoom_coef = (proto_catalogue_->render_settings().height() - 2 * proto_catalogue_->render_settings().padding()) 
-//                         / (scaler_.max_lat - scaler_.min_lat);
-//     }
-//     if (width_zoom_coef < height_zoom_coef){
-//         scaler_.zoom_coef = width_zoom_coef;
-//     } else {
-//         scaler_.zoom_coef = height_zoom_coef;
-//     }
-//     scaler_.padding = proto_catalogue_->render_settings().padding();         
-// }
 
 void MapRenderer::makeScaler(){
     if (catalogue_){
@@ -149,7 +116,6 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
     polylines_.reserve(proto_catalogue_->bus_size());
     route_names_.reserve(proto_catalogue_->bus_size());
     int route_counter = 0;
-    // for (int i = 0; i < proto_catalogue_->bus_size(); i++){
     for (const auto& [name, index] : *bus_index_map_){
         const catalogue_proto::Bus& info = proto_catalogue_->bus(index);
         const std::string& bus_name = info.name();
@@ -184,12 +150,6 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
                 route.AddPoint(GetSvgPoint(geo::Coordinates(stop.lattitude(), stop.longtitude())));
             }            
         }
-        // const auto& color_palette_proto = proto_catalogue_->render_settings().color_palette();
-        // int palette_size = proto_catalogue_->render_settings().color_palette_size();
-        // svg::Color color = getSvgColorOfProto(color_palette_proto(route_counter % size));
-        // polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(color)
-        //     .SetStrokeWidth(proto_catalogue_->render_settings().line_width())
-        //     .SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
         polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(settings_.color_palette[route_counter % settings_.color_palette.size()]).SetStrokeWidth(settings_.line_width)
             .SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
         route_counter += 1;
@@ -236,7 +196,6 @@ svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto){
 void MapRenderer::parseStopCirclesAndNamesProto(){
     stop_circles_.reserve(proto_catalogue_->stop_size());
     stop_names_.reserve(proto_catalogue_->stop_size());
-    // for (int i = 0; i < proto_catalogue_->stop_size(); i++){
     for (const auto& [name, index] : *stop_index_map_){
         const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(index);
         if (stop_info.bus_index_size() == 0){

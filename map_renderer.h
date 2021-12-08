@@ -53,18 +53,12 @@ public:
         settings_.stop_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset());
         settings_.underlayer_color = getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color());
         settings_.underlayer_width = proto_catalogue_->render_settings().underlayer_width();
-        // std::cerr << "Deserialization\n";
         for (int i = 0; i < proto_catalogue_->render_settings().color_palette_size(); i++){
             settings_.color_palette.push_back(
                 getSvgColorOfProto(proto_catalogue_->render_settings().color_palette(i))
             );
-        // std::cerr << i << " ";
-        // std::visit(svg::ColorPrinter{std::cerr}, settings_.color_palette[i]);
-        // std::cerr << '\n';
-        // std::cout << stop_index_map_.has_value() << '\n';
         InitilizeCatalogueMap(proto_catalogue_->bus(), bus_index_map_);
         InitilizeCatalogueMap(proto_catalogue_->stop(), stop_index_map_);
-        // std::cout << (*stop_index_map_).size() << '\n';
         }
     }
 
