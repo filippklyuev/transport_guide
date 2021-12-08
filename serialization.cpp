@@ -80,19 +80,14 @@ void Serializer::updateProtoWithRouter(){
 	catalogue_proto::TransportRouter* pr_router = proto_catalogue.mutable_router();
 	pr_router->set_wait_weight(router.getWaitWeight());
 	pr_router->set_bus_velocity(router.getBusVelocity());
-	updateProtoRouterWithVerticesInfo(router.getVerticesInfo(), pr_router); // write function
-	updateProtoRouterWithEdgesInfo(router.getEdgesInfo(), pr_router); //
-	fillProtoGraph(router, pr_router->mutable_graph()); // write function
+	updateProtoRouterWithVerticesInfo(router.getVerticesInfo(), pr_router);
+	updateProtoRouterWithEdgesInfo(router.getEdgesInfo(), pr_router); 
+	fillProtoGraph(router, pr_router->mutable_graph());
 }
 
 void Serializer::updateProtoRouterWithVerticesInfo(const std::vector<router::VertexInfo>& vertices_info,
 						catalogue_proto::TransportRouter* pr_router) const {
-	// int i = 0;
 	for (const router::VertexInfo& vertex_info : vertices_info){
-		// pr_router->add_vertex_ids();
-		// catalogue_proto::VertexInfo *pr_vert_info = pr_router->mutable_vertex_ids(i);
-		// pr_vert_info->set_stop_array_index(vertex_info.stop_info->id_);
-		// i++;
 		(*pr_router->mutable_stop_id_vertex_id())
 					[vertex_info.stop_info->id_] = vertex_info.id;
 	}
@@ -100,11 +95,10 @@ void Serializer::updateProtoRouterWithVerticesInfo(const std::vector<router::Ver
 
 void Serializer::updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
 								catalogue_proto::TransportRouter* pr_router) const {
-	for (size_t i = 0; i < edges_info.size(); i++){ // reserve 
+	for (size_t i = 0; i < edges_info.size(); i++){
 		pr_router->add_edges_info();
 	}
 	for (const auto& [edge_id, edge_info] : edges_info){
-		// std::cerr << edge_id << '\n';
 		catalogue_proto::EdgeInfo* pr_edge_info = pr_router->mutable_edges_info(static_cast<size_t>(edge_id));
 		pr_edge_info->set_bus_array_index(catalogue_.GetBusInfo(edge_info.bus_name).id_);
 		pr_edge_info->set_span(edge_info.span);
