@@ -197,7 +197,7 @@ void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& bui
     }
 }
 
-static graph_proto::RouteInfo buildProtoRoute(int id_from, int id_to
+static graph_proto::RouteInfo buildProtoRoute(size_t id_from, size_t id_to
     , const graph_proto::Graph& graph){
     const auto& route_internal_data = graph.routes_internal_data_matrix(id_from).route_internal_data(id_to);
     graph_proto::RouteInfo route_info;
@@ -205,7 +205,7 @@ static graph_proto::RouteInfo buildProtoRoute(int id_from, int id_to
         route_info.set_overall_time(route_internal_data.weight());
         bool prev_exists = route_internal_data.prev_exists();
         if (prev_exists){
-            for (int edge_id = route_internal_data.prev_edge_id(); prev_exists;
+            for (size_t edge_id = route_internal_data.prev_edge_id(); prev_exists;
                 edge_id = graph.routes_internal_data_matrix(id_from)
                                 .route_internal_data(graph.edge(edge_id).vertex_from()).prev_edge_id()){
                 route_info.add_edge_index_reversed(edge_id);
@@ -233,9 +233,9 @@ void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder
     const catalogue_proto::TransportRouter& router = proto_catalogue_->router();
     const graph_proto::Graph& graph = router.graph();
     if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
-        int id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
+        size_t id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
         // int id_to = (*proto_stops_map_).at(request.at("to").AsString());
-        int id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
+        size_t id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
         
         if (route.exists()){

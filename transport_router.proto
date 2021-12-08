@@ -5,17 +5,17 @@ import "graph.proto";
 package catalogue_proto;
 
 message EdgeInfo {
-	int32 bus_array_index = 1;
-	int32 span = 2;
+	uint64 bus_array_index = 1;
+	uint64 span = 2;
 	double weight = 3;
-	int32 from_stop_index = 4;
-	int32 to_stop_index = 5;
+	uint64 from_stop_index = 4;
+	uint64 to_stop_index = 5;
 }
 
 message TransportRouter {
 	double wait_weight = 1;
 	double bus_velocity = 2;
-	map <int32, int32> stop_id_vertex_id = 3;
+	map <uint64, uint64> stop_id_vertex_id = 3;
 	repeated EdgeInfo edges_info = 4;
 	graph_proto.Graph graph = 5;
 }

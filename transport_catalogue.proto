@@ -10,8 +10,8 @@ message Bus {
 	double factual_route_length = 2;
 	double geo_route_length = 3;
 	double curvature = 4;
-	int32 unique_stops_count = 5;
-	repeated int32 stop_index = 6;
+	uint64 unique_stops_count = 5;
+	repeated uint64 stop_index = 6;
 	bool is_cycled = 7;	
 }
 
@@ -19,8 +19,8 @@ message Stop {
 	string name = 1;
 	double lattitude = 2;
 	double longtitude = 3;
-	repeated int32 bus_index = 4;
-	map<int32, int32> stopid_distance = 5;
+	repeated uint64 bus_index = 4;
+	map<uint64, uint64> stopid_distance = 5;
 }
 
 message TransportCatalogue {

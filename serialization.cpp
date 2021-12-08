@@ -18,7 +18,7 @@ void Serializer::createProtoCatalogue(){
 
 void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map){
 	proto_catalogue.mutable_stop()->Reserve(stop_map.size());
-	for (int i = 0; i < stop_map.size(); i++){
+	for (size_t i = 0; i < stop_map.size(); i++){
 		proto_catalogue.add_stop(); // Бред, но у protobuf::RepeatedPtrField не нашел адекватного способа сделать resize :(
 	}
 	for (const auto& [name, info] : stop_map){
@@ -38,7 +38,7 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 
 void Serializer::updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map){
 	proto_catalogue.mutable_bus()->Reserve(bus_map.size());
-	for (int i = 0; i < bus_map.size(); i++){
+	for (size_t i = 0; i < bus_map.size(); i++){
 		proto_catalogue.add_bus();
 	}	
 	for (const auto& [name, info] : bus_map){
@@ -69,7 +69,7 @@ void Serializer::updateProtoWithRenderSettings(){
 	*settings->mutable_stop_label_offset() = getProtoPoint(render_settings_.stop_label_offset);
 	*settings->mutable_underlayer_color() = getProtoColor(render_settings_.underlayer_color);
 	settings->set_underlayer_width(render_settings_.underlayer_width);
-	for (int i = 0; i < render_settings_.color_palette.size(); i++){
+	for (size_t i = 0; i < render_settings_.color_palette.size(); i++){
 		settings->add_color_palette();
 		*settings->mutable_color_palette(i) = getProtoColor(render_settings_.color_palette[i]);
 	}
@@ -100,11 +100,11 @@ void Serializer::updateProtoRouterWithVerticesInfo(const std::vector<router::Ver
 
 void Serializer::updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
 								catalogue_proto::TransportRouter* pr_router) const {
-	for (int i = 0; i < edges_info.size(); i++){ // reserve 
+	for (size_t i = 0; i < edges_info.size(); i++){ // reserve 
 		pr_router->add_edges_info();
 	}
 	for (const auto& [edge_id, edge_info] : edges_info){
-		catalogue_proto::EdgeInfo* pr_edge_info = pr_router->mutable_edges_info(static_cast<int>(edge_id));
+		catalogue_proto::EdgeInfo* pr_edge_info = pr_router->mutable_edges_info(static_cast<size_t>(edge_id));
 		pr_edge_info->set_bus_array_index(catalogue_.GetBusInfo(edge_info.bus_name).id_);
 		pr_edge_info->set_span(edge_info.span);
 		pr_edge_info->set_weight(edge_info.weight);
@@ -114,20 +114,20 @@ void Serializer::updateProtoRouterWithEdgesInfo(const std::unordered_map<router:
 }
 
 void Serializer::fillProtoGraph(const router::TransportRouter& router, graph_proto::Graph* graph) const {
-	for (int i = 0; i < router.getGraph().GetEdgeCount(); i++){
+	for (size_t i = 0; i < router.getGraph().GetEdgeCount(); i++){
 		const graph::Edge<double>& edge = router.getGraph().GetEdge(i);
 		graph->add_edge();
 		graph_proto::Edge* pr_edge = graph->mutable_edge(i);
-		pr_edge->set_vertex_from(static_cast<int>(edge.from));
-		pr_edge->set_vertex_to(static_cast<int>(edge.to));
+		pr_edge->set_vertex_from(static_cast<size_t>(edge.from));
+		pr_edge->set_vertex_to(static_cast<size_t>(edge.to));
 		pr_edge->set_weight(edge.weight);
 	}
 	const auto& routes_internal_data_matrix = router.getRouter().getRoutesInternalData();
-	for (int i = 0; i < routes_internal_data_matrix.size(); i++){
+	for (size_t i = 0; i < routes_internal_data_matrix.size(); i++){
 		graph->add_routes_internal_data_matrix();
 		graph_proto::RoutesInternalData* pr_routes_internal_data = graph->mutable_routes_internal_data_matrix(i);
 		const auto& routes_internal_data = routes_internal_data_matrix[i];
-		for (int j = 0; j < routes_internal_data.size(); j++){
+		for (size_t j = 0; j < routes_internal_data.size(); j++){
 			pr_routes_internal_data->add_route_internal_data();
 			graph_proto::RouteInternalData* pr_route_internal_data = pr_routes_internal_data->mutable_route_internal_data(j);
 			if (routes_internal_data[j].has_value()){
@@ -135,7 +135,7 @@ void Serializer::fillProtoGraph(const router::TransportRouter& router, graph_pro
 				pr_route_internal_data->set_weight(routes_internal_data[j]->weight);
 				if (routes_internal_data[j]->prev_edge.has_value()){
 					pr_route_internal_data->set_prev_exists(true);
-					pr_route_internal_data->set_prev_edge_id(static_cast<int>(*routes_internal_data[j]->prev_edge));
+					pr_route_internal_data->set_prev_edge_id(static_cast<size_t>(*routes_internal_data[j]->prev_edge));
 				} else {
 					pr_route_internal_data->set_prev_exists(false);
 				}
