@@ -43,13 +43,13 @@ void MapRenderer::makeScalerOfProtoCatalogue(){
         for (int j = 0; j < bus_info.stop_index_size(); j++){
             const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(bus_info.stop_index(j));
             if (begin) {
-                scaler_.min_lat = stop_info.lattitude();
-                scaler_.max_lat = stop_info.lattitude();
-                scaler_.min_lon  = stop_info.longtitude();
-                scaler_.max_lon = stop_info.longtitude();
+                scaler_.min_lat = stop_info.coordinates().lattitude();
+                scaler_.max_lat = stop_info.coordinates().lattitude();
+                scaler_.min_lon  = stop_info.coordinates().longtitude();
+                scaler_.max_lon = stop_info.coordinates().longtitude();
                 begin = false;                
             }
-            geo::Coordinates crds = geo::Coordinates{stop_info.lattitude(), stop_info.longtitude()};
+            geo::Coordinates crds = geo::Coordinates{stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude()};
             if (crds.lat < scaler_.min_lat) { scaler_.min_lat = crds.lat; }
                 else if (crds.lat > scaler_.max_lat) { scaler_.max_lat = crds.lat; }
             if (crds.lng < scaler_.min_lon) { scaler_.min_lon = crds.lng; }
@@ -125,29 +125,29 @@ void MapRenderer::parsePolylinesAndRouteNamesProto(){
         svg::Polyline route;
         const catalogue_proto::Stop& first_stop = proto_catalogue_->stop(info.stop_index(0));
         route_names_.push_back(
-            getBusnameUnder(bus_name, geo::Coordinates(first_stop.lattitude(), first_stop.longtitude()))
+            getBusnameUnder(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()))
         );
         route_names_.push_back(
-            getBusnameText(bus_name, geo::Coordinates(first_stop.lattitude(), first_stop.longtitude()), route_counter)
+            getBusnameText(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()), route_counter)
         );
         for (int j = 0; j < info.stop_index_size(); j++){
             const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
-            route.AddPoint(GetSvgPoint(geo::Coordinates(stop.lattitude(), stop.longtitude())));
+            route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
         }
         const catalogue_proto::Stop& last_stop = proto_catalogue_->stop(info.stop_index(info.stop_index_size() - 1));
-        if (geo::Coordinates(first_stop.lattitude(), first_stop.longtitude())
-                             != geo::Coordinates(last_stop.lattitude(), last_stop.longtitude())){
+        if (geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude())
+                             != geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude())){
             route_names_.push_back(
-                getBusnameUnder(bus_name, geo::Coordinates(last_stop.lattitude(), last_stop.longtitude()))
+                getBusnameUnder(bus_name, geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude()))
             );
             route_names_.push_back(
-                getBusnameText(bus_name, geo::Coordinates(last_stop.lattitude(), last_stop.longtitude()), route_counter)
+                getBusnameText(bus_name, geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude()), route_counter)
             );
         }
         if (info.is_cycled() == false){
             for (int j = info.stop_index_size() - 2; j >= 0; j--){
                 const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
-                route.AddPoint(GetSvgPoint(geo::Coordinates(stop.lattitude(), stop.longtitude())));
+                route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
             }            
         }
         polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(settings_.color_palette[route_counter % settings_.color_palette.size()]).SetStrokeWidth(settings_.line_width)
@@ -203,17 +203,17 @@ void MapRenderer::parseStopCirclesAndNamesProto(){
         }
         svg::Circle circle;
         stop_circles_.push_back(circle.SetCenter(
-            GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
+            GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
             .SetRadius(settings_.stop_radius).SetFillColor(svg::Color("white")));
 
         svg::Text underliner, stoptext;
         stop_names_.push_back(underliner.SetPosition(
-            GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
+            GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
             .SetOffset(settings_.stop_label_offset).SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana")
             .SetData(stop_info.name()).SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color)
             .SetStrokeWidth(settings_.underlayer_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
 
-        stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.lattitude(), stop_info.longtitude())))
+        stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
             .SetOffset(settings_.stop_label_offset).
             SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana").SetData(stop_info.name()).SetFillColor(svg::Color("black")));
     }     

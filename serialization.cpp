@@ -26,8 +26,9 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 		proto_catalogue.add_stop();
 		catalogue_proto::Stop* stop = proto_catalogue.mutable_stop(info.id_);
 		stop->set_name(std::string(name));
-		stop->set_lattitude(info.coordinates.lat);
-		stop->set_longtitude(info.coordinates.lng);
+		catalogue_proto::Coordinates* crds = stop->mutable_coordinates();
+		crds->set_lattitude(info.coordinates.lat);
+		crds->set_longtitude(info.coordinates.lng);
 		for (const transport_guide::info::Bus* bus : info.passing_buses){
 			stop->add_bus_index(bus->id_);
 		}
