@@ -2,6 +2,18 @@
 
 namespace transport_guide {
 
+ QueryType defineRequestType(std::string_view type) const { 
+    if (type == "Stop"){
+        return QueryType::STOP;
+    } else if (type == "Bus"){
+        return QueryType::BUS;
+    } else if (type == "Map"){
+        return QueryType::MAP;
+    } else {
+        return QueryType::ROUTE;
+    }
+}    
+
 namespace json_reader {
 
 static svg::Color ParseColor(const json::Node& color_node){
@@ -107,18 +119,10 @@ void updateCatalogue(const json::Array& requests_vector, transport_guide::Transp
 
 bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const {
     if (type == QueryType::STOP){
-        if (catalogue_){
-            return catalogue_->IsStopListed(request.at("name").AsString());
-        } else {
-            return proto_stops_map_->count(request.at("name").AsString());
-        }
+        return catalogue_.IsStopListed(request.at("name").AsString());
     } 
     if (type == QueryType::BUS){
-        if (catalogue_){
-            return catalogue_->IsBusListed(request.at("name").AsString());
-        } else {
-            return proto_buses_map_->count(request.at("name").AsString());
-        }
+        return catalogue_.IsBusListed(request.at("name").AsString());
     }
     if (type == QueryType::MAP){
         return true;
@@ -127,27 +131,9 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
     return true;
 }
 
- QueryType StatParser::defineRequestType(std::string_view type) const { 
-    if (type == "Stop"){
-        return QueryType::STOP;
-    } else if (type == "Bus"){
-        return QueryType::BUS;
-    } else if (type == "Map"){
-        return QueryType::MAP;
-    } else {
-        return QueryType::ROUTE;
-    }
-}
-
 svg::Document StatParser::getSvgDoc() const {
-    if (catalogue_){
-        map_renderer::MapRenderer renderer(catalogue_, settings_);
-        return renderer.GetSvgDocument();
-    } else {
-        map_renderer::MapRenderer renderer(proto_catalogue_);
-        return renderer.GetSvgDocument();
-    }
-    
+    map_renderer::MapRenderer renderer(&catalogue_, settings_);
+    return renderer.GetSvgDocument();
 }
 
 static std::string SvgToStr(svg::Document doc){
@@ -196,91 +182,9 @@ void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& bui
     }
 }
 
-// copying router.h buildroute logic
-static graph_proto::RouteInfo buildProtoRoute(size_t id_from, size_t id_to
-    , const graph_proto::Graph& graph){
-    const auto& route_internal_data = graph.routes_internal_data_matrix(id_from).route_internal_data(id_to);
-    graph_proto::RouteInfo route_info;
-    if (route_internal_data.exists()){
-        route_info.set_overall_time(route_internal_data.weight());
-        bool prev_exists = route_internal_data.prev_exists();
-        if (prev_exists){
-            for (size_t edge_id = route_internal_data.prev_edge_id(); prev_exists;
-                edge_id = graph.routes_internal_data_matrix(id_from)
-                                .route_internal_data(graph.edge(edge_id).vertex_from()).prev_edge_id()){
-                route_info.add_edge_index_reversed(edge_id);
-                prev_exists = graph.routes_internal_data_matrix(id_from)
-                                .route_internal_data(graph.edge(edge_id).vertex_from()).prev_exists();
-            }
-        }
-        route_info.set_exists(true);
-        return route_info;
-    }
-    route_info.set_exists(false);
-    return route_info;
-}
-
-static std::vector<catalogue_proto::EdgeInfo> getProtoEdgesVector(const graph_proto::RouteInfo& route
-                                                                    , const catalogue_proto::TransportRouter& router){
-    std::vector<catalogue_proto::EdgeInfo> route_edges;
-    for (int i = route.edge_index_reversed_size() - 1; i >= 0; i--){
-        route_edges.push_back(router.edges_info(route.edge_index_reversed(i)));
-    }
-    return route_edges;
-}
-
-bool StatParser::isProtoRouteValid(const json::Dict& request) const {
-    if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
-        int from_id_catalogue = (*proto_stops_map_).at(request.at("from").AsString());
-        int to_id_catalogue = (*proto_stops_map_).at(request.at("to").AsString());
-        if (proto_catalogue_->router().stop_id_vertex_id().contains(from_id_catalogue) && 
-                    proto_catalogue_->router().stop_id_vertex_id().contains(to_id_catalogue)){
-            return true;
-        }
-    }
-    return false;
-}
-
-void StatParser::parseRouteRequestProto(const json::Dict& request, json::Builder& builder){
-    const catalogue_proto::TransportRouter& router = proto_catalogue_->router();
-    const graph_proto::Graph& graph = router.graph();
-    if (isProtoRouteValid(request)){
-        int from_id_catalogue = (*proto_stops_map_).at(request.at("from").AsString());
-        int to_id_catalogue = (*proto_stops_map_).at(request.at("to").AsString());
-        int id_from = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
-        int id_to = proto_catalogue_->router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
-        graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
-        if (route.exists()){
-            std::vector<catalogue_proto::EdgeInfo> route_edges = getProtoEdgesVector(route, router);
-            builder.StartDict()
-                   .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
-                   .Key("items")
-                        .StartArray();
-                        for (const auto& edge : route_edges){
-                            builder.StartDict()
-                                .Key("stop_name").Value(json::Node(static_cast<std::string>(proto_catalogue_->stop(edge.from_stop_index()).name())))
-                                .Key("time").Value(json::Node(static_cast<double>(router.wait_weight())))
-                                .Key("type").Value(json::Node(static_cast<std::string>("Wait")))
-                            .EndDict()
-                            .StartDict()
-                                .Key("bus").Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(edge.bus_array_index()).name())))
-                                .Key("span_count").Value(json::Node(static_cast<int>(edge.span())))
-                                .Key("time").Value(json::Node(static_cast<double>(edge.weight() - router.wait_weight())))
-                                .Key("type").Value(json::Node(static_cast<std::string>("Bus")))
-                            .EndDict();
-                        }
-                        builder.EndArray()
-                    .Key("total_time").Value(json::Node(static_cast<double>(route.overall_time())))
-                .EndDict();
-            return ;
-        }        
-    }
-    HandleError(request, builder);
-}
-
 void StatParser::parseStopRequest(const json::Dict& request, json::Builder& builder) const {
     std::string_view name = request.at("name").AsString();
-    const info::Stop& stop_info = catalogue_->GetStopInfo(name);
+    const info::Stop& stop_info = catalogue_.GetStopInfo(name);
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("buses").StartArray();
@@ -291,23 +195,10 @@ void StatParser::parseStopRequest(const json::Dict& request, json::Builder& buil
     .EndDict();    
 }
 
-void StatParser::parseStopRequestProto(const json::Dict& request, json::Builder& builder) const {
-    std::string name = request.at("name").AsString();
-    const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(proto_stops_map_->at(name));
-
-    builder.StartDict()
-           .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
-           .Key("buses").StartArray();
-           for (int i = 0; i < stop_info.bus_index_size(); i++){
-                builder.Value(json::Node(static_cast<std::string>(proto_catalogue_->bus(stop_info.bus_index(i)).name())));
-           }
-           builder.EndArray()
-    .EndDict();
-}
 
 void StatParser::parseBusRequest(const json::Dict& request, json::Builder& builder) const {
     std::string_view name = request.at("name").AsString();
-        const info::Bus& bus_info = catalogue_->GetBusInfo(name);
+        const info::Bus& bus_info = catalogue_.GetBusInfo(name);
 
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
@@ -318,40 +209,11 @@ void StatParser::parseBusRequest(const json::Dict& request, json::Builder& build
     .EndDict();
 }
 
-void StatParser::parseBusRequestProto(const json::Dict& request, json::Builder& builder) const {
-    std::string name = request.at("name").AsString();
-    const catalogue_proto::Bus& bus_info = proto_catalogue_->bus(proto_buses_map_->at(name));
-    builder.StartDict()
-           .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
-           .Key("curvature").Value(json::Node(static_cast<double>(bus_info.curvature())))
-           .Key("route_length").Value(json::Node(static_cast<int>(bus_info.factual_route_length())))
-           .Key("stop_count").Value(json::Node(static_cast<int>(bus_info.is_cycled()
-                                                                        ? bus_info.stop_index_size()
-                                                                        : bus_info.stop_index_size() * 2 - 1)))
-           .Key("unique_stop_count").Value(json::Node(static_cast<int>(bus_info.unique_stops_count())))
-    .EndDict();
-}
-
 void StatParser::parseMapRequest(const json::Dict& request, json::Builder& builder) const {
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("map").Value(json::Node(static_cast<std::string>(SvgToStr(getSvgDoc()))))
     .EndDict();   
-}
-
-void StatParser::initializeProtoNameMaps(){
-    if (!proto_stops_map_.has_value()){
-        proto_stops_map_.emplace(std::unordered_map<std::string_view, int>{});
-        for (int i = 0; i < proto_catalogue_->stop_size(); i++){
-            proto_stops_map_->emplace(proto_catalogue_->stop(i).name(), i);
-        }
-    }
-    if (!proto_buses_map_.has_value()){
-        proto_buses_map_.emplace(std::unordered_map<std::string_view, int>{});
-        for (int i = 0; i < proto_catalogue_->bus_size(); i++){
-            proto_buses_map_->emplace(proto_catalogue_->bus(i).name(), i);
-        }
-    }
 }
 
 void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
@@ -362,11 +224,11 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
     }
     switch (request_type){
         case QueryType::STOP : {     
-            catalogue_ != nullptr ? parseStopRequest(request, builder) : parseStopRequestProto(request, builder);
+            parseStopRequest(request, builder);
             break;
         }
         case QueryType::BUS : {    
-            catalogue_ != nullptr ? parseBusRequest(request, builder) : parseBusRequestProto(request, builder);
+            parseBusRequest(request, builder);
             break;
         }
         case QueryType::MAP : {  
@@ -374,16 +236,13 @@ void StatParser::parseSingleStatRequest(const json::Dict& request, json::Builder
             break;
         }
         case QueryType::ROUTE : {    
-            catalogue_ != nullptr ? parseRouteRequest(request, builder) : parseRouteRequestProto(request, builder);
+            parseRouteRequest(request, builder);
             break;
         }
     }
 }
 
 json::Document StatParser::parseStatArray(const json::Array& requests_vector) { 
-    if (catalogue_ == nullptr){
-        initializeProtoNameMaps();
-    }
     json::Builder builder;
     builder.StartArray();
         for (const auto& request : requests_vector){

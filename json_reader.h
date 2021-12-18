@@ -29,6 +29,8 @@ enum class QueryType {
     ROUTE
 };
 
+QueryType defineRequestType(std::string_view type) const;
+
 namespace json_reader {
 
 struct ParsedStopQuery  {
@@ -53,24 +55,17 @@ RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const TransportCatalogue* catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
         catalogue_(catalogue),
         settings_(std::move(settings)),
         routing_settings_(routing_settings)
-    {}
-
-    StatParser(const catalogue_proto::TransportCatalogue* proto_catalogue)
-        : proto_catalogue_(proto_catalogue)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
     std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
-    const TransportCatalogue* catalogue_ = nullptr;
-    const catalogue_proto::TransportCatalogue* proto_catalogue_ = nullptr;
-    std::optional<std::unordered_map<std::string_view, int>> proto_stops_map_ = std::nullopt;
-    std::optional<std::unordered_map<std::string_view, int>> proto_buses_map_ = std::nullopt;
+    const TransportCatalogue& catalogue_;
     const map_renderer::RenderSettings settings_;
     const RoutingSettings routing_settings_;
 
@@ -78,27 +73,16 @@ private:
 
     svg::Document getSvgDoc() const;
 
-    QueryType defineRequestType(std::string_view type) const;
-
     bool isValidRequest(const json::Dict& request, QueryType type) const;
 
     void parseStopRequest(const json::Dict& request, json::Builder& builder) const;
 
-    void parseStopRequestProto(const json::Dict& request, json::Builder& builder) const;
-
     void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
-
-    void parseBusRequestProto(const json::Dict& request, json::Builder& builder) const;
 
     void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 
     void parseRouteRequest(const json::Dict& request, json::Builder& builder);
 
-    void parseRouteRequestProto(const json::Dict& request, json::Builder& builder);
-
-    void initializeProtoNameMaps();
-
-    bool isProtoRouteValid(const json::Dict& request) const;
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
