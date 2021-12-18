@@ -89,7 +89,9 @@ private:
 
 	void parseRouteRequest(const json::Dict& request, json::Builder& builder);
 
-	void parseBusRequestProto(const json::Dict& request, json::Builder& builder) const;
+	void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
+
+	void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
 
 	bool isRouteValid(const json::Dict& request) const;
 

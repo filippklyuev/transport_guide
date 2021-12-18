@@ -4,7 +4,7 @@ namespace transport_guide {
 
 namespace router {
 
-explicit TransportRouter::TransportRouter(const TransportCatalogue& catalogue, RoutingSettings routing_settings)
+TransportRouter::TransportRouter(const TransportCatalogue& catalogue, RoutingSettings routing_settings)
 		: catalogue_(catalogue)
 		, wait_weight_(routing_settings.bus_wait_time)
 		, bus_velocity_(routing_settings.bus_velocity)
@@ -14,7 +14,7 @@ explicit TransportRouter::TransportRouter(const TransportCatalogue& catalogue, R
 			MapOfRoutes routes = getRoutes();
 			graph_ = std::make_unique<Graph>(vertices_info_.size());
 			fillGraphWithEdges(std::move(routes));
-			outer_ = std::make_unique<Router>(*graph_);
+			router_ = std::make_unique<Router>(*graph_);
 	}
 
 void TransportRouter::assignVertices(){

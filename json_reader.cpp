@@ -2,7 +2,7 @@
 
 namespace transport_guide {
 
- QueryType defineRequestType(std::string_view type) const { 
+ QueryType defineRequestType(std::string_view type){ 
     if (type == "Stop"){
         return QueryType::STOP;
     } else if (type == "Bus"){
@@ -151,7 +151,7 @@ static void HandleError(const json::Dict& request, json::Builder& builder){
 
 void StatParser::parseRouteRequest(const json::Dict& request, json::Builder& builder){
     if (!router_manager_){
-        router_manager_ = std::make_unique<router::TransportRouter>(*catalogue_, routing_settings_);
+        router_manager_ = std::make_unique<router::TransportRouter>(catalogue_, routing_settings_);
     }
     std::optional<router::RouteInfo> result = router_manager_->GetRouteInfo(request.at("from").AsString(), request.at("to").AsString());
     if (!result.has_value()){

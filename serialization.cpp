@@ -239,9 +239,9 @@ static std::vector<catalogue_proto::EdgeInfo> getProtoEdgesVector(const graph_pr
 }
 
 bool StatParser_Deserialized::isRouteValid(const json::Dict& request) const {
-    if ((*proto_stops_map_).count(request.at("from").AsString()) && (*proto_stops_map_).count(request.at("to").AsString())){
-        int from_id_catalogue = (*proto_stops_map_).at(request.at("from").AsString());
-        int to_id_catalogue = (*proto_stops_map_).at(request.at("to").AsString());
+    if (proto_stops_map_.count(request.at("from").AsString()) && proto_stops_map_.count(request.at("to").AsString())){
+        int from_id_catalogue = proto_stops_map_.at(request.at("from").AsString());
+        int to_id_catalogue = proto_stops_map_.at(request.at("to").AsString());
         if (proto_catalogue_.router().stop_id_vertex_id().contains(from_id_catalogue) && 
                     proto_catalogue_.router().stop_id_vertex_id().contains(to_id_catalogue)){
             return true;
@@ -253,11 +253,11 @@ bool StatParser_Deserialized::isRouteValid(const json::Dict& request) const {
 void StatParser_Deserialized::parseRouteRequest(const json::Dict& request, json::Builder& builder){
     const catalogue_proto::TransportRouter& router = proto_catalogue_.router();
     const graph_proto::Graph& graph = router.graph();
-    if (isProtoRouteValid(request)){
-        int from_id_catalogue = (*proto_stops_map_).at(request.at("from").AsString());
-        int to_id_catalogue = (*proto_stops_map_).at(request.at("to").AsString());
-        int id_from = proto_catalogue_.router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("from").AsString()));
-        int id_to = proto_catalogue_.router().stop_id_vertex_id().at((*proto_stops_map_).at(request.at("to").AsString()));
+    if (isRouteValid(request)){
+        int from_id_catalogue = proto_stops_map_.at(request.at("from").AsString());
+        int to_id_catalogue = proto_stops_map_.at(request.at("to").AsString());
+        int id_from = proto_catalogue_.router().stop_id_vertex_id().at(proto_stops_map_.at(request.at("from").AsString()));
+        int id_to = proto_catalogue_.router().stop_id_vertex_id().at(proto_stops_map_.at(request.at("to").AsString()));
         graph_proto::RouteInfo route = buildProtoRoute(id_from, id_to, graph);
         if (route.exists()){
             std::vector<catalogue_proto::EdgeInfo> route_edges = getProtoEdgesVector(route, router);
@@ -315,6 +315,19 @@ void StatParser_Deserialized::parseBusRequest(const json::Dict& request, json::B
     .EndDict();
 }
 
+static std::string SvgToStr(svg::Document doc){
+    std::stringstream strm;
+    doc.Render(strm);
+    return std::move(strm.str());
+}
+
+void StatParser_Deserialized::parseMapRequest(const json::Dict& request, json::Builder& builder) const {
+    builder.StartDict()
+           .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
+           .Key("map").Value(json::Node(static_cast<std::string>(SvgToStr(getSvgDoc()))))
+    .EndDict();   
+}
+
 void StatParser_Deserialized::initializeProtoNameMaps(){
     for (int i = 0; i < proto_catalogue_.stop_size(); i++){
         proto_stops_map_.emplace(proto_catalogue_.stop(i).name(), i);
@@ -325,7 +338,7 @@ void StatParser_Deserialized::initializeProtoNameMaps(){
 }
 
 void StatParser_Deserialized::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
-    QueryType request_type = json_reader::defineRequestType(request.at("type").AsString());
+    QueryType request_type = defineRequestType(request.at("type").AsString());
     if (!isValidRequest(request, request_type)){
         HandleError(request, builder);
         return;   

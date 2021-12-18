@@ -29,7 +29,7 @@ enum class QueryType {
     ROUTE
 };
 
-QueryType defineRequestType(std::string_view type) const;
+QueryType defineRequestType(std::string_view type);
 
 namespace json_reader {
 
