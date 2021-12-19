@@ -8,11 +8,11 @@ const std::filesystem::path& Serializer::getPath() const {
 	return filename_;
 }
 
-const TransportCatalogue& getTransportCatalogue() const {
+const TransportCatalogue& Serializer::getTransportCatalogue() const {
 	return catalogue_;
 }
 
-const catalogue_proto::TransportCatalogue& getProtoCatalogue() const {
+const catalogue_proto::TransportCatalogue& Serializer::getProtoCatalogue() const {
 	return proto_catalogue_;
 } 
 
