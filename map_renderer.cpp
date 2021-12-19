@@ -102,10 +102,6 @@ void MapRenderer::parsePolylinesAndRouteNames(){
     }
 }
 
-svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto){
-    return svg::Point(point_proto.x(), point_proto.y());
-}
-
 void MapRenderer::parseStopCirclesAndNames(){
     stop_circles_.reserve(catalogue_.GetStopsSet().size());
     stop_names_.reserve(catalogue_.GetStopsSet().size());

@@ -110,30 +110,26 @@ svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto);
 
 class ProtoMapRenderer {
 public:	
-    ProtoMapRenderer(const catalogue_proto::TransportCatalogue& proto_catalogue
-    		, const std::unordered_map<std::string_view, int>& proto_stops_map
-    		, const std::unordered_map<std::string_view, int>& proto_buses_map)
+    ProtoMapRenderer(const catalogue_proto::TransportCatalogue& proto_catalogue)
     	: proto_catalogue_(proto_catalogue)
-        , proto_stops_map_(proto_stops_map)
-        , proto_buses_map_(proto_stops_map_)
     {
-        settings_.width = proto_catalogue_->render_settings().width();
-        settings_.height = proto_catalogue_->render_settings().height();
-        settings_.padding = proto_catalogue_->render_settings().padding();
-        settings_.line_width = proto_catalogue_->render_settings().line_width();
-        settings_.stop_radius = proto_catalogue_->render_settings().stop_radius();
-        settings_.bus_label_font_size = proto_catalogue_->render_settings().bus_label_font_size();
-        settings_.bus_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().bus_label_offset());
-        settings_.stop_label_font_size = proto_catalogue_->render_settings().stop_label_font_size();
-        settings_.stop_label_offset = getSvgPointOfProto(proto_catalogue_->render_settings().stop_label_offset());
-        settings_.underlayer_color = getSvgColorOfProto(proto_catalogue_->render_settings().underlayer_color());
-        settings_.underlayer_width = proto_catalogue_->render_settings().underlayer_width();
-        for (int i = 0; i < proto_catalogue_->render_settings().color_palette_size(); i++){
+        settings_.width = proto_catalogue_.render_settings().width();
+        settings_.height = proto_catalogue_.render_settings().height();
+        settings_.padding = proto_catalogue_.render_settings().padding();
+        settings_.line_width = proto_catalogue_.render_settings().line_width();
+        settings_.stop_radius = proto_catalogue_.render_settings().stop_radius();
+        settings_.bus_label_font_size = proto_catalogue_.render_settings().bus_label_font_size();
+        settings_.bus_label_offset = getSvgPointOfProto(proto_catalogue_.render_settings().bus_label_offset());
+        settings_.stop_label_font_size = proto_catalogue_.render_settings().stop_label_font_size();
+        settings_.stop_label_offset = getSvgPointOfProto(proto_catalogue_.render_settings().stop_label_offset());
+        settings_.underlayer_color = getSvgColorOfProto(proto_catalogue_.render_settings().underlayer_color());
+        settings_.underlayer_width = proto_catalogue_.render_settings().underlayer_width();
+        for (int i = 0; i < proto_catalogue_.render_settings().color_palette_size(); i++){
             settings_.color_palette.push_back(
-                getSvgColorOfProto(proto_catalogue_->render_settings().color_palette(i))
+                getSvgColorOfProto(proto_catalogue_.render_settings().color_palette(i))
             );
-        // InitilizeCatalogueMap(proto_catalogue_->bus(), bus_index_map_);
-        // InitilizeCatalogueMap(proto_catalogue_->stop(), stop_index_map_);
+        InitilizeCatalogueMap(proto_catalogue_.bus(), bus_index_map_);
+        InitilizeCatalogueMap(proto_catalogue_.stop(), stop_index_map_);
         }
     }
 
@@ -148,8 +144,8 @@ public:
 
 private:
 	const catalogue_proto::TransportCatalogue& proto_catalogue_;
-    const std::optional<std::map<std::string_view, int>>& bus_index_map_;
-    const std::optional<std::map<std::string_view, int>>& stop_index_map_;
+    std::map<std::string_view, int> bus_index_map_;
+    std::map<std::string_view, int> stop_index_map_;
     map_renderer::RenderSettings settings_;
     map_renderer::ScalerStruct scaler_;
     std::vector<svg::Polyline> polylines_;
@@ -163,13 +159,23 @@ private:
 
     void makeScalerOfCatalogue();
 
+    svg::Point GetSvgPoint(geo::Coordinates coordinates);
+
     void makeScaler();
 
     void addObjectsToDoc(svg::Document& document);
     
     svg::Text getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates);
     
-    svg::Text getBusnameText(const std::string& bus_name, geo::Coordinates coordinates, int route_counter);    
+    svg::Text getBusnameText(const std::string& bus_name, geo::Coordinates coordinates, int route_counter);
+
+    template<typename Repeated,typename Map>
+    void InitilizeCatalogueMap(const Repeated& repeated, Map& map){
+        // map.emplace(std::map<std::string_view, int>{});
+        for (int i = 0; i < repeated.size(); i++){
+            map.emplace(repeated.at(i).name(), i);
+        }
+    }
 };
 
 catalogue_proto::Color getProtoColor(const svg::Color& color);

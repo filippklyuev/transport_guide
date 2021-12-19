@@ -196,7 +196,7 @@ bool ProtoStatParser::isValidRequest(const json::Dict& request, QueryType type) 
 }
 
 svg::Document ProtoStatParser::getSvgDoc() const {
-    map_renderer::MapRenderer renderer(proto_catalogue_, proto_stops_map_, proto_stops_map_);
+    ProtoMapRenderer renderer(proto_catalogue_);
     return renderer.GetSvgDocument();	
 }
 
@@ -374,11 +374,26 @@ json::Document ProtoStatParser::parseStatArray(const json::Array& requests_vecto
     return json::Document(builder.Build());
 }
 
+svg::Point ProtoMapRenderer::GetSvgPoint(geo::Coordinates coordinates){
+    double x, y;
+    if (coordinates.lng == scaler_.min_lon){
+        x = scaler_.padding;
+    } else {
+        x = (coordinates.lng - scaler_.min_lon) * scaler_.zoom_coef + scaler_.padding;
+    }
+    if (coordinates.lat == scaler_.max_lat){
+        y = scaler_.padding;
+    } else {
+        y = (scaler_.max_lat - coordinates.lat) * scaler_.zoom_coef + scaler_.padding; 
+    }
+    return svg::Point(x, y);
+}
+
 void ProtoMapRenderer::parseStopCirclesAndNames(){
-    stop_circles_.reserve(proto_catalogue_->stop_size());
-    stop_names_.reserve(proto_catalogue_->stop_size());
-    for (const auto& [name, index] : *stop_index_map_){
-        const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(index);
+    stop_circles_.reserve(proto_catalogue_.stop_size());
+    stop_names_.reserve(proto_catalogue_.stop_size());
+    for (const auto& [name, index] : stop_index_map_){
+        const catalogue_proto::Stop& stop_info = proto_catalogue_.stop(index);
         if (stop_info.bus_index_size() == 0){
             continue ;
         }
@@ -401,17 +416,17 @@ void ProtoMapRenderer::parseStopCirclesAndNames(){
 }
 
 void ProtoMapRenderer::parsePolylinesAndRouteNames(){
-    polylines_.reserve(proto_catalogue_->bus_size());
-    route_names_.reserve(proto_catalogue_->bus_size());
+    polylines_.reserve(proto_catalogue_.bus_size());
+    route_names_.reserve(proto_catalogue_.bus_size());
     int route_counter = 0;
-    for (const auto& [name, index] : *bus_index_map_){
-        const catalogue_proto::Bus& info = proto_catalogue_->bus(index);
+    for (const auto& [name, index] : bus_index_map_){
+        const catalogue_proto::Bus& info = proto_catalogue_.bus(index);
         const std::string& bus_name = info.name();
         if (info.stop_index_size() == 0){
             continue ;
         }
         svg::Polyline route;
-        const catalogue_proto::Stop& first_stop = proto_catalogue_->stop(info.stop_index(0));
+        const catalogue_proto::Stop& first_stop = proto_catalogue_.stop(info.stop_index(0));
         route_names_.push_back(
             getBusnameUnder(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()))
         );
@@ -419,10 +434,10 @@ void ProtoMapRenderer::parsePolylinesAndRouteNames(){
             getBusnameText(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()), route_counter)
         );
         for (int j = 0; j < info.stop_index_size(); j++){
-            const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
+            const catalogue_proto::Stop& stop = proto_catalogue_.stop(info.stop_index(j));
             route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
         }
-        const catalogue_proto::Stop& last_stop = proto_catalogue_->stop(info.stop_index(info.stop_index_size() - 1));
+        const catalogue_proto::Stop& last_stop = proto_catalogue_.stop(info.stop_index(info.stop_index_size() - 1));
         if (geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude())
                              != geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude())){
             route_names_.push_back(
@@ -434,7 +449,7 @@ void ProtoMapRenderer::parsePolylinesAndRouteNames(){
         }
         if (info.is_cycled() == false){
             for (int j = info.stop_index_size() - 2; j >= 0; j--){
-                const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
+                const catalogue_proto::Stop& stop = proto_catalogue_.stop(info.stop_index(j));
                 route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
             }            
         }
@@ -461,7 +476,7 @@ svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color){
     }
 }
 
-svg::Text ProtoProtoMapRenderer::getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates){
+svg::Text ProtoMapRenderer::getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates){
     svg::Text busname_under;
 
     busname_under.SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color).
@@ -483,10 +498,10 @@ svg::Text ProtoMapRenderer::getBusnameText(const std::string& bus_name, geo::Coo
 
 void ProtoMapRenderer::makeScaler(){
     bool begin = true;
-    for (int i = 0; i < proto_catalogue_->bus_size(); i++){
-        const catalogue_proto::Bus& bus_info = proto_catalogue_->bus(i);
+    for (int i = 0; i < proto_catalogue_.bus_size(); i++){
+        const catalogue_proto::Bus& bus_info = proto_catalogue_.bus(i);
         for (int j = 0; j < bus_info.stop_index_size(); j++){
-            const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(bus_info.stop_index(j));
+            const catalogue_proto::Stop& stop_info = proto_catalogue_.stop(bus_info.stop_index(j));
             if (begin) {
                 scaler_.min_lat = stop_info.coordinates().lattitude();
                 scaler_.max_lat = stop_info.coordinates().lattitude();
@@ -517,7 +532,7 @@ void ProtoMapRenderer::makeScaler(){
     scaler_.padding = settings_.padding;        
 }
 
-svg::Document MapRenderer::GetSvgDocument(){
+svg::Document ProtoMapRenderer::GetSvgDocument(){
     svg::Document document;
     makeScaler();
     parsePolylinesAndRouteNames();
