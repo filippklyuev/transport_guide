@@ -39,6 +39,12 @@ public:
 
 	void SerializeTransportCatalogue();
 
+	const std::filesystem::path& getPath() const ;
+
+	const TransportCatalogue& getTransportCatalogue() const ;
+
+	const catalogue_proto::TransportCatalogue& getProtoCatalogue() const ;
+
 private:
 	const std::filesystem::path filename_;
 	const TransportCatalogue& catalogue_;

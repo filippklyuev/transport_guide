@@ -4,6 +4,18 @@ namespace transport_guide {
 
 namespace proto {
 
+const std::filesystem::path& Serializer::getPath() const {
+	return filename_;
+}
+
+const TransportCatalogue& getTransportCatalogue() const {
+	return catalogue_;
+}
+
+const catalogue_proto::TransportCatalogue& getProtoCatalogue() const {
+	return proto_catalogue_;
+} 
+
 void Serializer::SerializeTransportCatalogue(){
 	proto_catalogue_ = createProtoCatalogue();
 	std::ofstream ofs(filename_, std::ios::binary);
