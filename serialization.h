@@ -44,16 +44,16 @@ private:
 	const TransportCatalogue& catalogue_;
 	const map_renderer::RenderSettings& render_settings_;
 	RoutingSettings routing_settings_;
-	catalogue_proto::TransportCatalogue proto_catalogue;
+	catalogue_proto::TransportCatalogue proto_catalogue_;
 
 
-	void createProtoCatalogue();
+	catalogue_proto::TransportCatalogue proto_catalogue createProtoCatalogue();
 
-	void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map);
+	void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue_proto::TransportCatalogue& proto_catalogue);
 
-	void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map);	
+	void updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_proto::TransportCatalogue& proto_catalogue);	
 
-	void updateProtoWithRenderSettings();
+	void updateProtoWithRenderSettings(catalogue_proto::TransportCatalogue& proto_catalogue);
 
 	void updateProtoRouterWithVerticesInfo(const std::vector<router::VertexInfo>& vertices_info,
 								catalogue_proto::TransportRouter* pr_router) const;
@@ -61,7 +61,7 @@ private:
 	void updateProtoRouterWithEdgesInfo(const std::unordered_map<router::EdgeId, router::EdgeInfo>& edges_info,
 								catalogue_proto::TransportRouter* pr_router) const;
 
-	void updateProtoWithRouter();
+	void updateProtoWithRouter(catalogue_proto::TransportCatalogue& proto_catalogue);
 
 	void fillProtoGraph(const router::TransportRouter& router, graph_proto::Graph* graph) const;
 };

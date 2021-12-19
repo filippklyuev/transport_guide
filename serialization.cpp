@@ -5,19 +5,21 @@ namespace transport_guide {
 namespace proto {
 
 void Serializer::SerializeTransportCatalogue(){
-	createProtoCatalogue();
+	proto_catalogue_ = createProtoCatalogue();
 	std::ofstream ofs(filename_, std::ios::binary);
-	proto_catalogue.SerializeToOstream(&ofs);
+	proto_catalogue_.SerializeToOstream(&ofs);
 }
 
-void Serializer::createProtoCatalogue(){
-	updateProtoWithStops(catalogue_.GetStopsMap());
-	updateProtoWithBuses(catalogue_.GetBusesMap());
-	updateProtoWithRenderSettings();
-	updateProtoWithRouter();
+catalogue_proto::TransportCatalogue proto_catalogue Serializer::createProtoCatalogue(){
+	catalogue_proto::TransportCatalogue proto_catalogue;
+	updateProtoWithStops(catalogue_.GetStopsMap(), proto_catalogue);
+	updateProtoWithBuses(catalogue_.GetBusesMap(), proto_catalogue);
+	updateProtoWithRenderSettings(proto_catalogue);
+	updateProtoWithRouter(proto_catalogue);
+	return proto_catalogue;
 }
 
-void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map){
+void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue_proto::TransportCatalogue& proto_catalogue){
 	proto_catalogue.mutable_stop()->Reserve(stop_map.size());
 	for (size_t i = 0; i < stop_map.size(); i++){
 		proto_catalogue.add_stop();
@@ -43,7 +45,7 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 	}
 }
 
-void Serializer::updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map){
+void Serializer::updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map, catalogue_proto::TransportCatalogue& proto_catalogue){
 	proto_catalogue.mutable_bus()->Reserve(bus_map.size());
 	for (size_t i = 0; i < bus_map.size(); i++){
 		proto_catalogue.add_bus();
@@ -63,7 +65,7 @@ void Serializer::updateProtoWithBuses(const TransportCatalogue::BusMap& bus_map)
 }
 
 
-void Serializer::updateProtoWithRenderSettings(){
+void Serializer::updateProtoWithRenderSettings(catalogue_proto::TransportCatalogue& proto_catalogue){
 	catalogue_proto::RenderSettings* settings = proto_catalogue.mutable_render_settings();
 	settings->set_width(render_settings_.width);
 	settings->set_height(render_settings_.height);
@@ -82,7 +84,7 @@ void Serializer::updateProtoWithRenderSettings(){
 	}
 }
 
-void Serializer::updateProtoWithRouter(){
+void Serializer::updateProtoWithRouter(catalogue_proto::TransportCatalogue& proto_catalogue){
 	router::TransportRouter router(catalogue_, routing_settings_);
 	catalogue_proto::TransportRouter* pr_router = proto_catalogue.mutable_router();
 	pr_router->set_wait_weight(router.getWaitWeight());
