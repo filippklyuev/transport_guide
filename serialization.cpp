@@ -35,10 +35,10 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 		for (const auto& [stop_name, distance] : info.distance_to_stops){
 			// (*stop->mutable_stopid_distance())[stop_map.at(stop_name).id_] = distance;
 			stop->add_distance();
-			catalogue_proto::Distance* distance = stop->mutable_distance().at(stop->distance_size() - 1);
-			distance->set_id_from(info.id_);
-			distance->set_id_to(stop_map.at(stop_name).id_);
-			distance->set_distance(distance);
+			catalogue_proto::Distance* distance_info = stop->mutable_distance(stop->distance_size() - 1);
+			distance_info->set_id_from(info.id_);
+			distance_info->set_id_to(stop_map.at(stop_name).id_);
+			distance_info->set_distance(distance);
 		}
 	}
 }
