@@ -47,7 +47,7 @@ private:
 	catalogue_proto::TransportCatalogue proto_catalogue_;
 
 
-	catalogue_proto::TransportCatalogue proto_catalogue createProtoCatalogue();
+	catalogue_proto::TransportCatalogue createProtoCatalogue();
 
 	void updateProtoWithStops(const TransportCatalogue::StopMap& stop_map, catalogue_proto::TransportCatalogue& proto_catalogue);
 

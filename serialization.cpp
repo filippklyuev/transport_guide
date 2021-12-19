@@ -10,7 +10,7 @@ void Serializer::SerializeTransportCatalogue(){
 	proto_catalogue_.SerializeToOstream(&ofs);
 }
 
-catalogue_proto::TransportCatalogue proto_catalogue Serializer::createProtoCatalogue(){
+catalogue_proto::TransportCatalogue Serializer::createProtoCatalogue(){
 	catalogue_proto::TransportCatalogue proto_catalogue;
 	updateProtoWithStops(catalogue_.GetStopsMap(), proto_catalogue);
 	updateProtoWithBuses(catalogue_.GetBusesMap(), proto_catalogue);
