@@ -20,7 +20,7 @@ void Serializer::createProtoCatalogue(){
 void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_map){
 	proto_catalogue.mutable_stop()->Reserve(stop_map.size());
 	for (size_t i = 0; i < stop_map.size(); i++){
-		proto_catalogue.add_stop(); // Бред, но у protobuf::RepeatedPtrField не нашел адекватного способа сделать resize :(
+		proto_catalogue.add_stop();
 	}
 	for (const auto& [name, info] : stop_map){
 		proto_catalogue.add_stop();
@@ -33,7 +33,12 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 			stop->add_bus_index(bus->id_);
 		}
 		for (const auto& [stop_name, distance] : info.distance_to_stops){
-			(*stop->mutable_stopid_distance())[stop_map.at(stop_name).id_] = distance;
+			// (*stop->mutable_stopid_distance())[stop_map.at(stop_name).id_] = distance;
+			stop->add_distance();
+			catalogue_proto::Distance* distance = stop->mutable_distance().at(stop->distance_size() - 1);
+			distance->set_id_from(info.id_);
+			distance->set_id_to(stop_map.at(stop_name).id_);
+			distance->set_distance(distance);
 		}
 	}
 }

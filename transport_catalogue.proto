@@ -30,7 +30,7 @@ message Stop {
 	string name = 1;
 	Coordinates coordinates = 2;
 	repeated uint32 bus_index = 3;
-	map<uint32, int32> stopid_distance = 4;
+	repeated Distance distance = 4;
 }
 
 message TransportCatalogue {

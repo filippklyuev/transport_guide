@@ -171,7 +171,6 @@ private:
 
     template<typename Repeated,typename Map>
     void InitilizeCatalogueMap(const Repeated& repeated, Map& map){
-        // map.emplace(std::map<std::string_view, int>{});
         for (int i = 0; i < repeated.size(); i++){
             map.emplace(repeated.at(i).name(), i);
         }
