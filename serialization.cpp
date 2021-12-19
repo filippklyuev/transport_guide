@@ -46,6 +46,9 @@ void Serializer::updateProtoWithStops(const TransportCatalogue::StopMap& stop_ma
 		for (const transport_guide::info::Bus* bus : info.passing_buses){
 			stop->add_bus_index(bus->id_);
 		}
+
+		// Добавил в прото файл дистанции, но не стал выносить от отдельную структуру в самом каталоге - не очень понял как ее там сделать
+		// юзабельной - просто репитед с расстояниями записанными подряд? Как мне кажется в остановках им самое место :)
 		for (const auto& [stop_name, distance] : info.distance_to_stops){
 			// (*stop->mutable_stopid_distance())[stop_map.at(stop_name).id_] = distance;
 			stop->add_distance();

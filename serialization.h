@@ -39,6 +39,8 @@ public:
 
 	void SerializeTransportCatalogue();
 
+	// Добавил геттеры, сеттеры мне кажутся здесь излишними, лучше все сразу строго будет инициалироваться в в конструкторе
+
 	const std::filesystem::path& getPath() const ;
 
 	const TransportCatalogue& getTransportCatalogue() const ;
