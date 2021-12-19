@@ -132,7 +132,7 @@ bool StatParser::isValidRequest(const json::Dict& request, QueryType type) const
 }
 
 svg::Document StatParser::getSvgDoc() const {
-    map_renderer::MapRenderer renderer(&catalogue_, settings_);
+    map_renderer::MapRenderer renderer(catalogue_, settings_);
     return renderer.GetSvgDocument();
 }
 

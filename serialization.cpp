@@ -181,7 +181,7 @@ catalogue_proto::TransportCatalogue DeserializeCatalogue(const std::filesystem::
 	return proto_catalogue;
 }
 
-bool StatParser_Deserialized::isValidRequest(const json::Dict& request, QueryType type) const {
+bool ProtoStatParser::isValidRequest(const json::Dict& request, QueryType type) const {
     if (type == QueryType::STOP){
         return proto_stops_map_.count(request.at("name").AsString());
     } 
@@ -195,12 +195,12 @@ bool StatParser_Deserialized::isValidRequest(const json::Dict& request, QueryTyp
     return true;
 }
 
-svg::Document StatParser_Deserialized::getSvgDoc() const {
-    map_renderer::MapRenderer renderer(&proto_catalogue_);
+svg::Document ProtoStatParser::getSvgDoc() const {
+    map_renderer::MapRenderer renderer(proto_catalogue_, proto_stops_map_, proto_stops_map_);
     return renderer.GetSvgDocument();	
 }
 
-void StatParser_Deserialized::HandleError(const json::Dict& request, json::Builder& builder){
+void ProtoStatParser::HandleError(const json::Dict& request, json::Builder& builder){
         builder.StartDict()
                .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
                .Key("error_message").Value(json::Node(static_cast<std::string>("not found")))
@@ -239,7 +239,7 @@ static std::vector<catalogue_proto::EdgeInfo> getProtoEdgesVector(const graph_pr
     return route_edges;
 }
 
-bool StatParser_Deserialized::isRouteValid(const json::Dict& request) const {
+bool ProtoStatParser::isRouteValid(const json::Dict& request) const {
     if (proto_stops_map_.count(request.at("from").AsString()) && proto_stops_map_.count(request.at("to").AsString())){
         int from_id_catalogue = proto_stops_map_.at(request.at("from").AsString());
         int to_id_catalogue = proto_stops_map_.at(request.at("to").AsString());
@@ -251,7 +251,7 @@ bool StatParser_Deserialized::isRouteValid(const json::Dict& request) const {
     return false;
 }
 
-void StatParser_Deserialized::parseRouteRequest(const json::Dict& request, json::Builder& builder){
+void ProtoStatParser::parseRouteRequest(const json::Dict& request, json::Builder& builder){
     const catalogue_proto::TransportRouter& router = proto_catalogue_.router();
     const graph_proto::Graph& graph = router.graph();
     if (isRouteValid(request)){
@@ -288,7 +288,7 @@ void StatParser_Deserialized::parseRouteRequest(const json::Dict& request, json:
     HandleError(request, builder);
 }
 
-void StatParser_Deserialized::parseStopRequest(const json::Dict& request, json::Builder& builder) const {
+void ProtoStatParser::parseStopRequest(const json::Dict& request, json::Builder& builder) const {
     std::string name = request.at("name").AsString();
     const catalogue_proto::Stop& stop_info = proto_catalogue_.stop(proto_stops_map_.at(name));
 
@@ -302,7 +302,7 @@ void StatParser_Deserialized::parseStopRequest(const json::Dict& request, json::
     .EndDict();
 }
 
-void StatParser_Deserialized::parseBusRequest(const json::Dict& request, json::Builder& builder) const {
+void ProtoStatParser::parseBusRequest(const json::Dict& request, json::Builder& builder) const {
     std::string name = request.at("name").AsString();
     const catalogue_proto::Bus& bus_info = proto_catalogue_.bus(proto_buses_map_.at(name));
     builder.StartDict()
@@ -322,14 +322,14 @@ static std::string SvgToStr(svg::Document doc){
     return std::move(strm.str());
 }
 
-void StatParser_Deserialized::parseMapRequest(const json::Dict& request, json::Builder& builder) const {
+void ProtoStatParser::parseMapRequest(const json::Dict& request, json::Builder& builder) const {
     builder.StartDict()
            .Key("request_id").Value(json::Node(static_cast<int>(request.at("id").AsInt())))
            .Key("map").Value(json::Node(static_cast<std::string>(SvgToStr(getSvgDoc()))))
     .EndDict();   
 }
 
-void StatParser_Deserialized::initializeProtoNameMaps(){
+void ProtoStatParser::initializeProtoNameMaps(){
     for (int i = 0; i < proto_catalogue_.stop_size(); i++){
         proto_stops_map_.emplace(proto_catalogue_.stop(i).name(), i);
     }
@@ -338,7 +338,7 @@ void StatParser_Deserialized::initializeProtoNameMaps(){
     }
 }
 
-void StatParser_Deserialized::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
+void ProtoStatParser::parseSingleStatRequest(const json::Dict& request, json::Builder& builder){
     QueryType request_type = defineRequestType(request.at("type").AsString());
     if (!isValidRequest(request, request_type)){
         HandleError(request, builder);
@@ -364,7 +364,7 @@ void StatParser_Deserialized::parseSingleStatRequest(const json::Dict& request, 
     }
 }
 
-json::Document StatParser_Deserialized::parseStatArray(const json::Array& requests_vector) { 
+json::Document ProtoStatParser::parseStatArray(const json::Array& requests_vector) { 
     json::Builder builder;
     builder.StartArray();
         for (const auto& request : requests_vector){
@@ -372,6 +372,161 @@ json::Document StatParser_Deserialized::parseStatArray(const json::Array& reques
         }
         builder.EndArray();
     return json::Document(builder.Build());
+}
+
+void ProtoMapRenderer::parseStopCirclesAndNames(){
+    stop_circles_.reserve(proto_catalogue_->stop_size());
+    stop_names_.reserve(proto_catalogue_->stop_size());
+    for (const auto& [name, index] : *stop_index_map_){
+        const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(index);
+        if (stop_info.bus_index_size() == 0){
+            continue ;
+        }
+        svg::Circle circle;
+        stop_circles_.push_back(circle.SetCenter(
+            GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
+            .SetRadius(settings_.stop_radius).SetFillColor(svg::Color("white")));
+
+        svg::Text underliner, stoptext;
+        stop_names_.push_back(underliner.SetPosition(
+            GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
+            .SetOffset(settings_.stop_label_offset).SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana")
+            .SetData(stop_info.name()).SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color)
+            .SetStrokeWidth(settings_.underlayer_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
+
+        stop_names_.push_back(stoptext.SetPosition(GetSvgPoint(geo::Coordinates(stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude())))
+            .SetOffset(settings_.stop_label_offset).
+            SetFontSize(settings_.stop_label_font_size).SetFontFamily("Verdana").SetData(stop_info.name()).SetFillColor(svg::Color("black")));
+    }     
+}
+
+void ProtoMapRenderer::parsePolylinesAndRouteNames(){
+    polylines_.reserve(proto_catalogue_->bus_size());
+    route_names_.reserve(proto_catalogue_->bus_size());
+    int route_counter = 0;
+    for (const auto& [name, index] : *bus_index_map_){
+        const catalogue_proto::Bus& info = proto_catalogue_->bus(index);
+        const std::string& bus_name = info.name();
+        if (info.stop_index_size() == 0){
+            continue ;
+        }
+        svg::Polyline route;
+        const catalogue_proto::Stop& first_stop = proto_catalogue_->stop(info.stop_index(0));
+        route_names_.push_back(
+            getBusnameUnder(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()))
+        );
+        route_names_.push_back(
+            getBusnameText(bus_name, geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude()), route_counter)
+        );
+        for (int j = 0; j < info.stop_index_size(); j++){
+            const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
+            route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
+        }
+        const catalogue_proto::Stop& last_stop = proto_catalogue_->stop(info.stop_index(info.stop_index_size() - 1));
+        if (geo::Coordinates(first_stop.coordinates().lattitude(), first_stop.coordinates().longtitude())
+                             != geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude())){
+            route_names_.push_back(
+                getBusnameUnder(bus_name, geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude()))
+            );
+            route_names_.push_back(
+                getBusnameText(bus_name, geo::Coordinates(last_stop.coordinates().lattitude(), last_stop.coordinates().longtitude()), route_counter)
+            );
+        }
+        if (info.is_cycled() == false){
+            for (int j = info.stop_index_size() - 2; j >= 0; j--){
+                const catalogue_proto::Stop& stop = proto_catalogue_->stop(info.stop_index(j));
+                route.AddPoint(GetSvgPoint(geo::Coordinates(stop.coordinates().lattitude(), stop.coordinates().longtitude())));
+            }            
+        }
+        polylines_.push_back(route.SetFillColor(svg::Color()).SetStrokeColor(settings_.color_palette[route_counter % settings_.color_palette.size()]).SetStrokeWidth(settings_.line_width)
+            .SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND));
+        route_counter += 1;
+
+    }
+}
+
+svg::Point getSvgPointOfProto(const catalogue_proto::Point& point_proto){
+    return svg::Point(point_proto.x(), point_proto.y());
+}
+
+svg::Color getSvgColorOfProto(const catalogue_proto::Color& proto_color){
+    if (proto_color.has_rgb()){
+        const catalogue_proto::RGB& rgb = proto_color.rgb();
+        return svg::Color(svg::Rgb(rgb.red(), rgb.green(), rgb.blue()));
+    } else if (proto_color.has_rgba()){
+        const catalogue_proto::RGBA& rgba = proto_color.rgba();
+        return svg::Color(svg::Rgba(rgba.red(), rgba.green(), rgba.blue(), rgba.opacity()));
+    } else {
+        return svg::Color(proto_color.str());
+    }
+}
+
+svg::Text ProtoProtoMapRenderer::getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates){
+    svg::Text busname_under;
+
+    busname_under.SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color).
+            SetPosition(GetSvgPoint(coordinates)).SetOffset(settings_.bus_label_offset).SetFontSize(settings_.bus_label_font_size).
+            SetFontFamily("Verdana").SetFontWeight("bold").SetData(bus_name).SetStrokeWidth(settings_.underlayer_width).SetStrokeLineCap(svg::StrokeLineCap::ROUND).
+            SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+    return busname_under;
+}
+
+svg::Text ProtoMapRenderer::getBusnameText(const std::string& bus_name, geo::Coordinates coordinates, int route_counter){
+    svg::Text busname_text;
+
+    busname_text.SetFillColor(settings_.color_palette[route_counter % settings_.color_palette.size()]).
+        SetPosition(GetSvgPoint(coordinates)).
+        SetOffset(settings_.bus_label_offset).SetFontSize(settings_.bus_label_font_size).
+        SetFontFamily("Verdana").SetFontWeight("bold").SetData(bus_name);
+    return busname_text;
+}
+
+void ProtoMapRenderer::makeScaler(){
+    bool begin = true;
+    for (int i = 0; i < proto_catalogue_->bus_size(); i++){
+        const catalogue_proto::Bus& bus_info = proto_catalogue_->bus(i);
+        for (int j = 0; j < bus_info.stop_index_size(); j++){
+            const catalogue_proto::Stop& stop_info = proto_catalogue_->stop(bus_info.stop_index(j));
+            if (begin) {
+                scaler_.min_lat = stop_info.coordinates().lattitude();
+                scaler_.max_lat = stop_info.coordinates().lattitude();
+                scaler_.min_lon  = stop_info.coordinates().longtitude();
+                scaler_.max_lon = stop_info.coordinates().longtitude();
+                begin = false;                
+            }
+            geo::Coordinates crds = geo::Coordinates{stop_info.coordinates().lattitude(), stop_info.coordinates().longtitude()};
+            if (crds.lat < scaler_.min_lat) { scaler_.min_lat = crds.lat; }
+                else if (crds.lat > scaler_.max_lat) { scaler_.max_lat = crds.lat; }
+            if (crds.lng < scaler_.min_lon) { scaler_.min_lon = crds.lng; }
+                else if (crds.lng > scaler_.max_lon) { scaler_.max_lon = crds.lng; }            
+        }
+    }	
+    double width_zoom_coef = 0.0; 
+    double height_zoom_coef = 0.0;
+    if ((scaler_.max_lon - scaler_.min_lon) != 0.0){
+        width_zoom_coef = (settings_.width - 2 * settings_.padding) / (scaler_.max_lon - scaler_.min_lon);
+    }
+    if ((scaler_.max_lat - scaler_.min_lat) != 0.0){
+        height_zoom_coef = (settings_.height - 2 * settings_.padding) / (scaler_.max_lat - scaler_.min_lat);
+    }
+    if (width_zoom_coef < height_zoom_coef){
+        scaler_.zoom_coef = width_zoom_coef;
+    } else {
+        scaler_.zoom_coef = height_zoom_coef;
+    }
+    scaler_.padding = settings_.padding;        
+}
+
+svg::Document MapRenderer::GetSvgDocument(){
+    svg::Document document;
+    makeScaler();
+    parsePolylinesAndRouteNames();
+    parseStopCirclesAndNames();
+    addObjectsToDoc(polylines_.begin(), polylines_.end(), document);
+    addObjectsToDoc(route_names_.begin(), route_names_.end(), document);
+    addObjectsToDoc(stop_circles_.begin(), stop_circles_.end(), document);
+    addObjectsToDoc(stop_names_.begin(), stop_names_.end(), document);
+    return document;
 }
 
 } // namespace proto
