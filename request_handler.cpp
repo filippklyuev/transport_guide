@@ -1,10 +1,12 @@
 #include "request_handler.h"
 
+namespace transport_guide {
+
 namespace request_handler {
 
-json::Array getPassingBuses(const transport_guide::info::Stop& stop_info){
+json::Array getPassingBuses(const StopInfo& stop_info){
     json::Array result;
-    for (const transport_guide::info::Bus* passing_bus : stop_info.passing_buses){
+    for (const info::Bus* passing_bus : stop_info.passing_buses){
         result.push_back(json::Node(std::string(passing_bus->getName())));
     }
     return result;
@@ -15,3 +17,5 @@ void printSvgDoc(std::ostream& out, const json::Document& doc_to_print){
 }
 
 } // namespace request handler
+
+} // namespace transport_guide

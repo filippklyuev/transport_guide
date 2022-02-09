@@ -16,45 +16,42 @@ class ValueContext;
 class DictItemContext;
 class ValueDictContext;
 
-class DictItemContext{
-private:
-	Builder& builder_;
+class BuilderContext {
 public:
-	DictItemContext(Builder& builder) : builder_(builder)
+	BuilderContext(Builder& builder)
+		: builder_(builder)
 	{}
+protected:	
+	Builder& builder_;
+};
+
+class DictItemContext : protected BuilderContext {
+public:
+	using BuilderContext::BuilderContext;
 	ValueDictContext Key(std::string key);
 	Builder& EndDict();
 };
 
-class ValueContext{
-private:
-	Builder& builder_;
-public:
-	ValueContext(Builder& builder) : builder_(builder)
-	{}
+class ValueContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	ValueContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext StartDict();
 };
 
-class ArrayItemContext{
-private:
-	Builder& builder_;
-public:
-	ArrayItemContext(Builder& builder) : builder_(builder)
-	{}
+class ArrayItemContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	ArrayItemContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext  StartDict();
 	Builder& EndArray();
 };
 
-class ValueDictContext{
-private:
-	Builder& builder_;
-public:
-	ValueDictContext(Builder& builder) : builder_(builder)
-	{}
+class ValueDictContext : protected BuilderContext {
+public:	
+	using BuilderContext::BuilderContext;
 	DictItemContext Value(Node value);
 	ArrayItemContext StartArray();
 	DictItemContext StartDict();	
@@ -80,27 +77,24 @@ public:
 
 private:
 	std::vector<Node*> nodes_stack_;
-	std::string last_key_;
+	Node* dict_value_ptr_ = nullptr;
 	Node root_;
-	bool key_is_last = false;
 
 	Node::Value& getLastNodeValue();
 	const Node::Value& getLastNodeValue() const;
-	void checkValueExpected(std::string node_type);
 	void checkDocumentCompletion(std::string func_name);
 
 	template<typename Type>
 	void insertDictOrArray(Type value){
-		if (key_is_last){
-			std::get<Dict>(getLastNodeValue()).at(last_key_) = value;
-			nodes_stack_.push_back(&(std::get<Dict>(getLastNodeValue())).at(last_key_));
+		if (nodes_stack_.back()->IsDict()){
+			*dict_value_ptr_  = value;
+			nodes_stack_.push_back(dict_value_ptr_ );
 		} else if (nodes_stack_.back()->IsArray()){
 			std::get<Array>(getLastNodeValue()).push_back(value);
 			nodes_stack_.push_back(&((std::get<Array>(getLastNodeValue())).back()));
 		} else { // after constructors
 			root_ = value;
 		}
-		key_is_last = false;
 	}
 
 public:

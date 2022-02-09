@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <iostream>
 #include <variant>
 #include <vector>
@@ -13,53 +14,76 @@
 #include "json_builder.h"
 #include "svg.h"
 #include "map_renderer.h"
+#include "transport_router.h"
 #include "request_handler.h"
 #include "transport_catalogue.h"
 
+namespace transport_guide {
+
+enum class QueryType {
+    STOP,
+    BUS,
+    MAP,
+    ROUTE
+};
+
 namespace json_reader {
 
-using DistanceMap = std::unordered_map<std::string_view, int>;
+struct ParsedStopQuery  {
+    std::string_view name;
+    geo::Coordinates coordinates = {};
+    DistanceMap distance_to_stops = {};
+};
 
-namespace parser {
+struct ParsedBusQuery {
+    std::string_view name;
+    bool is_cycled;
+    std::vector<std::string_view> stops_on_route;
+};              
 
-void updateCatalogue(const json::Array& requests_vector, transport_guide::TransportCatalogue& catalogue);
+void updateCatalogue(const json::Array& requests_vector, TransportCatalogue& catalogue);
 
-transport_guide::input::ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
+ParsedStopQuery parseStopRequest(const json::Dict& stop_request);
 
-transport_guide::input::ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+ParsedBusQuery parseBusRequest(const json::Dict& bus_request);
+
+RoutingSettings parseRoutingSettings(const json::Dict& routing_settings);
 
 class StatParser {
 public:
-    StatParser(const transport_guide::TransportCatalogue& catalogue, map_renderer::RenderSettings settings) :
+    StatParser(const TransportCatalogue& catalogue, map_renderer::RenderSettings&& settings, RoutingSettings routing_settings) :
         catalogue_(catalogue),
-        settings_(settings)
+        settings_(std::move(settings)),
+        routing_settings_(routing_settings)
     {}
 
     json::Document parseStatArray(const json::Array& requests_vector);
 
 private:
-    const transport_guide::TransportCatalogue& catalogue_;
-    map_renderer::RenderSettings settings_;
+    std::unique_ptr<router::TransportRouter> router_manager_ = nullptr;
+    const TransportCatalogue& catalogue_;
+    const map_renderer::RenderSettings settings_;
+    const RoutingSettings routing_settings_;
 
-    void parseSingleStatRequest(const json::Dict& request,json::Builder& builder);
+    void parseSingleStatRequest(const json::Dict& request, json::Builder& builder);
 
-    void updateResultWithBusInfo(json::Builder& builder, const transport_guide::info::Bus& bus_info);
+    svg::Document getSvgDoc() const;
 
-    void updateResultWithStopInfo(json::Builder& builder, const transport_guide::info::Stop& stop_info);
+    QueryType defineRequestType(std::string_view type) const;
 
-    void updateResultWithMap(json::Builder& builder);
+    bool isValidRequest(const json::Dict& request, QueryType type) const;
+
+    void parseStopRequest(const json::Dict& request, json::Builder& builder) const;
+
+    void parseBusRequest(const json::Dict& request, json::Builder& builder) const;
+
+    void parseMapRequest(const json::Dict& request, json::Builder& builder) const;
+
+    void parseRouteRequest(const json::Dict& request, json::Builder& builder);
 };
 
 map_renderer::RenderSettings parseRenderSettings(const json::Dict& render_settings);
 
-namespace detail {
-
-std::vector<std::string_view> parseStopsArray(const json::Array& stops);
-
-DistanceMap GetDistanceToStops(const json::Dict& distance_to_stops);
-
-} // namespace detail
-
-} // namespace parser
-
 } // namespace json_reader
+
+} // namespace transport_guide
