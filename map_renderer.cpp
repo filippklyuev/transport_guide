@@ -47,7 +47,7 @@ void MapRenderer::makeScaler(){
     } else {
         scaler_.zoom_coef = height_zoom_coef;
     }
-    scaler_.padding = settings_.padding;
+    scaler_.padding = settings_.padding;        
 }
 
 svg::Text MapRenderer::getBusnameUnder(const std::string& bus_name, geo::Coordinates coordinates){
