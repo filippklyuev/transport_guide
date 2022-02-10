@@ -1,0 +1,174 @@
+[
+    {
+        "curvature": 1.36159,
+        "request_id": 1,
+        "route_length": 5880,
+        "stop_count": 6,
+        "unique_stop_count": 5
+    },
+    {
+        "curvature": 1.12195,
+        "request_id": 2,
+        "route_length": 14810,
+        "stop_count": 11,
+        "unique_stop_count": 6
+    },
+    {
+        "curvature": 1.31245,
+        "request_id": 3,
+        "route_length": 15790,
+        "stop_count": 11,
+        "unique_stop_count": 6
+    },
+    {
+        "buses": [
+            "297",
+            "635",
+            "828"
+        ],
+        "request_id": 4
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Zapadnoye",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "828",
+                "span_count": 2,
+                "time": 3,
+                "type": "Bus"
+            },
+            {
+                "stop_name": "Biryusinka",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 1,
+                "time": 0.42,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 5,
+        "total_time": 7.42
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Zapadnoye",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "828",
+                "span_count": 4,
+                "time": 9.44,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 6,
+        "total_time": 11.44
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Tovarnaya",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 1,
+                "time": 1.78,
+                "type": "Bus"
+            },
+            {
+                "stop_name": "Universam",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "828",
+                "span_count": 1,
+                "time": 4.92,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 7,
+        "total_time": 10.7
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Tovarnaya",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 4,
+                "time": 6.56,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 8,
+        "total_time": 8.56
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Tovarnaya",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "635",
+                "span_count": 5,
+                "time": 14.32,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 9,
+        "total_time": 16.32
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Apteka",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 1,
+                "time": 2.84,
+                "type": "Bus"
+            },
+            {
+                "stop_name": "Biryulyovo Zapadnoye",
+                "time": 2,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 1,
+                "time": 5.2,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 10,
+        "total_time": 12.04
+    },
+    {
+        "error_message": "not found",
+        "request_id": 11
+    },
+    {
+        "map": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n  <polyline points=\"164.492,135.162 170,85.4419 147.56,97.7557 155.172,116.312 166.17,119.247 164.492,135.162\" fill=\"none\" stroke=\"green\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  <polyline points=\"170,85.4419 147.56,97.7557 155.172,116.312 137.905,117.382 118.923,52.8537 30,30 118.923,52.8537 137.905,117.382 155.172,116.312 147.56,97.7557 170,85.4419\" fill=\"none\" stroke=\"rgb(255,160,0)\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  <polyline points=\"164.492,135.162 137.905,117.382 155.172,116.312 147.56,97.7557 118.923,52.8537 35.1221,75.4427 118.923,52.8537 147.56,97.7557 155.172,116.312 137.905,117.382 164.492,135.162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">297</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"green\">297</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">635</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgb(255,160,0)\">635</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">635</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgb(255,160,0)\">635</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">828</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"red\">828</text>\n  <text x=\"35.1221\" y=\"75.4427\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">828</text>\n  <text x=\"35.1221\" y=\"75.4427\" dx=\"7\" dy=\"15\" font-size=\"5\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"red\">828</text>\n  <circle cx=\"166.17\" cy=\"119.247\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"170\" cy=\"85.4419\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"164.492\" cy=\"135.162\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"155.172\" cy=\"116.312\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"118.923\" cy=\"52.8537\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"30\" cy=\"30\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"35.1221\" cy=\"75.4427\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"137.905\" cy=\"117.382\" r=\"2\" fill=\"white\"/>\n  <circle cx=\"147.56\" cy=\"97.7557\" r=\"2\" fill=\"white\"/>\n  <text x=\"166.17\" y=\"119.247\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Apteka</text>\n  <text x=\"166.17\" y=\"119.247\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Apteka</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Biryulyovo Tovarnaya</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Biryulyovo Tovarnaya</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Biryulyovo Zapadnoye</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Biryulyovo Zapadnoye</text>\n  <text x=\"155.172\" y=\"116.312\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Biryusinka</text>\n  <text x=\"155.172\" y=\"116.312\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Biryusinka</text>\n  <text x=\"118.923\" y=\"52.8537\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Pokrovskaya</text>\n  <text x=\"118.923\" y=\"52.8537\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Pokrovskaya</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Prazhskaya</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Prazhskaya</text>\n  <text x=\"35.1221\" y=\"75.4427\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Rossoshanskaya ulitsa</text>\n  <text x=\"35.1221\" y=\"75.4427\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Rossoshanskaya ulitsa</text>\n  <text x=\"137.905\" y=\"117.382\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">TETs 26</text>\n  <text x=\"137.905\" y=\"117.382\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">TETs 26</text>\n  <text x=\"147.56\" y=\"97.7557\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Universam</text>\n  <text x=\"147.56\" y=\"97.7557\" dx=\"7\" dy=\"-3\" font-size=\"5\" font-family=\"Verdana\"  fill=\"black\">Universam</text>\n</svg>\n",
+        "request_id": 12
+    }
+]

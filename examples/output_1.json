@@ -1,0 +1,65 @@
+[
+    {
+        "curvature": 1.42963,
+        "request_id": 1,
+        "route_length": 5990,
+        "stop_count": 4,
+        "unique_stop_count": 3
+    },
+    {
+        "map": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n  <polyline points=\"164.492,135.162 170,85.4419 147.56,97.7557 164.492,135.162\" fill=\"none\" stroke=\"green\" stroke-width=\"14\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  <polyline points=\"170,85.4419 147.56,97.7557 30,30 147.56,97.7557 170,85.4419\" fill=\"none\" stroke=\"rgb(255,160,0)\" stroke-width=\"14\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">297</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"green\">297</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">635</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgb(255,160,0)\">635</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">635</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\"  fill=\"rgb(255,160,0)\">635</text>\n  <circle cx=\"170\" cy=\"85.4419\" r=\"5\" fill=\"white\"/>\n  <circle cx=\"164.492\" cy=\"135.162\" r=\"5\" fill=\"white\"/>\n  <circle cx=\"30\" cy=\"30\" r=\"5\" fill=\"white\"/>\n  <circle cx=\"147.56\" cy=\"97.7557\" r=\"5\" fill=\"white\"/>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Biryulyovo Tovarnaya</text>\n  <text x=\"170\" y=\"85.4419\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"black\">Biryulyovo Tovarnaya</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Biryulyovo Zapadnoye</text>\n  <text x=\"164.492\" y=\"135.162\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"black\">Biryulyovo Zapadnoye</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Prazhskaya</text>\n  <text x=\"30\" y=\"30\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"black\">Prazhskaya</text>\n  <text x=\"147.56\" y=\"97.7557\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\">Universam</text>\n  <text x=\"147.56\" y=\"97.7557\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\"  fill=\"black\">Universam</text>\n</svg>\n",
+        "request_id": 2
+    },
+    {
+        "buses": [
+            "297",
+            "635"
+        ],
+        "request_id": 3
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Zapadnoye",
+                "time": 6,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 2,
+                "time": 5.235,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 4,
+        "total_time": 11.235
+    },
+    {
+        "items": [
+            {
+                "stop_name": "Biryulyovo Zapadnoye",
+                "time": 6,
+                "type": "Wait"
+            },
+            {
+                "bus": "297",
+                "span_count": 1,
+                "time": 3.9,
+                "type": "Bus"
+            },
+            {
+                "stop_name": "Biryulyovo Tovarnaya",
+                "time": 6,
+                "type": "Wait"
+            },
+            {
+                "bus": "635",
+                "span_count": 2,
+                "time": 8.31,
+                "type": "Bus"
+            }
+        ],
+        "request_id": 5,
+        "total_time": 24.21
+    }
+]

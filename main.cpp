@@ -14,7 +14,13 @@ void Test(){
     auto routing_settings = transport_guide::json_reader::parseRoutingSettings(all_requests.at("routing_settings").AsDict());
     transport_guide::json_reader::StatParser stat_parser(catalogue, std::move(render_settings), std::move(routing_settings));
     json::Document result_to_print(stat_parser.parseStatArray(all_requests.at("stat_requests").AsArray()));
-    json::Print(result_to_print, std::cout);    
+
+    //Uncomment to print map only \
+            //You can specify the output file in terminal with '> filename.extension_name' to create svg file
+    // transport_guide::request_handler::printSvgDoc(std::cout, result_to_print);
+
+    //Also comment this line if you wish to create svg map exclusivly
+    json::Print(result_to_print, std::cout);
 }
 
 int main(){
