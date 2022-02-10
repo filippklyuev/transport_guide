@@ -52,4 +52,3 @@ Run:
 ```
 
 See example to better understand json syntax specifics for two stages app.
-
