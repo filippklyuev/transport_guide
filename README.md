@@ -1,6 +1,6 @@
 # Basic transport guide/catalogue console app.
 
-## Program is designed to build bus stops/routes map of given information (i.e. stop coordinates, distance between stops, routes etc). Two branches exist - see readme's two understand the differences.
+## Program is created using c++ and is designed to build bus stops/routes map of given information (i.e. stop coordinates, distance between stops, routes etc). Two branches exist - main branch 'one stage' application, two stages branch - 'two stages' application.
 
 
 ### Main Branch
